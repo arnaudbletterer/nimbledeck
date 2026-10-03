@@ -4,7 +4,7 @@
   "description": "Nimbledeck base themes: plain, paper and night. Same seven layouts, different design tokens.",
   "keywords": ["slidev-theme", "slidev"],
   "engines": { "slidev": ">=0.50.0" },
-  "dependencies": { "slidev-addon-nimbledeck": "*" },
+  "dependencies": { "slidev-addon-nimbledeck": "0.1.0" },
   "slidev": {
     "defaults": {
       "aspectRatio": "16/9",

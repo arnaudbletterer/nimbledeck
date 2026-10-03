@@ -9,9 +9,9 @@
     "export": "slidev export how-it-works.md --with-clicks"
   },
   "dependencies": {
-    "@slidev/cli": "latest",
-    "nimbledeck": "*",
-    "slidev-theme-nimbledeck": "*",
-    "playwright-chromium": "latest"
+    "@slidev/cli": "53.0.0",
+    "nimbledeck": "0.1.0",
+    "slidev-theme-nimbledeck": "0.1.0",
+    "playwright-chromium": "1.63.0"
   }
 }
