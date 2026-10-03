@@ -7,3 +7,6 @@ __marimo__/
 .DS_Store
 *.log
 examples/*/public/nimbledeck.json
+
+e2e-*.png
+out-*.png

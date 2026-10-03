@@ -51,6 +51,11 @@ the deck stays responsive.
    background; light-mode syntax colours on a dark panel). Fix: code colours follow the tokens, and the `night`
    variant switches Slidev to its dark syntax theme. Reported by the first user to try the dark variant.
 
+## Bug found by the interaction end-to-end test (fixed)
+
+12. Faded quiz answers used the CSS class `nd-dim`, which `Photo` and `Clip` already use for a black overlay, so the faded
+    answers became full-size overlays covering the quiz. Components share one CSS namespace: check for name clashes.
+
 ## Bugs found by `nimbledeck verify` (all fixed)
 
 9. Live scenes in normal slides overflowed the slide by 70 px on the right and ran into the footer zone (100% width
