@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+.venv/
+__marimo__/
+*.pyc
+.DS_Store
+*.log
+examples/*/public/nimbledeck.json

@@ -1,0 +1,9 @@
+{
+  "name": "nimbledeck-workspace",
+  "private": true,
+  "workspaces": ["packages/*", "examples/*"],
+  "scripts": {
+    "test": "node --test \"packages/cli/test/**/*.test.mjs\"",
+    "example": "npm --workspace examples/how-it-works run dev"
+  }
+}
