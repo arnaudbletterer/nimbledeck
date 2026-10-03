@@ -29,15 +29,20 @@ everything on exit. Components read `nimbledeck.json` at runtime, so they never 
 `runner/runner.py` executes Python typed on a slide. It runs code with the presenter's own rights, like a notebook, so it is
 strict about who can talk to it:
 
-- binds to 127.0.0.1 only; a connection needs the per-session random token (`?t=`), and any browser connection must come
-  from the deck's own origin, so another website open in the same browser cannot use it (both checked in tests and in a
-  real browser);
-- every run is a separate subprocess in a temporary folder and its own process group, with a wall-clock timeout, a CPU
-  limit and a memory limit (POSIX), killed as a whole at the end or when a newer run replaces it;
-- output and image sizes are capped.
+- binds to 127.0.0.1 only; a connection needs the per-session random token (`?t=`) and an `Origin` header from the deck's
+  own origins (`--origin`). A request without an Origin is refused too, so only a browser on the deck's page connects
+  (checked in tests with an explicit Origin header, and in a real browser);
+- every run is a separate subprocess in a temporary folder and its own process group, with a wall-clock timeout (at most
+  60 s), killed as a whole at the end or when a newer run replaces it. On POSIX it also gets a CPU limit
+  (`RLIMIT_CPU`) and a file-size limit (`RLIMIT_FSIZE`) where the OS accepts them;
+- memory: `RLIMIT_AS` is set where the OS accepts it (Linux; macOS refuses it, and the runner logs that at startup), and on
+  every POSIX system the runner also polls the resident memory of the run's process group every 200 ms and kills it above
+  `--memory-mb` (default 4096), reporting "Stopped: memory limit". Windows has no memory limit;
+- output is read incrementally and only its last 20,000 characters are kept; a run that prints more than 10 MB is stopped.
+  A figure file larger than 8 MB is dropped without being read.
 
 It is for the presenter's machine and the presenter's own code. Do not expose the port, and do not paste code you would
-not run anyway. Windows: the limits and process-group kill fall back to a plain kill; not tested.
+not run anyway. Windows: no limits, the process-group kill falls back to a plain kill; not tested.
 
 ## Failure model
 
