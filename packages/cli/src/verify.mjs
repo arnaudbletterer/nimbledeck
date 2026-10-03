@@ -10,16 +10,17 @@ const CHROME = [process.env.NIMBLEDECK_CHROME, '/Applications/Google Chrome.app/
 // Runs inside the page: measures the current slide against the 1280 x 720 frame.
 // Content clipped by an overflow:hidden ancestor is fine; content that reaches outside the slide, enters the footer zone,
 // or is silently cut off (ellipsis, clipped box) is reported.
-function measure({ layoutClass }) {
+export function measure({ chrome: chromeSelectors, bleed: bleedSelectors, lead: leadLayouts }) {
   // The visible slide is the one layout with a real size (neighbouring slides are mounted but hidden at 0 x 0).
   const root = [...document.querySelectorAll('.slidev-layout')].find((e) => e.getBoundingClientRect().width > 0)
   if (!root) return { error: 'no visible slide found, nothing was verified' }
   const frame = root.getBoundingClientRect()
   const issues = []
   // Full-bleed photo columns and media are meant to reach the slide edge.
-  const bleed = (el) => el.closest('.ql-photo, .nd-photo, .nd-media')
-  const chrome = (el) => el.closest('.nd-foot, .nd-page, .ql-foot, .ql-foot-light, .ql-page, footer')
-  const lead = /(^|\s)(cover|divider|closing|closing-photo|full)(\s|$)/.test(root.className)
+  // Which selectors count as slide furniture or bleed comes from nimbledeck.config.json (verify.chrome, verify.bleed).
+  const bleed = (el) => el.closest(bleedSelectors.join(', '))
+  const chrome = (el) => el.closest(chromeSelectors.join(', '))
+  const lead = leadLayouts.some((n) => root.classList.contains(n))
   const label = (el) => `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : ''}`
   const visibleRect = (el) => {
     let r = el.getBoundingClientRect()
@@ -74,7 +75,7 @@ export async function verifyDeck(deckPath, root, url) {
       await page.waitForFunction(() => [...document.querySelectorAll('.slidev-layout')].some((e) => e.getBoundingClientRect().width > 0), null, { timeout: 15000 })
     } catch (e) { console.log(`ERROR slide ${n}: did not load (${String(e.message).split('\n')[0]})`); total++; continue }
     await page.waitForTimeout(/<(Demo|PyStream|Scene3D|Site)\b/.test(slides[n - 1].body) ? 4500 : 1200)
-    const r = await page.evaluate(measure, {})
+    const r = await page.evaluate(measure, { chrome: cfg.verify.chrome, bleed: cfg.verify.bleed, lead: cfg.leadLayouts })
     if (r.error) { console.log(`ERROR slide ${n}: ${r.error}`); total++; continue }
     if (r.frame[0] !== 1280 || r.frame[1] !== 720) { console.log(`ERROR slide ${n}: frame is ${r.frame.join('x')}, expected 1280x720, so nothing can be trusted`); total++; continue }
     const seen = new Set()

@@ -2,11 +2,9 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { imageSize } from './imagesize.mjs'
-import { loadConfig } from './config.mjs'
+import { loadConfig, validateConfig } from './config.mjs'
 import { knownLayouts } from './layouts.mjs'
 import { parseHeadmatter, splitSlides } from './slides.mjs'
-
-const LEAD = new Set(['cover', 'divider', 'closing', 'closing-photo', 'full', 'end', 'section', 'intro', 'none'])
 
 // Slide canvas is 1280 x 720. Content area of a normal slide: 1140 wide, about 500 tall.
 const CONTENT = { w: 1140, h: 500 }, SLIDE = { w: 1280, h: 720 }
@@ -30,6 +28,9 @@ function checkStages(body, layout, where, errors) {
 export function checkDeck(deckPath, root = dirname(deckPath)) {
   const text = readFileSync(deckPath, 'utf8')
   const cfg = loadConfig(root)
+  const bad = validateConfig(cfg, root)
+  if (bad.length) throw new Error(`invalid nimbledeck.config.json:\n  ${bad.join('\n  ')}`)
+  const LEAD = new Set(cfg.leadLayouts)
   const head = parseHeadmatter(text)
   const layouts = knownLayouts(root, head)
   const slides = splitSlides(text)
