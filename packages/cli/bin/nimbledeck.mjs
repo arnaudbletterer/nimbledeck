@@ -2,9 +2,10 @@
 import { basename, dirname, resolve } from 'node:path'
 import { checkDeck } from '../src/check.mjs'
 import { runDeck } from '../src/run.mjs'
+import { verifyDeck } from '../src/verify.mjs'
 
-const [cmd, deck] = process.argv.slice(2)
-const usage = () => { console.error('usage: nimbledeck run <deck.md> | nimbledeck check <deck.md>'); process.exit(2) }
+const [cmd, deck, ...rest] = process.argv.slice(2)
+const usage = () => { console.error('usage: nimbledeck run <deck.md> | check <deck.md> | verify <deck.md> [--url http://localhost:3030]'); process.exit(2) }
 
 // Slidev takes public/, layouts/ and components/ from the folder that contains the deck file, so the
 // config, demos and assets are resolved relative to that folder too.
@@ -16,4 +17,7 @@ if (cmd === 'check' && deck) {
   process.exit(errors.length ? 1 : 0)
 } else if (cmd === 'run' && deck) {
   await runDeck(basename(deck), dirname(resolve(deck)))
+} else if (cmd === 'verify' && deck) {
+  const u = rest.indexOf('--url')
+  process.exit(await verifyDeck(resolve(deck), dirname(resolve(deck)), u >= 0 ? rest[u + 1] : undefined))
 } else usage()
