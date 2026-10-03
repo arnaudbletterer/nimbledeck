@@ -5,7 +5,7 @@
 1. Read the source document. Decide one message per slide.
 2. Write `<name>.md`: a cover slide first, a closing slide last.
 3. `nimbledeck check <name>.md` and fix every ERROR. Warnings mean "split this slide".
-4. `nimbledeck run <name>.md`, then open http://localhost:3030 (keys: arrows, `O` overview, `P` presenter).
+4. `nimbledeck run <name>.md`, then open http://localhost:3030 (keys: arrows to move, `?` lists every shortcut, `/` searches slides, `O` overview; presenter view is the address `/presenter/1`).
 5. Export: `slidev export <name>.md --with-clicks` (one page per build step).
 
 ## Syntax
@@ -143,6 +143,15 @@ plt.plot(x, np.sin(x))
 cannot intercept. So an embedded page starts behind a transparent shield: arrow keys and clicks drive the deck, even on a
 full-frame slide with no margin. Click the page to interact with it; a control bar inside the slide then offers
 previous, "Back to slides" and next, and works whatever the frame size. Leaving the slide re-guards the page.
+
+## Finding your way: the command palette and the cheat-sheet
+
+Press `/` (or Ctrl/Cmd+K) to open the command palette. Type to fuzzy-search slide titles and body text; every word must
+match, in any order, and a number jumps to that slide. Results show thumbnails drawn by Slidev's own renderer with the matching words
+highlighted; arrows move, Enter jumps, Esc closes. Press `?` for the cheat-sheet listing every shortcut, Slidev's and
+Nimbledeck's. The palette and `?` ignore keystrokes while you type in an input or the code editor. In a static build
+(not `nimbledeck run`) Slidev blanks the slide text, so only titles and notes are searchable. Thumbnails of website and
+demo slides show a placeholder instead of loading the page.
 
 ## Interactions are for the presenter
 
