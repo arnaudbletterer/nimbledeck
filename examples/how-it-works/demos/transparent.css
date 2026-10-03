@@ -1,0 +1,3 @@
+/* Let the slide show through: the demo page paints no background of its own. */
+html, body, #root, #App, main { background: transparent !important; }
+.marimo-cell, .marimo-cell > * { background: transparent !important; box-shadow: none !important; }
