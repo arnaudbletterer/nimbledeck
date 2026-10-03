@@ -113,3 +113,15 @@
 .nd-cmp-handle span { position: absolute; top: 50%; left: 50%; width: 36px; height: 36px; margin: -18px; border-radius: 50%; background: var(--nd-bg); box-shadow: 0 0 8px rgba(0, 0, 0, .45); }
 .nd-compare:focus-visible { outline: 2px solid var(--nd-accent-2); outline-offset: -2px; }
 .nd-countup { font-family: var(--nd-font-display); font-variant-numeric: tabular-nums; }
+
+/* FrameGuard: the shield and the control bar live in the slide, above the embedded page. */
+.nd-guard { position: relative; width: 100%; height: 100%; }
+.nd-guard > iframe { width: 100%; height: 100%; }
+.nd-shield { position: absolute; inset: 0; z-index: 5; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
+.nd-shield-hint { opacity: 0; transition: opacity .2s; background: color-mix(in srgb, var(--nd-ink) 82%, transparent); color: var(--nd-bg); font: 600 15px var(--nd-font-body); padding: 5px 14px; border-radius: 999px; pointer-events: none; }
+.nd-shield:hover .nd-shield-hint { opacity: 1; }
+.nd-bar { position: absolute; z-index: 6; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+  background: color-mix(in srgb, var(--nd-ink) 88%, transparent); box-shadow: 0 2px 12px rgba(0, 0, 0, .35); }
+.nd-bar button { color: var(--nd-bg); background: transparent; border: 0; font: 600 16px var(--nd-font-body); padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+.nd-bar button:hover, .nd-bar button:focus-visible { background: color-mix(in srgb, var(--nd-bg) 22%, transparent); outline: none; }
+.nd-bar .nd-bar-main { padding: 6px 18px; }
