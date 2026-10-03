@@ -12,6 +12,7 @@ const slides = splitSlides(readFileSync(deck, 'utf8'))
 const at = (title) => slides.findIndex((s) => s.body.includes(`# ${title}`)) + 1
 const quizSlide = at('An interactive quiz'), miscSlide = at('Flip, compare, count up')
 if (!quizSlide || !miscSlide) throw new Error('example slides not found')
+const siteSlide = slides.findIndex((s) => /<Site url=/.test(s.body)) + 1
 const liveSlide = at('Live code'), manualSlide = at('Live code, run on demand')
 const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && s.fm.layout === 'full') + 1
 
@@ -187,6 +188,30 @@ if (frameSlide) {
   const b3 = page.url(); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1200)
   check('keys work immediately on a guarded full-frame slide', page.url() !== b3)
 } else console.log('SKIP  no full-frame <Demo> slide in this deck')
+
+// Gating: neighbouring slides stay mounted, but must not probe the demo or load the website
+{
+  const demoPort = (await (await fetch(`${base}/nimbledeck.json`)).json()).demos?.compute?.port
+  const hits = []; page.on('request', (r) => { if (/sli\.dev/.test(r.url()) || (demoPort && r.url().includes(`:${demoPort}`))) hits.push(r.url()) })
+  const frames = () => page.evaluate(() => [...document.querySelectorAll('iframe')].map((f) => f.src))
+  if (frameSlide) {
+    await go(frameSlide - 1); hits.length = 0; await page.waitForTimeout(4000)
+    check('a neighbour of the demo slide does not probe or embed the demo', hits.length === 0 && (await frames()).length === 0, hits.slice(0, 3).join(" "))
+    await go(frameSlide); await page.waitForSelector('[data-kind=guard]', { timeout: 20000 })
+    check('the demo slide itself embeds the demo', (await frames()).some((f) => f.includes(`:${demoPort}`)))
+  }
+  if (siteSlide) {
+    await go(siteSlide - 1); hits.length = 0; await page.waitForTimeout(2500)
+    check('a neighbour of the site slide does not load the website', hits.length === 0 && (await frames()).length === 0, hits.slice(0, 3).join(" "))
+    await go(siteSlide); await page.waitForSelector('iframe', { timeout: 20000 })
+    check('the site slide itself embeds the website', (await frames()).some((f) => /sli\.dev/.test(f)))
+  }
+  // the quiz number keys must not fire while typing in a field (here the palette search)
+  await go(quizSlide); await page.mouse.click(640, 30); await page.keyboard.press('/'); await page.waitForTimeout(500)
+  await page.keyboard.type('3'); await page.waitForTimeout(500)
+  check('a number typed in the palette does not answer the quiz', (await page.locator('[data-kind=quiz][data-state=open]').count()) > 0 && (await page.locator('.nd-pal-input').inputValue()) === '3')
+  await page.keyboard.press('Escape')
+}
 
 check('no page errors', errors.length === 0, errors.join(' | '))
 await browser.close()
