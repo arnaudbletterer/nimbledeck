@@ -270,6 +270,34 @@ layout: full
 layout: default
 ---
 
+# Live code
+
+<Stage>
+<At :w="1140" :h="460">
+<LiveCode>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 6.28, 200)
+plt.plot(x, np.sin(x))
+plt.plot(x, np.cos(x))
+```
+
+</LiveCode>
+</At>
+</Stage>
+
+<!--
+Click in the editor and change the code: the plot updates as you type. The code runs in a local Python process.
+Esc leaves the editor so the arrow keys drive the deck again.
+-->
+
+---
+layout: default
+---
+
 # An interactive quiz
 
 <Stage>

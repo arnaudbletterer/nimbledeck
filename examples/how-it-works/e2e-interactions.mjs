@@ -12,6 +12,7 @@ const slides = splitSlides(readFileSync(deck, 'utf8'))
 const at = (title) => slides.findIndex((s) => s.body.includes(`# ${title}`)) + 1
 const quizSlide = at('An interactive quiz'), miscSlide = at('Flip, compare, count up')
 if (!quizSlide || !miscSlide) throw new Error('example slides not found')
+const liveSlide = at('Live code')
 const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && /layout: full/.test(s.fm.layout ? 'layout: full' : '')) + 1
 
 const chrome = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => { try { readFileSync(p); return true } catch { return false } })
@@ -71,6 +72,46 @@ check('dragging moves the compare divider', pos >= 22 && pos <= 28, `at ${pos}%`
 await page.waitForTimeout(1500)
 check('number counts up to its target', Number(await attr('[data-kind=countup]', 'data-value')) === 3200)
 await page.screenshot({ path: 'e2e-misc.png' })
+
+// Live code: edit Python in the slide, see the result change, survive errors and loops, and stay safe
+if (liveSlide) {
+  await go(liveSlide)
+  const live = '[data-kind=livecode]'
+  await page.waitForFunction((s) => document.querySelector(s + '[data-state=ok]'), live, { timeout: 60000 })
+  check('live code runs its starting code and shows a figure', await page.locator(`${live} .nd-live-img`).count() === 1)
+  const src0 = await attr(`${live} .nd-live-img`, 'src')
+  const type = async (code) => { await vis(`${live} .cm-content`).click(); await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A'); await page.keyboard.insertText(code) }
+  await type('import matplotlib.pyplot as plt\nplt.bar(["a", "b"], [3, 7])\nprint("edited", 6 * 7)')
+  await page.waitForFunction((s) => /edited 42/.test(document.querySelector(s + ' .nd-live-stdout')?.textContent ?? ''), live, { timeout: 30000 })
+  check('editing the code changes the output', true)
+  check('editing the code changes the picture', (await attr(`${live} .nd-live-img`, 'src')) !== src0)
+  await type('def broken(:\n  pass')
+  await page.waitForFunction((s) => document.querySelector(s + '[data-state=error]'), live, { timeout: 30000 })
+  check('a syntax error is shown', /SyntaxError/.test(await vis(`${live} .nd-live-stderr`).innerText()))
+  check('the last good picture stays while the code is broken', await page.locator(`${live} .nd-live-img`).count() === 1)
+  await type('while True: pass')
+  await page.waitForTimeout(1500)
+  check('a long-running program shows as running', (await attr(live, 'data-state')) === 'running')
+  const t0 = Date.now(); await type('print("replaced")')
+  await page.waitForFunction((s) => /replaced/.test(document.querySelector(s + ' .nd-live-stdout')?.textContent ?? ''), live, { timeout: 30000 })
+  check('a newer run replaces the stuck one quickly', Date.now() - t0 < 8000, `${Date.now() - t0} ms`)
+  // keyboard: inside the editor the deck must not move; Esc gives the keyboard back
+  const here = page.url()
+  await vis(`${live} .cm-content`).click(); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(500)
+  check('arrow keys inside the editor do not navigate', page.url() === here)
+  await page.keyboard.press('Escape'); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1200)
+  check('Esc leaves the editor and the arrows navigate again', page.url() !== here)
+  // security from a real browser: the runner must refuse other origins and wrong tokens
+  await go(liveSlide)
+  const cfg = await page.evaluate(() => fetch('/nimbledeck.json').then((r) => r.json()))
+  const probe = (origin, token) => page.evaluate(({ port, token }) => new Promise((res) => { const w = new WebSocket(`ws://127.0.0.1:${port}/?t=${token}`); w.onopen = () => { w.close(); res('connected') }; w.onerror = () => res('refused') }), { port: cfg.runner.port, token })
+  check('the deck origin with the right token connects', (await probe(base, cfg.runner.token)) === 'connected')
+  check('a wrong token is refused', (await probe(base, 'wrong')) === 'refused')
+  const other = await browser.newPage(); await other.goto('http://127.0.0.1:' + Object.values(cfg.demos)[0].port, { waitUntil: 'domcontentloaded' })
+  const foreign = await other.evaluate(({ port, token }) => new Promise((res) => { const w = new WebSocket(`ws://127.0.0.1:${port}/?t=${token}`); w.onopen = () => { w.close(); res('connected') }; w.onerror = () => res('refused') }), { port: cfg.runner.port, token: cfg.runner.token })
+  check('another website with the right token is refused (origin check)', foreign === 'refused')
+  await other.close()
+} else console.log('SKIP  no live code slide in this deck')
 
 // Full-frame embedded page: the presentation must stay controllable (needs a deck with a full-frame <Demo>)
 if (frameSlide) {
