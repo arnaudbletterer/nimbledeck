@@ -19,8 +19,8 @@ brand-repo/
 
 ## The contract
 
-1. **Implement the seven base layout names** so decks are portable between themes: `cover`, `agenda`, `divider`,
-   `default`, `two-cols`, `photo-right`, `closing`. Brand-only layouts may be added.
+1. **Implement the eight base layout names** so decks are portable between themes: `cover`, `agenda`, `divider`,
+   `default`, `two-cols`, `photo-right`, `closing`, `full` (no chrome; the slot fills the slide, clipped to it). Brand-only layouts may be added.
 2. **Override the tokens** (`--nd-bg`, `--nd-ink`, `--nd-accent`, ...). The live components follow automatically.
 3. **Keep shared CSS global** (`styles/index.css`), not in a layout's `<style>`.
 4. **List the addon** in the theme's `slidev.defaults.addons` so decks need only `theme: <brand>`.
