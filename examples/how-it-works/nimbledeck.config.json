@@ -1,12 +1,33 @@
 {
-  "python": { "version": "3.12", "requirements": "demos/requirements.txt" },
+  "python": {
+    "version": "3.12",
+    "requirements": "demos/requirements.txt"
+  },
   "demos": {
-    "compute": { "file": "demos/compute.py", "port": 2719 },
-    "slow": { "file": "demos/slow.py", "port": 2720 },
-    "crash": { "file": "demos/crash.py", "port": 2721 }
+    "compute": {
+      "file": "demos/compute.py",
+      "port": 2719
+    },
+    "slow": {
+      "file": "demos/slow.py",
+      "port": 2720
+    },
+    "crash": {
+      "file": "demos/crash.py",
+      "port": 2721
+    }
   },
   "streams": {
-    "nbody": { "file": "demos/stream_nbody.py", "port": 18765 }
+    "nbody": {
+      "file": "demos/stream_nbody.py",
+      "port": 18765
+    }
   },
-  "limits": { "maxTitle": 40, "maxBullets": 7 }
+  "limits": {
+    "maxTitle": 40,
+    "maxBullets": 7
+  },
+  "runner": {
+    "port": 18800
+  }
 }
