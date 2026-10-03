@@ -60,3 +60,17 @@ test('theme: foo resolves to slidev-theme-foo, including layouts of addons the t
   writeFileSync(join(pkg('slidev-addon-bar'), 'layouts', 'from-addon.vue'), '<template/>')
   assert.deepEqual(checkDeck(join(root, 'deck.md'), root).errors, [])
 })
+
+test('<At> must fit its <Stage>, and a <Stage> must fit the content area', () => {
+  const r = run('---\ntheme: none\n---\n\n# A\n\n<Stage :w="1140" :h="460">\n<At :x="600" :y="0" :w="700" :h="100">\nx\n</At>\n</Stage>\n\n<Stage :w="1200" :h="600">\n</Stage>\n\n---\nlayout: full\n---\n\n<Stage full>\n<At :w="1280" :h="720">\nok\n</At>\n</Stage>\n')
+  const text = r.errors.join('\n')
+  assert.match(text, /<At> at \(600,0\) size 700x100 falls outside its 1140x460 <Stage>/)
+  assert.match(text, /<Stage> 1200x600 does not fit the content area/)
+  assert.doesNotMatch(text, /slide 2/)
+})
+
+test('very text-heavy slides get a warning', () => {
+  const r = run('---\ntheme: none\n---\n\n# A\n\n' + 'word '.repeat(300) + '\n')
+  assert.equal(r.errors.length, 0)
+  assert.match(r.warnings.join('\n'), /characters > 900/)
+})
