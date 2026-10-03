@@ -43,6 +43,8 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     const h1 = body.match(/^# (.+)$/m)
     if (!LEAD.has(layout) && !h1) errors.push(`${where}: missing '# title'`)
     if (h1 && h1[1].length > cfg.limits.maxTitle) errors.push(`${where}: title ${h1[1].length} chars > ${cfg.limits.maxTitle}, would be cut off`)
+    const sub = body.match(/^#### (.+)$/m)
+    if (!LEAD.has(layout) && sub && sub[1].length > cfg.limits.maxSubtitle) warnings.push(`${where}: subtitle ${sub[1].length} chars > ${cfg.limits.maxSubtitle}, would be cut off`)
     const bullets = (body.match(/^\s*[-*] /gm) || []).length
     if (bullets > cfg.limits.maxBullets) warnings.push(`${where}: ${bullets} bullets > ${cfg.limits.maxBullets}, split the slide`)
     checkStages(body, layout, where, errors)

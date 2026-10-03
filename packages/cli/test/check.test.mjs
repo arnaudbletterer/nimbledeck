@@ -87,3 +87,9 @@ test('<LiveCode> requires the runner in the config', () => {
   assert.match(run(deck).errors.join('\n'), /<LiveCode> needs a "runner" entry/)
   assert.deepEqual(run(deck, { config: { runner: { port: 18800 } } }).errors, [])
 })
+
+test('an over-long subtitle is a warning', () => {
+  const r = run('---\ntheme: none\n---\n\n# A\n\n#### ' + 'long '.repeat(15) + '\n\ntext\n')
+  assert.equal(r.errors.length, 0)
+  assert.match(r.warnings.join('\n'), /subtitle \d+ chars > 55/)
+})
