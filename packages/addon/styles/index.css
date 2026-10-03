@@ -125,3 +125,22 @@
 .nd-bar button { color: var(--nd-bg); background: transparent; border: 0; font: 600 16px var(--nd-font-body); padding: 6px 14px; border-radius: 999px; cursor: pointer; }
 .nd-bar button:hover, .nd-bar button:focus-visible { background: color-mix(in srgb, var(--nd-bg) 22%, transparent); outline: none; }
 .nd-bar .nd-bar-main { padding: 6px 18px; }
+
+/* LiveCode: editor on the left, result on the right, filling the box they are placed in. */
+.nd-live { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: auto; height: 100%; min-height: 240px; max-height: 500px; }
+:where(.nd-at) > .nd-live { width: 100%; max-height: none; }
+.nd-live-source { display: none; }
+.nd-live-code { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.nd-live-editor { flex: 1; min-height: 0; overflow: hidden; }
+.nd-live-bar { display: flex; align-items: center; gap: 8px; padding-top: 6px; font-size: 14px; color: var(--nd-muted); }
+.nd-live-bar button { border: 1px solid var(--nd-ink); background: var(--nd-surface); color: var(--nd-ink); padding: 2px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.nd-live-hint { margin-left: auto; }
+.nd-live-out { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; min-height: 0; overflow: hidden; transition: opacity .2s; }
+.nd-live-out.nd-stale { opacity: .55; }
+.nd-live-img { flex: 1 1 0; min-height: 0; width: 100%; object-fit: contain; object-position: left top; }
+.nd-live-stdout, .nd-live-stderr { margin: 0; padding: 6px 8px; font: 14px/1.4 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; max-height: 35%; overflow: auto; border-radius: 4px; }
+.nd-live-stdout { background: var(--nd-surface); color: var(--nd-ink); }
+.nd-live-stderr { background: var(--nd-bad); color: var(--nd-ink); }
+.nd-live-status { position: absolute; right: 4px; top: 0; font-size: 13px; color: var(--nd-muted); }
+.nd-st-error { color: #b03030; }
+.nd-live-msg { margin: auto; text-align: center; color: var(--nd-muted); }
