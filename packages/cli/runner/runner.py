@@ -2,11 +2,14 @@
 
 Security model (this executes code, so it is strict):
   * binds to 127.0.0.1 only;
-  * a WebSocket must carry the per-session token (?t=...) AND, if it has an Origin header (every browser does), that origin
-    must be in the allow-list, so another website open in the same browser cannot use it;
+  * a WebSocket must carry the per-session token (?t=...) AND an Origin header from the allow-list (--origin, the deck's own
+    browser origins), so another website open in the same browser cannot use it, and a request without Origin is refused;
   * every run is a separate subprocess in a temporary directory, in its own process group, with a wall-clock timeout, a CPU
-    limit and a memory limit (POSIX), killed as a whole when done or when a newer run replaces it;
-  * output and image sizes are capped.
+    limit, a file-size limit and a memory limit (POSIX), killed as a whole when done or when a newer run replaces it. The
+    memory limit is RLIMIT_AS where the OS accepts it (Linux) and always also a poll of the group's resident memory every
+    200 ms (the only way on macOS), reported as "Stopped: memory limit";
+  * output is read incrementally into capped buffers (only the tail is kept, and a run printing over 10 MB is stopped), and
+    figure sizes are checked before they are read.
 It runs the code with the presenter's own rights, like a notebook does: only ever type code you would run anyway.
 
 Protocol (JSON text frames):
@@ -23,6 +26,7 @@ import os
 import secrets
 import shutil
 import signal
+import subprocess
 import sys
 import tempfile
 import time
@@ -34,50 +38,129 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MAX_TEXT = 20_000
 MAX_IMAGE_BYTES = 8_000_000
 MAX_TIMEOUT = 60
+MAX_FILE_BYTES = 32_000_000     # RLIMIT_FSIZE: largest file the code may write
+MAX_OUTPUT_BYTES = 10_000_000   # stdout + stderr together, then the run is stopped
+MEMORY_POLL = 0.2
 
 
-def limits(timeout, memory_mb):
-    def apply():
+def _set_limits(timeout, memory_mb, which):
+    import resource
+    if "cpu" in which:
+        resource.setrlimit(resource.RLIMIT_CPU, (int(timeout) + 2, int(timeout) + 2))
+    if "as" in which:
+        resource.setrlimit(resource.RLIMIT_AS, (memory_mb * 1024 * 1024, memory_mb * 1024 * 1024))
+    if "fsize" in which:
+        resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_FILE_BYTES, MAX_FILE_BYTES))
+
+
+def probe_limits(memory_mb):
+    """Which rlimits this OS lets us set on a child. Failures are logged, never hidden: RLIMIT_AS, for one, raises
+    "current limit exceeds maximum limit" on macOS, so there the memory limit is enforced by polling the child's RSS."""
+    ok = set()
+    if os.name != "posix":
+        return ok
+    for name in ("cpu", "as", "fsize"):
         try:
-            import resource
-            resource.setrlimit(resource.RLIMIT_CPU, (int(timeout) + 2, int(timeout) + 2))
-            resource.setrlimit(resource.RLIMIT_AS, (memory_mb * 1024 * 1024, memory_mb * 1024 * 1024))
-        except Exception:
-            pass
-    return apply
+            subprocess.run([sys.executable, "-c", "pass"], check=True, capture_output=True,
+                           preexec_fn=lambda n=name: _set_limits(5, memory_mb, {n}))
+            ok.add(name)
+        except Exception as e:
+            print(f"runner: rlimit {name} is not available here ({e}), compensating where possible", file=sys.stderr, flush=True)
+    return ok
 
 
-async def run_code(msg, memory_mb):
+async def watch_memory(proc, memory_mb, hit):
+    """Poll the resident memory of the child's process group; kill it above the limit (POSIX)."""
+    while proc.returncode is None:
+        await asyncio.sleep(MEMORY_POLL)
+        try:
+            p = await asyncio.create_subprocess_exec("ps", "-A", "-o", "pgid=,rss=", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL)
+            out, _ = await p.communicate()
+        except OSError:
+            return
+        kb = 0
+        for line in out.decode().splitlines():
+            parts = line.split()
+            if len(parts) == 2 and parts[0] == str(proc.pid) and parts[1].isdigit():
+                kb += int(parts[1])
+        if kb > memory_mb * 1024:
+            hit.set()
+            kill(proc)
+            return
+
+
+class Capped:
+    """Reads a pipe in chunks and keeps only its tail, so a flood of output never grows the runner."""
+    def __init__(self, stream, flood):
+        self.stream, self.flood, self.tail, self.total = stream, flood, bytearray(), 0
+
+    async def pump(self):
+        while True:
+            chunk = await self.stream.read(65536)
+            if not chunk:
+                return
+            self.total += len(chunk)
+            self.tail += chunk
+            if len(self.tail) > MAX_TEXT * 4:
+                del self.tail[:-MAX_TEXT * 4]
+            if self.total > MAX_OUTPUT_BYTES:
+                self.flood.set()
+
+    def text(self):
+        return self.tail.decode("utf-8", "replace")[-MAX_TEXT:]
+
+
+async def run_code(msg, memory_mb, rlimits=frozenset()):
     timeout = min(float(msg.get("timeout") or 10), MAX_TIMEOUT)
     work = tempfile.mkdtemp(prefix="nd-run-")
     t0 = time.perf_counter()
-    proc = None
+    proc, tasks = None, []
     try:
-        open(os.path.join(work, "code.py"), "w", encoding="utf-8").write(str(msg.get("code", "")))
-        json.dump({"dpi": min(float(msg.get("dpi") or 100), 300), "theme": msg.get("theme") or {}}, open(os.path.join(work, "params.json"), "w"))
+        with open(os.path.join(work, "code.py"), "w", encoding="utf-8") as f:
+            f.write(str(msg.get("code", "")))
+        with open(os.path.join(work, "params.json"), "w") as f:
+            json.dump({"dpi": min(float(msg.get("dpi") or 100), 300), "theme": msg.get("theme") or {}}, f)
         env = {k: v for k, v in os.environ.items() if k not in ("NIMBLEDECK_TOKEN",)}
-        kwargs = {"start_new_session": True, "preexec_fn": limits(timeout, memory_mb)} if os.name == "posix" else {}
+        kwargs = {"start_new_session": True, "preexec_fn": lambda: _set_limits(timeout, memory_mb, rlimits)} if os.name == "posix" else {}
         proc = await asyncio.create_subprocess_exec(sys.executable, "-I", os.path.join(HERE, "wrapper.py"), work, cwd=work, env=env,
                                                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, **kwargs)
+        flood, mem_hit = asyncio.Event(), asyncio.Event()
+        out, err = Capped(proc.stdout, flood), Capped(proc.stderr, flood)
+        tasks = [asyncio.create_task(out.pump()), asyncio.create_task(err.pump())]
+        if os.name == "posix":
+            tasks.append(asyncio.create_task(watch_memory(proc, memory_mb, mem_hit)))
+        flood_task = asyncio.create_task(flood.wait())
+        tasks.append(flood_task)
+        wait_task = asyncio.create_task(proc.wait())
+        tasks.append(wait_task)
         timed_out = False
-        try:
-            out, err = await asyncio.wait_for(proc.communicate(), timeout)
-        except asyncio.TimeoutError:
-            timed_out = True
+        await asyncio.wait([wait_task, flood_task], timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
+        if proc.returncode is None:
+            timed_out = not flood.is_set()
             kill(proc)
-            out, err = await proc.communicate()
+            await proc.wait()
+        await asyncio.wait(tasks[:2], timeout=2)   # drain what the dead process left in the pipes
         images, total = [], 0
         for name in sorted(f for f in os.listdir(work) if f.startswith("fig-") and f.endswith(".png")):
-            data = open(os.path.join(work, name), "rb").read()
-            total += len(data)
-            if total <= MAX_IMAGE_BYTES:
-                images.append(base64.b64encode(data).decode())
-        err_text = err.decode("utf-8", "replace")[-MAX_TEXT:]
-        if timed_out:
+            path = os.path.join(work, name)
+            size = os.path.getsize(path)
+            total += size
+            if size <= MAX_IMAGE_BYTES and total <= MAX_IMAGE_BYTES:
+                with open(path, "rb") as f:
+                    images.append(base64.b64encode(f.read()).decode())
+        err_text = err.text()
+        stopped = mem_hit.is_set() or flood.is_set() or timed_out
+        if mem_hit.is_set():
+            err_text += f"\nStopped: memory limit ({memory_mb} MB)."
+        elif flood.is_set():
+            err_text += f"\nStopped: the code printed more than {MAX_OUTPUT_BYTES // 1_000_000} MB."
+        elif timed_out:
             err_text += f"\nStopped: the code ran longer than {timeout:g} seconds."
-        return {"ok": proc.returncode == 0 and not timed_out, "ms": int((time.perf_counter() - t0) * 1000), "stdout": out.decode("utf-8", "replace")[-MAX_TEXT:],
+        return {"ok": proc.returncode == 0 and not stopped, "ms": int((time.perf_counter() - t0) * 1000), "stdout": out.text(),
                 "stderr": err_text, "images": images, "timedOut": timed_out}
     finally:
+        for t in tasks:
+            t.cancel()
         if proc and proc.returncode is None:
             kill(proc)
         shutil.rmtree(work, ignore_errors=True)
@@ -89,11 +172,11 @@ def kill(proc):
             os.killpg(proc.pid, signal.SIGKILL)
         else:
             proc.kill()
-    except ProcessLookupError:
+    except (ProcessLookupError, PermissionError):
         pass
 
 
-def make_handler(token, memory_mb):
+def make_handler(token, memory_mb, rlimits):
     async def handler(ws):
         current = None   # the run in progress for this connection
 
@@ -110,7 +193,7 @@ def make_handler(token, memory_mb):
         async def execute(msg):
             await ws.send(json.dumps({"type": "status", "id": msg.get("id"), "state": "running"}))
             try:
-                res = await run_code(msg, memory_mb)
+                res = await run_code(msg, memory_mb, rlimits)
             except asyncio.CancelledError:
                 raise
             except Exception as e:
@@ -148,7 +231,11 @@ async def main():
             return connection.respond(403, "forbidden\n")
         return None
 
-    async with serve(make_handler(token, args.memory_mb), "127.0.0.1", args.port, origins=args.origin + [None], process_request=process_request,
+    if not args.origin:
+        sys.exit("runner: at least one --origin is required (the deck's own browser origin)")
+    rlimits = probe_limits(args.memory_mb)
+    print(f"runner: memory limit {args.memory_mb} MB via " + ("RLIMIT_AS and RSS polling" if "as" in rlimits else "RSS polling"), file=sys.stderr, flush=True)
+    async with serve(make_handler(token, args.memory_mb, rlimits), "127.0.0.1", args.port, origins=args.origin, process_request=process_request,
                      max_size=2_000_000):
         print(f"runner on ws://127.0.0.1:{args.port}", flush=True)
         await asyncio.Future()
