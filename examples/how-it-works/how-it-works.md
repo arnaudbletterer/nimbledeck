@@ -270,6 +270,56 @@ layout: full
 layout: default
 ---
 
+# An interactive quiz
+
+<Stage>
+<At :x="0" :y="0" :w="1000" :h="460">
+<Quiz answer="B">
+<Choice letter="A">Lorem ipsum dolor sit amet</Choice>
+<Choice letter="B">Consectetur adipiscing elit</Choice>
+<Choice letter="C">Sed do eiusmod tempor</Choice>
+<Choice letter="D">Incididunt ut labore</Choice>
+<Explain letter="B">
+
+The explanation appears once an answer is picked, with the right answer revealed.
+
+</Explain>
+</Quiz>
+</At>
+<At :x="1020" :y="0" :w="120" :h="120">
+<Countdown :seconds="20" />
+</At>
+</Stage>
+
+<!--
+Click an answer, or press 1 to 4. Leaving the slide resets the quiz. The countdown starts when the slide opens.
+-->
+
+---
+layout: default
+---
+
+# Flip, compare, count up
+
+<Stage>
+<At :x="0" :y="0" :w="360" :h="230">
+<Flip>
+<template #front>Click to reveal</template>
+<template #back>The hidden answer</template>
+</Flip>
+</At>
+<At :x="0" :y="270" :w="360" :h="150">
+<Headline size="l" tone="dark"><CountUp :to="3200" suffix="K" /></Headline>
+</At>
+<At :x="400" :y="0" :w="740" :h="420">
+<Compare before="/before.jpg" after="/after.jpg" />
+</At>
+</Stage>
+
+---
+layout: default
+---
+
 # A website, inside a slide
 
 <Stage>
