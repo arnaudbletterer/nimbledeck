@@ -80,6 +80,8 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 | `<PyStream name="x" />` | A Python process streaming state to a canvas. |
 | `<Demo name="x" />` | A local marimo app in an iframe, with an offline fallback. |
 | `<Clip src="/a.mp4" />` | A looping video. `fit`, `dim`, `controls`. |
+| `<Chart type="bar" :labels="[...]" :data="[...]" />` | Chart.js chart (`bar`, `line`, `pie`, `doughnut`), coloured by `--nd-chart-1..4`, animated when its slide appears. `horizontal`, `stacked`, `values`, `legend`, `center="3,2K"` (donut). |
+| `<Quiz>` with `<Choice letter="A" correct>` and `<Explain letter="B">` | Answer grid and the explanation panel. |
 | `<Photo src="/a.jpg" />` | An image. `fit`, `position`, `dim`. |
 | `<Headline>text</Headline>` | Large display text (`size` xl, l, m; `tone` light, dark). |
 | `<Site url="https://..." />` | A website in a frame. Many sites forbid framing (GitHub does): use a screenshot or open it separately. |
