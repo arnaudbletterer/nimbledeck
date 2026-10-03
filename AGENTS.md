@@ -18,4 +18,6 @@ changing a component.
 - Shared CSS goes in the global stylesheet, not in a layout's `<style>`.
 - Test in a browser by loading slides directly (reload on a middle slide) and by walking with the keyboard. Both
   found real bugs that a build did not.
-- Run `npm test` before finishing.
+- Run `npm test` before finishing. It covers only the CLI and the live-code runner. A change in `packages/addon`
+  (components, composables, global CSS) also needs the browser end-to-end test (`examples/how-it-works/e2e-interactions.mjs`
+  against the running example), because no unit test exercises it.

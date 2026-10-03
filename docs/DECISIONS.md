@@ -1,6 +1,7 @@
 # Decisions and evidence
 
-Every number below was measured in Chrome on an Apple A18 Pro laptop (macOS) unless stated.
+Every number below was measured by hand in Chrome on an Apple A18 Pro laptop (macOS), unless stated. No script produced
+them, so `npm test` does not reproduce them; re-measure before relying on a figure for a different deck or machine.
 
 ## Why Slidev as the base
 
@@ -22,6 +23,8 @@ large download, runs slower than native, and cannot use native executables. It w
 
 ## Measurements
 
+Measured by hand on 2026-10-03; there is no script behind these numbers.
+
 | Test | Result |
 |---|---|
 | Canvas scene (40 orbiting bodies) | 60 fps |
@@ -32,7 +35,7 @@ large download, runs slower than native, and cannot use native executables. It w
 | Slide change while a 10 s computation runs | 30 ms |
 | Demo subprocess crashes | Error shown inside that demo only, deck and demo stay up |
 | Demo process killed, then restarted | Offline panel, then the iframe returns on its own |
-| PDF export with `--with-clicks` (9 slides) | 12 pages, 8 s |
+| PDF export with `--with-clicks` | 12 pages, 8 s for the 9-slide deck of the time; not re-measured on the current 28-slide example |
 
 Smooth animation needs one Python step to fit in about 16 ms. Beyond that the frame rate follows the step time, but
 the deck stays responsive.
@@ -59,18 +62,6 @@ after typing stops plus the run time; an infinite loop is killed at the timeout 
 replaces a stuck one in about 1.6 s; a wrong token and a foreign origin with the right token are both refused.
 A warm worker pool would cut the per-run start-up but would make killing runaway code harder.
 
-## Bug reported on a full-frame website slide (fixed)
-
-13. An embedded page that fills the slide took the keyboard and mouse away from the presentation; only clicking a black
-    margin helped, and a full-frame slide has none. Browsers do not let a page intercept keys typed inside a cross-origin
-    iframe. Fix: a shield over the page (the deck keeps control) plus an in-slide control bar once the presenter chooses
-    to interact. Covered by the end-to-end test.
-
-## Bug found by the interaction end-to-end test (fixed)
-
-12. Faded quiz answers used the CSS class `nd-dim`, which `Photo` and `Clip` already use for a black overlay, so the faded
-    answers became full-size overlays covering the quiz. Components share one CSS namespace: check for name clashes.
-
 ## Bugs found by `nimbledeck verify` (all fixed)
 
 9. Live scenes in normal slides overflowed the slide by 70 px on the right and ran into the footer zone (100% width
@@ -80,15 +71,30 @@ A warm worker pool would cut the per-run start-up but would make killing runaway
 11. The verifier itself passed silently on a hidden slide at first. A zero-size frame is now an error, loading has a
     timeout, and the tool was validated against a deliberately broken deck.
 
+## Bug found by the interaction end-to-end test (fixed)
+
+12. Faded quiz answers used the CSS class `nd-dim`, which `Photo` and `Clip` already use for a black overlay, so the faded
+    answers became full-size overlays covering the quiz. Components share one CSS namespace: check for name clashes.
+
+## Bug reported on a full-frame website slide (fixed)
+
+13. An embedded page that fills the slide took the keyboard and mouse away from the presentation; only clicking a black
+    margin helped, and a full-frame slide has none. Browsers do not let a page intercept keys typed inside a cross-origin
+    iframe. Fix: a shield over the page (the deck keeps control) plus an in-slide control bar once the presenter chooses
+    to interact. Covered by the end-to-end test.
+
 ## Known gaps
 
-- `verify` did not flag a title truncated by an ellipsis in a deliberately broken deck (`check` rejects it by length).
+- An early `verify` run did not flag a title truncated by an ellipsis in a deliberately broken deck (`check` rejects it by
+  length). `verify.mjs` now has a rule for CSS `text-overflow: ellipsis` ("text cut off") and one for clipped boxes, but this
+  case was not re-tested, so do not rely on `verify` for truncated titles; `check` is the gate.
 
 - PPTX export is one image per slide (Slidev), not editable and without animations. No tool tested provides native
   PowerPoint animations from this kind of source.
 - Live content exists only in the browser. PDF export captures the current state of a running demo as a snapshot.
 - Websites that forbid framing (GitHub, MDN, OpenStreetMap) cannot be embedded.
 - A dev-mode console warning, "Hydration completed but contains mismatches", appears. Not investigated.
-- Mermaid does not follow theme tokens yet.
+- Mermaid follows the theme tokens only for its base colour, border, text, line and font (see `docs/THEMING.md`); the
+  diagram sits in a shadow root, so page CSS does not reach it.
 - Windows, Firefox, Safari, offline use, presenter mode with live components and talk recording are untested.
 - Slidev has a `slidev mcp` command that lets agents inspect and edit slides. Not evaluated.

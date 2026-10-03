@@ -4,8 +4,8 @@
 
 ```
 packages/addon   slidev-addon-nimbledeck   components + design tokens + composables
-packages/theme   slidev-theme-nimbledeck   seven layouts, three variants, pulls in the addon by default
-packages/cli     nimbledeck                run, check
+packages/theme   slidev-theme-nimbledeck   eight layouts, three variants, pulls in the addon by default
+packages/cli     nimbledeck                run, check, verify
 examples/        decks that exercise everything (also the integration test)
 ```
 
@@ -23,6 +23,36 @@ A deck project needs: a Slidev entry file, `nimbledeck.config.json`, optional `d
 `nimbledeck run` reads `nimbledeck.config.json`, checks that every port is free, starts each process with
 `uv run` (bound to 127.0.0.1), writes `public/nimbledeck.json` with the ports, starts the deck, and stops
 everything on exit. Components read `nimbledeck.json` at runtime, so they never import project files.
+
+`NIMBLEDECK_PORT_OFFSET=<n>` adds `n` to every port (deck, demos, streams, runner), so several decks, or several agents on
+one machine, can run side by side. `nimbledeck.json` carries the shifted ports, so the components follow. Example:
+`NIMBLEDECK_PORT_OFFSET=200 npm run example` serves the deck on http://localhost:3230.
+
+Each child's output goes to `<deck folder>/.nimbledeck/logs/<name>.log` (the deck's own Slidev output stays on the
+terminal). When a child dies, the CLI prints `<name> exited (code N), see <log>` and keeps the rest running. Add
+`.nimbledeck/` and `public/nimbledeck.json` (it holds the session token) to the deck project's `.gitignore`.
+`nimbledeck run` validates the config first: `python.version` must look like `3.12`, and every demo, stream, requirements
+and `publicDir` path must stay inside the project folder and contain no shell characters.
+
+## nimbledeck.config.json
+
+| Key | Default | Meaning |
+|---|---|---|
+| `python.version`, `python.requirements` | `3.12`, `demos/requirements.txt` | Python for `uv run`, and the packages file (used when it exists) |
+| `demos`, `streams` | none | `{ "name": { "file": "...", "port": n } }` for `<Demo>` and `<PyStream>` |
+| `runner` | none | `{ "port": n }` enables live code |
+| `port`, `publicDir` | `3030`, `public` | the deck's port, and where its assets live |
+| `limits.maxTitle`, `limits.maxSubtitle` | 40, 55 | longest `# title` (error) and `#### subtitle` (warning) before the theme cuts it off |
+| `limits.maxBullets`, `limits.maxChars` | 7, 900 | bullets per slide, and characters of prose per slide (warnings) |
+| `leadLayouts` | `cover, divider, closing, full, end, section, intro, none` | layouts that need no `# title` and skip the text limits |
+| `verify.chrome` | `.nd-foot, .nd-page, footer` | CSS selectors of slide furniture, exempt from `verify`'s placement checks |
+| `verify.bleed` | `.nd-photo, .nd-media` | CSS selectors of media meant to reach the slide edge |
+
+A list given in the config replaces the default list; it is not merged. A brand theme with its own classes and layout
+names sets `leadLayouts` and `verify`, so the generic CLI carries no brand names.
+
+`nimbledeck verify <deck.md>` opens the running deck in Chrome at 1280 x 720 (device scale 2) and reports content that
+overflows the slide, enters the footer zone, is clipped or cut by an ellipsis, or is too low-resolution for its box.
 
 ## The live-code runner and its security model
 
@@ -59,8 +89,8 @@ not run anyway. Windows: no limits, the process-group kill falls back to a plain
 
 1. **Gate on `useActive()`.** Slidev keeps neighbouring slides mounted. Without the gate, timers, sockets and WebGL
    keep running off screen.
-2. **Never measure the element's size.** A mounted but hidden slide reports width 0. Use a fixed logical size
-   (the slide canvas is 1280 wide).
+2. **Never trust a 0 measurement.** A mounted but hidden slide reports width 0, so a measured size of 0 means "not
+   visible", not "empty". Use a fixed logical size (the slide canvas is 1280 wide).
 3. **Colours come from tokens**, via `cssVar('--nd-ink')`, never hard-coded.
 4. **Shared CSS goes in the global stylesheet**, never in one layout's `<style>`. Slidev loads a layout's styles
    only when that layout is first used, so a slide loaded on its own would lose them.
@@ -74,7 +104,8 @@ not run anyway. Windows: no limits, the process-group kill falls back to a plain
 ## Design tokens
 
 Defined with zero CSS priority (`:where(:root)`) in the addon, so any theme overrides them. Tokens:
-`--nd-bg --nd-ink --nd-muted --nd-accent --nd-accent-2 --nd-surface --nd-line --nd-font-body --nd-font-display`.
+`--nd-bg --nd-ink --nd-muted --nd-accent --nd-accent-2 --nd-surface --nd-line --nd-font-body --nd-font-display`, the chart
+palette `--nd-chart-1` to `--nd-chart-4` (used by `Chart`), and the quiz feedback tints `--nd-good` and `--nd-bad`.
 The base theme adds `--nd-cover-bg --nd-cover-fg --nd-title-transform --nd-title-size`.
 The variant is chosen by the headmatter key `ndVariant`, applied as `data-nd-variant` on `<html>`.
 
