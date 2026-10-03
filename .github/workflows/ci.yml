@@ -1,0 +1,31 @@
+# UNVERIFIED: this workflow has never run on GitHub Actions. It was written on macOS, where only its YAML syntax and
+# the commands it calls (npm ci, npm test, nimbledeck check, slidev build) were run by hand. Expect to fix the first run,
+# above all on windows-latest, which Nimbledeck has not been tested on yet (see docs/GETTING-STARTED.md).
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+      - run: npm ci
+      - run: npm test
+      - name: Check the example deck against the slide rules
+        run: node packages/cli/bin/nimbledeck.mjs check examples/how-it-works/how-it-works.md
+      - name: Build the example deck
+        run: npx slidev build examples/how-it-works/how-it-works.md
