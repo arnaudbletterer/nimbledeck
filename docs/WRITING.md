@@ -5,7 +5,7 @@
 1. Read the source document. Decide one message per slide.
 2. Write `<name>.md`: a cover slide first, a closing slide last.
 3. `nimbledeck check <name>.md` and fix every ERROR. Warnings mean "split this slide".
-4. `nimbledeck run <name>.md`, then open http://localhost:3030 (keys: arrows to move, `?` lists every shortcut, `/` searches slides, `O` overview; presenter view is the address `/presenter/1`).
+4. `nimbledeck run <name>.md`, then open http://localhost:3030 (keys: arrows to move, `?` lists every shortcut, `/` searches slides, `o` overview; presenter view is the address `/presenter/1`).
 5. Export: `slidev export <name>.md --with-clicks` (one page per build step).
 
 ## Syntax
@@ -129,7 +129,7 @@ plt.plot(x, np.sin(x))
 - Enable it with `"runner": { "port": 18800 }` in `nimbledeck.config.json`; `nimbledeck run` starts the runner. List the
   packages the code needs (numpy, matplotlib...) in `demos/requirements.txt`.
 - Figures are drawn in the slide's colours on a transparent background and rendered at screen resolution.
-- `:auto="false"` stops re-running while you type (for heavy code): use the Run button or Ctrl+Enter. `:timeout="20"` sets
+- `:auto="false"` stops re-running while you type (for heavy code): use the Run button or Cmd/Ctrl+Enter. `:timeout="20"` sets
   the time limit in seconds (default 10, at most 60).
 - Esc leaves the editor so the arrow keys drive the deck again. Reset restores the starting code. Edits are temporary:
   the Markdown stays the source of truth.

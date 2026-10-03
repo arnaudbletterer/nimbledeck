@@ -65,12 +65,16 @@ itself), and Google Chrome for `verify` and PDF export.
 brew install node uv   # macOS with Homebrew; any Node 20+ and uv install works
 npm install
 npm run example        # starts examples/how-it-works with its demos, on http://localhost:3030
-npm test               # CLI tests
+npm test               # CLI and live-code runner tests (not the browser components, see AGENTS.md)
 ```
 
 Notes:
 - Newer npm versions block install scripts and print `npm warn install-scripts`. That is harmless here: Nimbledeck uses
   your installed Chrome. If you want Playwright's own browser, run `npm install-scripts approve playwright-chromium`.
+- To run several decks (or several agents) at once, set `NIMBLEDECK_PORT_OFFSET=<n>`: it is added to every port, so
+  `NIMBLEDECK_PORT_OFFSET=200 npm run example` serves on http://localhost:3230.
+- `nimbledeck run` writes logs to `.nimbledeck/logs/` and a session file to `public/nimbledeck.json` in the deck
+  folder: add `.nimbledeck/` and `public/nimbledeck.json` to the deck project's `.gitignore`.
 - `nimbledeck verify` uses Chrome at its usual location. Set `NIMBLEDECK_CHROME` to its path if it is elsewhere.
 - PDF export: `npx slidev export <deck.md> --with-clicks --executable-path "<path to Chrome>"`.
 
@@ -98,6 +102,13 @@ layout: default
 ```
 
 More in [docs/WRITING.md](docs/WRITING.md). Agents: read [AGENTS.md](AGENTS.md).
+
+## Security
+
+**Running a deck means running its code (Vue components, setup files, demo processes, live code). Only open decks you
+trust.** Everything binds to 127.0.0.1, the live-code runner needs a per-session token and the deck's own browser origin,
+and its runs are limited in time, memory and output, but the code still runs with your own rights. Marimo demos run without
+a token (known risk and options in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 
 ## Brand themes live elsewhere
 
