@@ -51,6 +51,13 @@ the deck stays responsive.
    background; light-mode syntax colours on a dark panel). Fix: code colours follow the tokens, and the `night`
    variant switches Slidev to its dark syntax theme. Reported by the first user to try the dark variant.
 
+## Bug reported on a full-frame website slide (fixed)
+
+13. An embedded page that fills the slide took the keyboard and mouse away from the presentation; only clicking a black
+    margin helped, and a full-frame slide has none. Browsers do not let a page intercept keys typed inside a cross-origin
+    iframe. Fix: a shield over the page (the deck keeps control) plus an in-slide control bar once the presenter chooses
+    to interact. Covered by the end-to-end test.
+
 ## Bug found by the interaction end-to-end test (fixed)
 
 12. Faded quiz answers used the CSS class `nd-dim`, which `Photo` and `Clip` already use for a black overlay, so the faded

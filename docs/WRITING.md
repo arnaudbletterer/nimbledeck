@@ -105,6 +105,13 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 2. Register it under `streams` in the config, then use `<PyStream name="<name>" />`.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 
+## Embedded pages never take the deck hostage
+
+`<Site>` and `<Demo>` put a page in an iframe, and an iframe that has focus swallows keys and clicks, which the deck
+cannot intercept. So an embedded page starts behind a transparent shield: arrow keys and clicks drive the deck, even on a
+full-frame slide with no margin. Click the page to interact with it; a control bar inside the slide then offers
+previous, "Back to slides" and next, and works whatever the frame size. Leaving the slide re-guards the page.
+
 ## Interactions are for the presenter
 
 Interactive components react to clicks and keys on the presenting machine; they are not audience polling. Clicks on them
