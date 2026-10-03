@@ -81,7 +81,11 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 | `<Demo name="x" />` | A local marimo app in an iframe, with an offline fallback. |
 | `<Clip src="/a.mp4" />` | A looping video. `fit`, `dim`, `controls`. |
 | `<Chart type="bar" :labels="[...]" :data="[...]" />` | Chart.js chart (`bar`, `line`, `pie`, `doughnut`), coloured by `--nd-chart-1..4`, animated when its slide appears. `horizontal`, `stacked`, `values`, `legend`, `center="3,2K"` (donut). |
-| `<Quiz>` with `<Choice letter="A" correct>` and `<Explain letter="B">` | Answer grid and the explanation panel. |
+| `<Quiz answer="B">` with `<Choice letter="A">` ... and `<Explain letter="B">` inside | Interactive quiz: the presenter clicks an answer (or presses 1 to 4); it turns good or bad, the right answer is revealed, the others fade, and the explanation appears. Leaving the slide resets it. Without `answer`, mark the right choice with `correct` for a static slide (use that for PDF handouts). |
+| `<Countdown :seconds="20" />` | Circular timer that starts when its slide appears; click pauses. |
+| `<Flip>` with `<template #front>` and `<template #back>` | A card that flips on click. |
+| `<Compare before="/a.jpg" after="/b.jpg" />` | Before and after images with a draggable divider (arrow keys work too). |
+| `<CountUp :to="3200" suffix="K" />` | A number that counts up when its slide appears. |
 | `<Photo src="/a.jpg" />` | An image. `fit`, `position`, `dim`. |
 | `<Headline>text</Headline>` | Large display text (`size` xl, l, m; `tone` light, dark). |
 | `<Site url="https://..." />` | A website in a frame. Many sites forbid framing (GitHub does): use a screenshot or open it separately. |
@@ -100,6 +104,14 @@ images for a full-frame photo. Videos should be at least as wide as their box in
    binary float32 `[step_ms, n, x0, y0, x1, y1, ...]`. The client sends JSON parameters; apply them between steps.
 2. Register it under `streams` in the config, then use `<PyStream name="<name>" />`.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
+
+## Interactions are for the presenter
+
+Interactive components react to clicks and keys on the presenting machine; they are not audience polling. Clicks on them
+never advance the slide. Everything resets when you leave the slide, so a rehearsed quiz is fresh on stage. All motion
+respects the system "reduce motion" setting. In a PDF export an interactive quiz shows its initial, unanswered state.
+`examples/how-it-works/e2e-interactions.mjs` clicks through every interaction in a real browser and asserts the result
+(run it against the running example).
 
 ## Verifying placement in a browser
 
