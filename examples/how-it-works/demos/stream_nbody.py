@@ -13,7 +13,8 @@ import numpy as np
 from websockets.asyncio.server import serve
 
 PORT = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 18765
-ORIGINS = ["http://127.0.0.1:3030", "http://localhost:3030"]
+# allowed origins come from the CLI (`--origin`, repeatable); the default is the usual deck address
+ORIGINS = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--origin"] or ["http://127.0.0.1:3030", "http://localhost:3030"]
 FRAME_S = 1 / 60
 
 

@@ -40,6 +40,7 @@ export async function runDeck(deck, root = process.cwd()) {
   mkdirSync(pub, { recursive: true })
   writeFileSync(join(pub, 'nimbledeck.json'), JSON.stringify({ demos: cfg.demos, streams: cfg.streams, runner }, null, 2))
 
+  const origins = [`http://localhost:${cfg.port}`, `http://127.0.0.1:${cfg.port}`].flatMap((o) => ['--origin', o])
   const uv = (args, log) => spawn('uv', ['run', '--python', cfg.python.version, ...(existsSync(join(root, cfg.python.requirements)) ? ['--with-requirements', cfg.python.requirements] : []), ...args],
     { cwd: root, stdio: 'ignore', shell: isWin })
   for (const [kind, entries] of [['demo', cfg.demos], ['stream', cfg.streams]]) {
@@ -47,7 +48,7 @@ export async function runDeck(deck, root = process.cwd()) {
       if (!(await portFree(e.port))) { console.error(`port ${e.port} is already in use (${kind} ${name})`); cleanup(); process.exit(1) }
       const args = kind === 'demo'
         ? ['marimo', 'run', e.file, '--host', '127.0.0.1', '--port', String(e.port), '--headless', '--no-token']
-        : ['python', e.file, '--port', String(e.port)]
+        : ['python', e.file, '--port', String(e.port), ...origins]
       children.push(uv(args))
       console.log(`${kind} ${name} -> ${kind === 'demo' ? 'http' : 'ws'}://127.0.0.1:${e.port}`)
     }

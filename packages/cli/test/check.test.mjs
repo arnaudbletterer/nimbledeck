@@ -93,3 +93,14 @@ test('an over-long subtitle is a warning', () => {
   assert.equal(r.errors.length, 0)
   assert.match(r.warnings.join('\n'), /subtitle \d+ chars > 55/)
 })
+
+test('NIMBLEDECK_PORT_OFFSET shifts every port', async () => {
+  const { loadConfig } = await import('../src/config.mjs')
+  const root = mkdtempSync(join(tmpdir(), 'nd-'))
+  writeFileSync(join(root, 'nimbledeck.config.json'), JSON.stringify({ demos: { a: { file: 'a.py', port: 2719 } }, streams: { s: { file: 's.py', port: 18765 } }, runner: { port: 18800 } }))
+  process.env.NIMBLEDECK_PORT_OFFSET = '100'
+  try {
+    const c = loadConfig(root)
+    assert.deepEqual([c.port, c.demos.a.port, c.streams.s.port, c.runner.port], [3130, 2819, 18865, 18900])
+  } finally { delete process.env.NIMBLEDECK_PORT_OFFSET }
+})
