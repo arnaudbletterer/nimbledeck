@@ -51,6 +51,14 @@ the deck stays responsive.
    background; light-mode syntax colours on a dark panel). Fix: code colours follow the tokens, and the `night`
    variant switches Slidev to its dark syntax theme. Reported by the first user to try the dark variant.
 
+## Live code: Python in a local process
+
+Chosen over in-browser Python (slow start, no native executables) and over embedding a notebook (does not look like the
+slides). Measured: the starting code returned a figure in about 2 s cold; an edit to the result is visible about 0.6 s
+after typing stops plus the run time; an infinite loop is killed at the timeout and the next run works; a newer run
+replaces a stuck one in about 1.6 s; a wrong token and a foreign origin with the right token are both refused.
+A warm worker pool would cut the per-run start-up but would make killing runaway code harder.
+
 ## Bug reported on a full-frame website slide (fixed)
 
 13. An embedded page that fills the slide took the keyboard and mouse away from the presentation; only clicking a black

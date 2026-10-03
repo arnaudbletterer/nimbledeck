@@ -31,7 +31,7 @@ marimo, numpy, websockets.
 
 | Package | What it is |
 |---|---|
-| `slidev-addon-nimbledeck` | Live components: `Orbit` (canvas), `Scene3D` (WebGL), `PyStream` (Python over WebSocket), `Demo` (local marimo app), `Clip` (video), `Photo`, `Headline`, `Chart`, `Quiz` (interactive), `Countdown`, `Flip`, `Compare`, `CountUp`, `Site` (website), `Fly` (motion), and `Stage`/`At` to layer any of them with text. Design tokens (`--nd-*`) they all follow. |
+| `slidev-addon-nimbledeck` | Live components: `Orbit` (canvas), `Scene3D` (WebGL), `PyStream` (Python over WebSocket), `Demo` (local marimo app), `Clip` (video), `Photo`, `Headline`, `Chart`, `Quiz` (interactive), `Countdown`, `Flip`, `Compare`, `CountUp`, `LiveCode` (edit Python on the slide, the result updates), `Site` (website), `Fly` (motion), and `Stage`/`At` to layer any of them with text. Design tokens (`--nd-*`) they all follow. |
 | `slidev-theme-nimbledeck` | Base themes: `plain`, `paper`, `night`. Eight layouts: `cover`, `agenda`, `divider`, `default`, `two-cols`, `photo-right`, `closing`, `full`. |
 | `nimbledeck` (CLI) | `nimbledeck run` starts the deck and every demo on localhost. `nimbledeck check` lints a deck against the slide rules. `nimbledeck verify` opens the running deck in a browser and reports overflow and low-resolution content. |
 
