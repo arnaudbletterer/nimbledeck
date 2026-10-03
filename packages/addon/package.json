@@ -2,7 +2,15 @@
   "name": "slidev-addon-nimbledeck",
   "version": "0.1.0",
   "description": "Live components for Slidev decks: canvas, WebGL, Python streams, local demos, video, websites.",
-  "keywords": ["slidev-addon", "slidev"],
-  "engines": { "slidev": ">=0.50.0" },
-  "dependencies": { "three": "^0.170.0" }
+  "keywords": [
+    "slidev-addon",
+    "slidev"
+  ],
+  "engines": {
+    "slidev": ">=0.50.0"
+  },
+  "dependencies": {
+    "three": "^0.170.0",
+    "chart.js": "^4.4.0"
+  }
 }
