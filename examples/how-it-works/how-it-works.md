@@ -298,6 +298,28 @@ Esc leaves the editor so the arrow keys drive the deck again.
 layout: default
 ---
 
+# Live code, run on demand
+
+<Stage>
+<At :w="1140" :h="460">
+<LiveCode :auto="false">
+
+```python
+print("press Cmd/Ctrl+Enter to run me")
+```
+
+</LiveCode>
+</At>
+</Stage>
+
+<!--
+For heavy code: nothing runs while you type. Cmd/Ctrl+Enter or the Run button runs it.
+-->
+
+---
+layout: default
+---
+
 # An interactive quiz
 
 <Stage>

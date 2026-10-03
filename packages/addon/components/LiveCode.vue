@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useSlideContext } from '@slidev/client'
 import { EditorView, keymap } from '@codemirror/view'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Prec } from '@codemirror/state'
 import { basicSetup } from 'codemirror'
 import { python } from '@codemirror/lang-python'
 import { useActive } from '../composables/useActive'
@@ -19,7 +19,7 @@ import { useNimbleConfig, cssVar } from '../composables/useConfig'
 //   ```
 //
 //   </LiveCode>
-// `auto` re-runs while you type (default); set `:auto="false"` for heavy code: run with the button or Ctrl+Enter.
+// `auto` re-runs while you type (default); set `:auto="false"` for heavy code: run with the button or Cmd/Ctrl+Enter.
 const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean }>(), { auto: true, timeout: 10, frame: false })
 const { $scale } = useSlideContext()
 const source = ref<HTMLElement>()
@@ -83,10 +83,11 @@ function mount() {
       doc: initial.value,
       extensions: [
         basicSetup, python(), theme,
-        keymap.of([
+        // Highest precedence: basicSetup's default keymap binds Mod-Enter to insertBlankLine and would win otherwise.
+        Prec.highest(keymap.of([
           { key: 'Escape', run: (v) => { v.contentDOM.blur(); return true } },                     // give the keyboard back to the deck
           { key: 'Mod-Enter', run: () => { clearTimeout(debounce); run(); return true } },
-        ]),
+        ])),
         EditorView.updateListener.of((u) => { if (u.docChanged) schedule() }),
       ],
     }),
@@ -110,7 +111,7 @@ onUnmounted(() => { stop(); view?.destroy() })
       <div class="nd-live-bar">
         <button @click="reset">Reset</button>
         <button @click="clearTimeout(debounce); run()">Run</button>
-        <span class="nd-live-hint">Esc leaves the editor · Ctrl+Enter runs</span>
+        <span class="nd-live-hint">Esc leaves the editor · Cmd/Ctrl+Enter runs</span>
       </div>
     </div>
     <div ref="result" class="nd-live-out" :class="{ 'nd-stale': stale }">
