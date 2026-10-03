@@ -115,3 +115,15 @@ test('a deck with Windows line endings parses like the same deck with LF', () =>
   const root = project(deck.replace(/\n/g, '\r\n'))
   assert.equal(parseHeadmatter(readFileSync(join(root, 'deck.md'), 'utf8')).layout, 'mine')
 })
+
+test('lead layouts come from the config, with neutral defaults', () => {
+  const deck = '---\ntheme: none\n---\n\n# A\n\n---\nlayout: mine\n---\n\nno title here\n'
+  assert.match(run(deck).errors.join('\n'), /missing '# title'/)
+  assert.deepEqual(run(deck, { config: { leadLayouts: ['mine'] } }).errors, [])
+  assert.match(run('---\ntheme: none\nlayout: closing-photo\n---\n\nbody\n').errors.join('\n'), /unknown layout 'closing-photo'/)
+})
+
+test('a malformed leadLayouts or verify setting is a readable error', () => {
+  assert.throws(() => run('# A\n', { config: { leadLayouts: 'cover' } }), /leadLayouts: must be a non-empty list/)
+  assert.throws(() => run('# A\n', { config: { verify: { chrome: [] } } }), /verify.chrome/)
+})
