@@ -1,0 +1,31 @@
+/* Design tokens. A theme overrides these; components only ever use var(--nd-*). */
+:where(:root) {
+  --nd-bg: #ffffff;
+  --nd-ink: #1f2328;
+  --nd-muted: #6b7280;
+  --nd-accent: #2563eb;
+  --nd-accent-2: #9ca3af;
+  --nd-surface: #f3f4f6;
+  --nd-line: #d1d5db;
+  --nd-font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --nd-font-display: var(--nd-font-body);
+}
+
+.nd-scene { margin: 0 70px; position: relative; font-family: var(--nd-font-body); color: var(--nd-ink); }
+.nd-scene canvas, .nd-scene .nd-gl { border: 1px solid var(--nd-ink); display: block; width: 100%; }
+.nd-scene .nd-gl canvas { border: 0; width: 100% !important; }
+.nd-ctl { display: flex; gap: 18px; align-items: center; font-size: 18px; margin-top: 6px; flex-wrap: wrap; }
+.nd-ctl button { border: 1px solid var(--nd-ink); padding: 2px 14px; background: var(--nd-surface); color: var(--nd-ink); }
+.nd-fps { margin-left: auto; color: var(--nd-muted); }
+.nd-off { position: absolute; top: 200px; left: 0; right: 0; text-align: center; background: color-mix(in srgb, var(--nd-bg) 80%, transparent); color: var(--nd-ink); }
+.nd-demo { position: relative; width: calc(100% - 140px); height: 470px; margin: 10px 70px; }
+.nd-demo iframe { width: 100%; height: 100%; border: 1px solid var(--nd-ink); background: #fff; }
+.nd-down { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px dashed var(--nd-accent-2); color: var(--nd-ink); }
+.nd-down img { max-height: 70%; opacity: .5; }
+.nd-dot { position: absolute; top: 8px; right: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--nd-accent-2); }
+.nd-dot.on { background: var(--nd-ink); }
+.nd-site { margin: 10px 70px; height: 470px; }
+.nd-site iframe { width: 100%; height: 440px; border: 1px solid var(--nd-ink); }
+.nd-cap { font-size: 16px; color: var(--nd-muted); }
+.nd-clip { display: block; margin: 10px auto; height: 440px; }
+.nd-fly { display: inline-block; }
