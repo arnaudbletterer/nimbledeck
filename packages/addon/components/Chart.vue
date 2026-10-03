@@ -31,7 +31,7 @@ const ready = ref(false)
 let chart: Chart | null = null
 
 const series = () => (Array.isArray(props.data[0]) ? (props.data as number[][]) : [props.data as number[]])
-const palette = () => [1, 2, 3, 4].map((i) => cssVar(`--nd-chart-${i}`, ['#1f2328', '#9ca3af', '#e5e7eb', '#e8cdba'][i - 1]))
+const palette = () => [1, 2, 3, 4].map((i) => cssVar(`--nd-chart-${i}`, cssVar(['--nd-ink', '--nd-accent-2', '--nd-surface', '--nd-accent'][i - 1])))
 
 // Draws each value on its bar, point or slice.
 const valuePlugin = {
