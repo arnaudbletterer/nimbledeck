@@ -44,7 +44,11 @@ everything on exit. Components read `nimbledeck.json` at runtime, so they never 
 3. **Colours come from tokens**, via `cssVar('--nd-ink')`, never hard-coded.
 4. **Shared CSS goes in the global stylesheet**, never in one layout's `<style>`. Slidev loads a layout's styles
    only when that layout is first used, so a slide loaded on its own would lose them.
-5. **Apply parameter changes between steps** in stream servers, never mid-step (a resize during a step crashed an
+5. **Render canvases at the real resolution** with `useCrisp` (slide units x slide scale x pixel ratio), drawing in
+   logical coordinates, so they stay sharp on large and high-density screens.
+6. **Fill the box you are given.** Components are plain elements (no margins, borders or backgrounds of their own),
+   so `<Stage>`/`<At>` can layer them. Widths use `auto`, never `100%` plus side margins.
+7. **Apply parameter changes between steps** in stream servers, never mid-step (a resize during a step crashed an
    early version).
 
 ## Design tokens

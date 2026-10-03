@@ -51,7 +51,18 @@ the deck stays responsive.
    background; light-mode syntax colours on a dark panel). Fix: code colours follow the tokens, and the `night`
    variant switches Slidev to its dark syntax theme. Reported by the first user to try the dark variant.
 
+## Bugs found by `nimbledeck verify` (all fixed)
+
+9. Live scenes in normal slides overflowed the slide by 70 px on the right and ran into the footer zone (100% width
+   plus side margins). Screenshots had not made this obvious.
+10. Canvases rendered at a fixed 1000 x 460 pixels and were scaled up, so they looked soft on large or high-density
+    screens. They now render at the on-screen resolution.
+11. The verifier itself passed silently on a hidden slide at first. A zero-size frame is now an error, loading has a
+    timeout, and the tool was validated against a deliberately broken deck.
+
 ## Known gaps
+
+- `verify` did not flag a title truncated by an ellipsis in a deliberately broken deck (`check` rejects it by length).
 
 - PPTX export is one image per slide (Slidev), not editable and without animations. No tool tested provides native
   PowerPoint animations from this kind of source.
