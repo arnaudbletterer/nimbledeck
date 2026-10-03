@@ -73,3 +73,6 @@
 .nd-photo { position: absolute; top: 120px; bottom: 0; left: 50%; right: 0; background-size: cover; background-position: center; }
 /* Full-frame layout: no title bar, no footer. The slot fills the whole 1280 x 720 slide and is clipped to it. */
 .nd-full { position: relative; height: 100%; overflow: hidden; background: var(--nd-bg); }
+
+/* Code blocks sit inside the side gutters like every other block. */
+.nd-body .slidev-code-wrapper, .nd-body > pre { margin-left: 70px !important; margin-right: 70px !important; }
