@@ -1,3 +1,42 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import { useActive } from '../composables/useActive'
+
+// An answer grid. Static: mark the right <Choice> with `correct`. Interactive: give the quiz an `answer` letter and the
+// presenter clicks an answer (or presses its number key) to get feedback: the picked answer turns good or bad, the right
+// one is revealed, the others fade, and an <Explain> placed inside the quiz appears. Leaving the slide resets it.
+const props = defineProps<{ answer?: string }>()
+const picked = ref<string | null>(null)
+const letters = ref<string[]>([])
+const interactive = computed(() => !!props.answer)
+const revealed = computed(() => interactive.value && picked.value !== null)
+const right = computed(() => picked.value !== null && picked.value === props.answer)
+
+provide('ndQuiz', {
+  answer: computed(() => props.answer),
+  picked, interactive, revealed,
+  register: (l: string) => { letters.value.push(l); return () => { letters.value = letters.value.filter((x) => x !== l) } },
+  pick: (l: string) => { if (interactive.value && picked.value === null) picked.value = l },
+})
+
+const active = useActive()
+watch(active, (a) => { if (!a) picked.value = null })
+const onKey = (e: KeyboardEvent) => {
+  if (!active.value || !interactive.value || e.metaKey || e.ctrlKey || e.altKey) return
+  const l = letters.value[Number(e.key) - 1]
+  if (l && picked.value === null) { picked.value = l; e.preventDefault() }
+}
+onMounted(() => window.addEventListener('keydown', onKey))
+onUnmounted(() => window.removeEventListener('keydown', onKey))
+</script>
+
 <template>
-  <div class="nd-quiz"><slot /></div>
+  <div class="nd-quiz" :class="{ 'nd-revealed': revealed }" data-kind="quiz" :data-state="revealed ? (right ? 'good' : 'bad') : 'open'">
+    <slot />
+    <Transition name="nd-rise">
+      <div v-if="revealed" class="nd-verdict" :class="right ? 'nd-good' : 'nd-bad'" role="status">
+        {{ right ? 'Correct' : `Not quite. The answer is ${answer}.` }}
+      </div>
+    </Transition>
+  </div>
 </template>
