@@ -12,7 +12,7 @@ const slides = splitSlides(readFileSync(deck, 'utf8'))
 const at = (title) => slides.findIndex((s) => s.body.includes(`# ${title}`)) + 1
 const quizSlide = at('An interactive quiz'), miscSlide = at('Flip, compare, count up')
 if (!quizSlide || !miscSlide) throw new Error('example slides not found')
-const liveSlide = at('Live code')
+const liveSlide = at('Live code'), manualSlide = at('Live code, run on demand')
 const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && s.fm.layout === 'full') + 1
 
 const chrome = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => { try { readFileSync(p); return true } catch { return false } })
@@ -144,6 +144,19 @@ if (liveSlide) {
   const foreign = await other.evaluate(({ port, token }) => new Promise((res) => { const w = new WebSocket(`ws://127.0.0.1:${port}/?t=${token}`); w.onopen = () => { w.close(); res('connected') }; w.onerror = () => res('refused') }), { port: cfg.runner.port, token: cfg.runner.token })
   check('another website with the right token is refused (origin check)', foreign === 'refused')
   await other.close()
+  // :auto="false": typing must not run the code; Cmd/Ctrl+Enter must (CodeMirror binds it to "insert blank line" by default)
+  if (manualSlide) {
+    await go(manualSlide)
+    await page.waitForFunction((s) => document.querySelector(s + '[data-state=ok]'), live, { timeout: 60000 })
+    await vis(`${live} .cm-content`).click(); await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A'); await page.keyboard.insertText('print("manual", 6 * 7)')
+    await page.waitForTimeout(2000)                                  // well past the 600 ms auto-run debounce
+    const out = async () => (await vis(`${live} .nd-live-stdout`).textContent().catch(() => '')) ?? ''
+    check('typing does not auto-run when auto is false', !/manual 42/.test(await out()) && (await vis(live).getAttribute('data-state')) === 'ok')
+    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+Enter' : 'Control+Enter')
+    await page.waitForFunction((s) => /manual 42/.test(document.querySelector(s + ' .nd-live-stdout')?.textContent ?? ''), live, { timeout: 30000 })
+    check('Cmd/Ctrl+Enter runs the code and shows its output', /manual 42/.test(await out()))
+    check('Cmd/Ctrl+Enter does not insert a blank line', (await vis(`${live} .cm-content`).locator('.cm-line').count()) === 1)
+  } else console.log('SKIP  no run-on-demand live code slide in this deck')
 } else console.log('SKIP  no live code slide in this deck')
 
 // Full-frame embedded page: the presentation must stay controllable (needs a deck with a full-frame <Demo>)
