@@ -9,7 +9,7 @@ watch(active, (a) => { if (!a) flipped.value = false })
 </script>
 
 <template>
-  <div class="nd-flip" :class="{ 'nd-flipped': flipped }" data-kind="flip" :data-state="flipped ? 'back' : 'front'" role="button" tabindex="0"
+  <div class="nd-flip" :class="{ 'nd-flipped': flipped }" data-kind="flip" :data-state="flipped ? 'back' : 'front'" role="button" tabindex="0" :aria-pressed="flipped"
        @click.stop="flipped = !flipped" @keydown.enter.stop.prevent="flipped = !flipped" @keydown.space.stop.prevent="flipped = !flipped">
     <div class="nd-flip-inner">
       <div class="nd-flip-face nd-flip-front"><slot name="front" /></div>

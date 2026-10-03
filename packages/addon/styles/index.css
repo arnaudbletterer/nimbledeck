@@ -15,6 +15,8 @@
   --nd-chart-4: var(--nd-accent);
   --nd-good: #c9ecd9;
   --nd-bad: #f7cccc;
+  --nd-good-ink: #2f6b4f;   /* border and glyph of a right answer, so good and bad differ without colour */
+  --nd-bad-ink: #9b3a37;
 }
 
 /* Live components are plain elements: they fill the box they are placed in, have no frame or background by
@@ -77,10 +79,17 @@
 .nd-choice:focus-visible { outline: 2px solid var(--nd-accent-2); outline-offset: 2px; }
 .nd-revealed .nd-choice.nd-correct span { background: var(--nd-good); }
 .nd-choice.nd-wrong span { background: var(--nd-bad); }
+/* Right and wrong also differ by a glyph and a 2px border, not by colour alone. */
+.nd-choice.nd-correct span::before { content: "\2713"; margin-right: .5em; font-weight: bold; }
+.nd-choice.nd-wrong span::before { content: "\2717"; margin-right: .5em; font-weight: bold; }
+.nd-revealed .nd-choice.nd-correct span { box-shadow: inset 0 0 0 2px var(--nd-good-ink); }
+.nd-choice.nd-wrong span { box-shadow: inset 0 0 0 2px var(--nd-bad-ink); }
 .nd-choice.nd-wrong { animation: nd-shake .45s ease; }
 .nd-choice.nd-faded { opacity: .4; }
 .nd-verdict { grid-column: 1 / -1; padding: .6em 1em; font-size: 24px; border-radius: 6px; color: var(--nd-ink); }
-.nd-verdict.nd-good { background: var(--nd-good); } .nd-verdict.nd-bad { background: var(--nd-bad); }
+.nd-verdict.nd-good { background: var(--nd-good); box-shadow: inset 0 0 0 2px var(--nd-good-ink); } .nd-verdict.nd-bad { background: var(--nd-bad); box-shadow: inset 0 0 0 2px var(--nd-bad-ink); }
+.nd-verdict.nd-good::before { content: "\2713  "; font-weight: bold; } .nd-verdict.nd-bad::before { content: "\2717  "; font-weight: bold; }
+.nd-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .nd-quiz .nd-explain { grid-column: 1 / -1; margin-top: 0; }
 @keyframes nd-shake { 0%,100% { transform: translateX(0) } 20% { transform: translateX(-8px) } 40% { transform: translateX(7px) } 60% { transform: translateX(-5px) } 80% { transform: translateX(3px) } }
 .nd-rise-enter-active { transition: opacity .4s ease, transform .4s ease; }
@@ -92,6 +101,7 @@
 .nd-explain-body > :first-child { margin-top: 0; } .nd-explain-body > :last-child { margin-bottom: 0; }
 
 /* Countdown ring. */
+.nd-cd { position: relative; display: inline-block; line-height: 0; }
 .nd-countdown { position: relative; width: 120px; height: 120px; background: none; border: 0; padding: 0; cursor: pointer; color: var(--nd-ink); }
 .nd-countdown svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .nd-countdown circle { fill: none; stroke-width: 8; }
@@ -99,11 +109,13 @@
 .nd-ring { stroke: var(--nd-ink); stroke-linecap: round; transition: stroke .3s; }
 .nd-count { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--nd-font-display); font-size: 44px; }
 .nd-urgent .nd-ring { stroke: #c0392b; } .nd-done .nd-ring { stroke: var(--nd-accent-2); }
+@media (prefers-reduced-motion: reduce) { .nd-ring { transition: none; } }
 /* Flip card. */
 .nd-flip { perspective: 1200px; width: 100%; height: 100%; min-height: 160px; cursor: pointer; }
 .nd-flip-inner { position: relative; width: 100%; height: 100%; transition: transform .6s cubic-bezier(.4, .2, .2, 1); transform-style: preserve-3d; }
 .nd-flipped .nd-flip-inner { transform: rotateY(180deg); }
 .nd-flip-face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1em; background: var(--nd-surface); color: var(--nd-ink); font-size: 28px; }
+.nd-flip:focus-visible { outline: 2px solid var(--nd-accent-2); outline-offset: 2px; }
 .nd-flip-back { transform: rotateY(180deg); background: var(--nd-ink); color: var(--nd-bg); }
 @media (prefers-reduced-motion: reduce) { .nd-flip-inner { transition: none; } }
 /* Before / after slider. */
@@ -119,7 +131,8 @@
 .nd-guard > iframe { width: 100%; height: 100%; }
 .nd-shield { position: absolute; inset: 0; z-index: 5; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
 .nd-shield-hint { opacity: 0; transition: opacity .2s; background: color-mix(in srgb, var(--nd-ink) 82%, transparent); color: var(--nd-bg); font: 600 15px var(--nd-font-body); padding: 5px 14px; border-radius: 999px; pointer-events: none; }
-.nd-shield:hover .nd-shield-hint { opacity: 1; }
+.nd-shield:hover .nd-shield-hint, .nd-shield:focus-visible .nd-shield-hint { opacity: 1; }
+.nd-shield:focus-visible { outline: 2px solid var(--nd-accent-2); outline-offset: -4px; }
 /* Bottom right: Slidev's own (invisible) navigation overlay covers the bottom left half of the slide and eats clicks. */
 .nd-bar { position: absolute; z-index: 6; right: 12px; bottom: 12px; display: flex; gap: 4px; padding: 4px; border-radius: 999px;
   background: color-mix(in srgb, var(--nd-ink) 88%, transparent); box-shadow: 0 2px 12px rgba(0, 0, 0, .35); }
@@ -142,7 +155,7 @@
 .nd-live-stdout, .nd-live-stderr { margin: 0; padding: 6px 8px; font: 14px/1.4 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; max-height: 35%; overflow: auto; border-radius: 4px; }
 .nd-live-stdout { background: var(--nd-surface); color: var(--nd-ink); }
 .nd-live-stderr { background: var(--nd-bad); color: var(--nd-ink); }
-.nd-live-status { position: absolute; right: 4px; top: 0; font-size: 13px; color: var(--nd-muted); }
+.nd-live-status { position: absolute; right: 4px; top: 0; font-size: 14px; color: var(--nd-muted); }
 .nd-st-error { color: #b03030; }
 .nd-live-msg { margin: auto; text-align: center; color: var(--nd-muted); }
 

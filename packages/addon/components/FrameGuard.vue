@@ -23,7 +23,8 @@ function go(fn: () => void) { release(); fn() }
 <template>
   <div class="nd-guard" :class="{ 'nd-guard-live': interactive }" data-kind="guard" :data-state="interactive ? 'interactive' : 'guarded'">
     <slot />
-    <div v-if="!interactive" class="nd-shield" @click.stop="interactive = true"><span class="nd-shield-hint">Click to interact</span></div>
+    <div v-if="!interactive" class="nd-shield" role="button" tabindex="0" aria-label="Click to interact with the embedded page"
+         @click.stop="interactive = true" @keydown.enter.stop.prevent="interactive = true" @keydown.space.stop.prevent="interactive = true"><span class="nd-shield-hint">Click to interact</span></div>
     <div v-else class="nd-bar" role="toolbar" aria-label="Presentation controls">
       <button aria-label="Previous" @click.stop="go(prev)">‹</button>
       <button class="nd-bar-main" @click.stop="release">Back to slides</button>

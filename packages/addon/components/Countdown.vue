@@ -11,6 +11,9 @@ let raf = 0, last = 0
 const R = 54, C = 2 * Math.PI * R
 const dash = computed(() => C * (1 - left.value / props.seconds))
 const label = computed(() => Math.ceil(left.value))
+// A polite announcement, only at 10 s steps, at 5 s and at zero: a per-second live region would drown a screen reader.
+const spoken = ref('')
+watch(label, (l) => { spoken.value = l === 0 ? 'Time is up' : l % 10 === 0 || l === 5 ? `${l} seconds left` : spoken.value })
 
 function tick(ts: number) {
   const dt = last ? (ts - last) / 1000 : 0; last = ts
@@ -27,8 +30,11 @@ onUnmounted(stop)
 </script>
 
 <template>
-  <button class="nd-countdown" :class="{ 'nd-done': left <= 0, 'nd-urgent': left > 0 && left <= 5 }" data-kind="countdown" :data-left="label" @click.stop="toggle" :aria-label="`${label} seconds left`">
-    <svg viewBox="0 0 120 120"><circle class="nd-ring-bg" cx="60" cy="60" :r="R" /><circle class="nd-ring" cx="60" cy="60" :r="R" :stroke-dasharray="C" :stroke-dashoffset="dash" /></svg>
-    <span class="nd-count">{{ label }}</span>
-  </button>
+  <span class="nd-cd">
+    <button class="nd-countdown" :class="{ 'nd-done': left <= 0, 'nd-urgent': left > 0 && left <= 5 }" data-kind="countdown" :data-left="label" @click.stop="toggle" :aria-label="`${label} seconds left`">
+      <svg viewBox="0 0 120 120"><circle class="nd-ring-bg" cx="60" cy="60" :r="R" /><circle class="nd-ring" cx="60" cy="60" :r="R" :stroke-dasharray="C" :stroke-dashoffset="dash" /></svg>
+      <span class="nd-count">{{ label }}</span>
+    </button>
+    <span class="nd-sr" role="status" aria-live="polite">{{ spoken }}</span>
+  </span>
 </template>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { helpOpen } from '../composables/palette'
 
-// The keyboard cheat-sheet: Slidev's own keys (read from its shortcut setup) and the ones Nimbledeck adds. Open with ?
+// The keyboard cheat-sheet: Slidev's keys and the ones Nimbledeck adds. Open with ?
+// The list below is hard-coded: it does not read Slidev's shortcut setup, so update it when a key changes.
 const groups = [
   { title: 'Move through the deck', rows: [
     ['Space, →, Page Down', 'Next (shows the next build first)'],
@@ -24,7 +26,7 @@ const groups = [
     ['Drag, ← →', 'Move a before/after slider'],
     ['Click a website or demo', 'Interact with it; use the bar to go back to the slides'],
     ['Esc (in the code editor)', 'Leave the editor so the arrows move the deck again'],
-    ['Ctrl/Cmd+Enter (in the editor)', 'Run the code now'],
+    ['Cmd/Ctrl+Enter (in the editor)', 'Run the code now'],
   ] },
   { title: 'Presenting', rows: [
     ['/presenter/<n> in the address bar', 'Presenter view with notes and timer (also in the toolbar)'],
@@ -32,6 +34,12 @@ const groups = [
   ] },
 ]
 const close = () => { helpOpen.value = false }
+// Give the keyboard back to whatever had it before the sheet opened.
+let opener: HTMLElement | null = null
+watch(helpOpen, (open) => {
+  if (open) opener = document.activeElement as HTMLElement | null
+  else { opener?.focus?.(); opener = null }
+})
 </script>
 
 <template>

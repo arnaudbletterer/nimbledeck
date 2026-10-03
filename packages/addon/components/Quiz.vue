@@ -11,6 +11,7 @@ const letters = ref<string[]>([])
 const interactive = computed(() => !!props.answer)
 const revealed = computed(() => interactive.value && picked.value !== null)
 const right = computed(() => picked.value !== null && picked.value === props.answer)
+const verdict = computed(() => (right.value ? 'Correct' : `Not quite. The answer is ${props.answer}.`))
 
 provide('ndQuiz', {
   answer: computed(() => props.answer),
@@ -33,12 +34,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 
 <template>
-  <div class="nd-quiz" :class="{ 'nd-revealed': revealed }" data-kind="quiz" :data-state="revealed ? (right ? 'good' : 'bad') : 'open'">
+  <div class="nd-quiz" :class="{ 'nd-revealed': revealed }" role="group" data-kind="quiz" :data-state="revealed ? (right ? 'good' : 'bad') : 'open'">
     <slot />
     <Transition name="nd-rise">
-      <div v-if="revealed" class="nd-verdict" :class="right ? 'nd-good' : 'nd-bad'" role="status">
-        {{ right ? 'Correct' : `Not quite. The answer is ${answer}.` }}
-      </div>
+      <div v-if="revealed" class="nd-verdict" :class="right ? 'nd-good' : 'nd-bad'" aria-hidden="true">{{ verdict }}</div>
     </Transition>
+    <!-- Always mounted: a live region is only announced when its text changes, not when it is inserted. -->
+    <div class="nd-sr" role="status" aria-live="polite">{{ revealed ? verdict : '' }}</div>
   </div>
 </template>
