@@ -108,7 +108,7 @@ More in [docs/WRITING.md](docs/WRITING.md). Agents: read [AGENTS.md](AGENTS.md).
 **Running a deck means running its code (Vue components, setup files, demo processes, live code). Only open decks you
 trust.** Everything binds to 127.0.0.1, the live-code runner needs a per-session token and the deck's own browser origin,
 and its runs are limited in time, memory and output, but the code still runs with your own rights. Marimo demos run without
-a token (known risk and options in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+a token (known risk and options in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#known-risk-marimo-demos-run-without-a-token)).
 
 ## Brand themes live elsewhere
 
