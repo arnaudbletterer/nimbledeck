@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { checkDeck } from '../src/check.mjs'
+import { parseHeadmatter } from '../src/slides.mjs'
 
 function project(deck, { files = {}, config = {} } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'nd-'))
@@ -103,4 +104,14 @@ test('NIMBLEDECK_PORT_OFFSET shifts every port', async () => {
     const c = loadConfig(root)
     assert.deepEqual([c.port, c.demos.a.port, c.streams.s.port, c.runner.port], [3130, 2819, 18865, 18900])
   } finally { delete process.env.NIMBLEDECK_PORT_OFFSET }
+})
+
+test('a deck with Windows line endings parses like the same deck with LF', () => {
+  const deck = '---\ntheme: none\nlayout: mine\n---\n\n# Hello\n\n- one\n\n---\nlayout: mine\n---\n\n# Second\n'
+  const lf = run(deck), crlf = run(deck.replace(/\n/g, '\r\n'))
+  assert.equal(crlf.slides, 2)
+  assert.deepEqual(crlf.errors, lf.errors)
+  assert.deepEqual(crlf.errors, [])
+  const root = project(deck.replace(/\n/g, '\r\n'))
+  assert.equal(parseHeadmatter(readFileSync(join(root, 'deck.md'), 'utf8')).layout, 'mine')
 })
