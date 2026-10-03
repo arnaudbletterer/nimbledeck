@@ -5,5 +5,5 @@
   "type": "module",
   "bin": { "nimbledeck": "bin/nimbledeck.mjs" },
   "engines": { "node": ">=20" },
-  "files": ["bin", "src"]
+  "files": ["bin", "src", "runner"]
 }

@@ -81,3 +81,9 @@ test('a quiz answer must be one of its choices', () => {
   const bad = ok.replace('answer="B"', 'answer="Z"')
   assert.match(run(bad).errors.join('\n'), /<Quiz answer="Z"> has no <Choice letter="Z">/)
 })
+
+test('<LiveCode> requires the runner in the config', () => {
+  const deck = '---\ntheme: none\n---\n\n# A\n\n<LiveCode>\nx\n</LiveCode>\n'
+  assert.match(run(deck).errors.join('\n'), /<LiveCode> needs a "runner" entry/)
+  assert.deepEqual(run(deck, { config: { runner: { port: 18800 } } }).errors, [])
+})
