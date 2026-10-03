@@ -23,6 +23,8 @@ const active = useActive()
 watch(active, (a) => { if (!a) picked.value = null })
 const onKey = (e: KeyboardEvent) => {
   if (!active.value || !interactive.value || e.metaKey || e.ctrlKey || e.altKey) return
+  const t = e.target as HTMLElement | null
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return   // typing a number in a field is not an answer
   const l = letters.value[Number(e.key) - 1]
   if (l && picked.value === null) { picked.value = l; e.preventDefault() }
 }
