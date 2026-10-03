@@ -1,0 +1,17 @@
+{
+  "name": "nimbledeck-example-how-it-works",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nimbledeck run how-it-works.md",
+    "check": "nimbledeck check how-it-works.md",
+    "build": "slidev build how-it-works.md",
+    "export": "slidev export how-it-works.md --with-clicks"
+  },
+  "dependencies": {
+    "@slidev/cli": "latest",
+    "nimbledeck": "*",
+    "slidev-theme-nimbledeck": "*",
+    "playwright-chromium": "latest"
+  }
+}
