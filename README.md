@@ -58,13 +58,21 @@ Three ideas keep it robust:
 
 ## Quick start
 
-Requirements: Node 20+, [uv](https://docs.astral.sh/uv/) and Python 3.12 for demos, Chrome for PDF export.
+Requirements: Node 20+ (tested on 22 and 26), [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12 for demos by
+itself), and Google Chrome for `verify` and PDF export.
 
 ```sh
+brew install node uv   # macOS with Homebrew; any Node 20+ and uv install works
 npm install
 npm run example        # starts examples/how-it-works with its demos, on http://localhost:3030
 npm test               # CLI tests
 ```
+
+Notes:
+- Newer npm versions block install scripts and print `npm warn install-scripts`. That is harmless here: Nimbledeck uses
+  your installed Chrome. If you want Playwright's own browser, run `npm install-scripts approve playwright-chromium`.
+- `nimbledeck verify` uses Chrome at its usual location. Set `NIMBLEDECK_CHROME` to its path if it is elsewhere.
+- PDF export: `npx slidev export <deck.md> --with-clicks --executable-path "<path to Chrome>"`.
 
 Write a deck:
 
