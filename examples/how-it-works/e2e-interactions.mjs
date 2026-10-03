@@ -13,7 +13,7 @@ const at = (title) => slides.findIndex((s) => s.body.includes(`# ${title}`)) + 1
 const quizSlide = at('An interactive quiz'), miscSlide = at('Flip, compare, count up')
 if (!quizSlide || !miscSlide) throw new Error('example slides not found')
 const liveSlide = at('Live code')
-const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && /layout: full/.test(s.fm.layout ? 'layout: full' : '')) + 1
+const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && s.fm.layout === 'full') + 1
 
 const chrome = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => { try { readFileSync(p); return true } catch { return false } })
 const browser = await chromium.launch(chrome ? { executablePath: chrome } : {})
@@ -154,6 +154,14 @@ if (frameSlide) {
   await page.mouse.click(640, 360)                                    // click inside the frame: must NOT trap focus yet
   check('click on the shield makes it interactive', (await attr('[data-kind=guard]', 'data-state')) === 'interactive')
   check('the control bar is visible', await vis('.nd-bar').isVisible())
+  // regression: an interactive guard once picked up the LiveCode grid class and shrank the page to ~634x500
+  const boxes = await page.evaluate(() => {
+    const r = (e) => { const b = e.getBoundingClientRect(); return [b.x, b.y, b.width, b.height].map(Math.round) }
+    const g = [...document.querySelectorAll('[data-kind=guard]')].find((e) => e.getBoundingClientRect().width > 0)
+    return { guard: r(g), frame: r(g.querySelector('iframe')), slide: r(g.closest('.slidev-layout')) }
+  })
+  check('the interactive iframe fills its guard', boxes.frame.join() === boxes.guard.join(), `${boxes.frame} vs ${boxes.guard}`)
+  check('the interactive guard fills the slide', boxes.guard[2] >= boxes.slide[2] - 2 && boxes.guard[3] >= boxes.slide[3] - 2, `${boxes.guard} vs ${boxes.slide}`)
   const before = page.url()
   await vis('.nd-bar button[aria-label=Next]').click(); await page.waitForTimeout(1200)
   check('the bar Next button navigates even from inside the frame', page.url() !== before, `${before.split('/').pop()} -> ${page.url().split('/').pop()}`)

@@ -21,7 +21,7 @@ function go(fn: () => void) { release(); fn() }
 </script>
 
 <template>
-  <div class="nd-guard" :class="{ 'nd-live': interactive }" data-kind="guard" :data-state="interactive ? 'interactive' : 'guarded'">
+  <div class="nd-guard" :class="{ 'nd-guard-live': interactive }" data-kind="guard" :data-state="interactive ? 'interactive' : 'guarded'">
     <slot />
     <div v-if="!interactive" class="nd-shield" @click.stop="interactive = true"><span class="nd-shield-hint">Click to interact</span></div>
     <div v-else class="nd-bar" role="toolbar" aria-label="Presentation controls">
