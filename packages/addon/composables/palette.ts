@@ -14,6 +14,7 @@ export function plain(src: string): string {
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/```[a-z]*\n?/g, ' ')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/(^|\s):?-{2,}:?(?=\s|$)/g, ' ')   // table separator cells
     .replace(/[#*`|>_~\[\]\(\)]/g, ' ')
     .replace(/^\s*[-+]\s+/gm, ' ')
     .replace(/\s+/g, ' ')
