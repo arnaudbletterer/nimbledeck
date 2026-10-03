@@ -12,7 +12,7 @@ layout: cover
 
 <!--
 This deck is itself built with the system it describes. Every animation you see is live.
-Press P for presenter mode, O for the overview, arrow keys to move.
+Press ? for all shortcuts, / to search slides, O for the overview, arrow keys to move. Presenter view: /presenter/1 in the address bar.
 -->
 
 ---

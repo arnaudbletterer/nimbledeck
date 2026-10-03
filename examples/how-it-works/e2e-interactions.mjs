@@ -73,6 +73,39 @@ await page.waitForTimeout(1500)
 check('number counts up to its target', Number(await attr('[data-kind=countup]', 'data-value')) === 3200)
 await page.screenshot({ path: 'e2e-misc.png' })
 
+// Command palette and shortcut help
+{
+  await go(2)
+  await page.keyboard.press('?'); await page.waitForTimeout(400)
+  check('? opens the shortcut cheat-sheet', await vis('[data-kind=help]').isVisible())
+  check('the cheat-sheet lists the palette shortcut', /Command palette/.test(await vis('[data-kind=help]').innerText()))
+  await page.keyboard.press('Escape'); await page.waitForTimeout(400)
+  check('Esc closes the cheat-sheet', !(await page.locator('[data-kind=help]').count()))
+  await page.keyboard.press('/'); await page.waitForTimeout(500)
+  check('/ opens the command palette', await vis('[data-kind=palette]').isVisible())
+  check('the palette input has focus', await page.evaluate(() => document.activeElement?.classList.contains('nd-pal-input')))
+  await page.waitForFunction(() => document.querySelectorAll('.nd-pal-card .slidev-layout').length > 0, null, { timeout: 20000 })
+  check('results show real slide thumbnails', true)
+  await page.keyboard.type('adipiscing consectetur'); await page.waitForTimeout(700)   // words from a slide BODY, in reverse order
+  const first = await vis('.nd-pal-card').innerText()
+  check('body text is searched, words in any order', /interactive quiz/i.test(first), first.split('\n')[0])
+  check('the matching words are highlighted', await page.locator('.nd-pal-snip mark').count() > 0)
+  await page.keyboard.press('Enter'); await page.waitForTimeout(1200)
+  check('Enter jumps to the slide and closes the palette', page.url().endsWith('/' + quizSlide) && !(await page.locator('[data-kind=palette]').count()), page.url().split('/').pop())
+  await page.keyboard.press('Control+k'); await page.waitForTimeout(400)
+  check('Ctrl+K opens the palette too', await vis('[data-kind=palette]').isVisible())
+  await page.keyboard.type('5'); await page.waitForTimeout(500)
+  check('a number lists that slide first', (await vis('.nd-pal-card').getAttribute('data-no')) === '5')
+  await page.keyboard.press('Escape'); await page.waitForTimeout(400)
+  check('Esc closes the palette', !(await page.locator('[data-kind=palette]').count()))
+  await page.keyboard.type('zzzzqqq')
+  if (liveSlide) {
+    await go(liveSlide); await page.waitForSelector('[data-kind=livecode] .cm-content'); await page.locator('[data-kind=livecode] .cm-content').first().click()
+    await page.keyboard.type('/?'); await page.waitForTimeout(400)
+    check('/ and ? typed in the code editor open nothing', !(await page.locator('[data-kind=palette],[data-kind=help]').count()))
+  }
+}
+
 // Live code: edit Python in the slide, see the result change, survive errors and loops, and stay safe
 if (liveSlide) {
   await go(liveSlide)
