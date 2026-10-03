@@ -1,0 +1,9 @@
+{
+  "name": "nimbledeck",
+  "version": "0.1.0",
+  "description": "CLI for Nimbledeck: run a deck with its live demos, and check a deck against the slide rules.",
+  "type": "module",
+  "bin": { "nimbledeck": "bin/nimbledeck.mjs" },
+  "engines": { "node": ">=20" },
+  "files": ["bin", "src"]
+}
