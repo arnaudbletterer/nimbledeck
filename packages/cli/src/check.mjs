@@ -46,6 +46,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     const bullets = (body.match(/^\s*[-*] /gm) || []).length
     if (bullets > cfg.limits.maxBullets) warnings.push(`${where}: ${bullets} bullets > ${cfg.limits.maxBullets}, split the slide`)
     checkStages(body, layout, where, errors)
+    if (/<LiveCode\b/.test(body) && !cfg.runner) errors.push(`${where}: <LiveCode> needs a "runner" entry in nimbledeck.config.json`)
     // An interactive quiz needs its answer to be one of its choices.
     for (const q of body.matchAll(/<Quiz\b([^>]*)>([\s\S]*?)<\/Quiz>/g)) {
       const ans = q[1].match(/\banswer="([^"]+)"/)?.[1]
