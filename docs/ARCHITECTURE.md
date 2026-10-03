@@ -74,6 +74,26 @@ strict about who can talk to it:
 It is for the presenter's machine and the presenter's own code. Do not expose the port, and do not paste code you would
 not run anyway. Windows: no limits, the process-group kill falls back to a plain kill; not tested.
 
+## Known risk: marimo demos run without a token
+
+`nimbledeck run` starts each `<Demo>` with `marimo run ... --host 127.0.0.1 --headless --no-token`. The demo is bound to
+localhost, but it has no authentication: any local process, and any web page open in the same browser, can reach
+`http://127.0.0.1:<port>` and use the demo like the slide does. In `run` mode marimo serves an app, not an editor, and does
+not send the source to the client by default, so a visitor can drive the demo's own widgets and nothing more. Whatever
+those widgets make the demo do (read a file, compute for a long time) is open to them. Whether marimo checks the Origin of
+its WebSocket in this mode was not verified.
+
+Options, none implemented yet:
+
+1. Accept it for demos you wrote, on a single-user machine (today's behaviour).
+2. `--token-password-file <file>` (or `--token-password`): marimo then requires the token. The iframe URL must carry it
+   (`?access_token=...`), so the `Demo` component, which lives in `packages/addon`, has to append it, read from
+   `nimbledeck.json` the way the runner token is, and its offline probe must carry it too. Prefer the file form: a password
+   on the command line is visible to other local users in `ps`.
+3. `--allow-origins` to restrict CORS to the deck's origin. This does not stop a request from another process.
+
+Option 2 is the proper fix and needs a change in the addon first.
+
 ## Failure model
 
 - Demo process down: the `Demo` component shows an offline panel (and a poster if `public/posters/<name>.png`
