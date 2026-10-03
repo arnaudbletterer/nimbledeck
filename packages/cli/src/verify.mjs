@@ -16,6 +16,8 @@ function measure({ layoutClass }) {
   if (!root) return { error: 'no visible slide found, nothing was verified' }
   const frame = root.getBoundingClientRect()
   const issues = []
+  // Full-bleed photo columns and media are meant to reach the slide edge.
+  const bleed = (el) => el.closest('.ql-photo, .nd-photo, .nd-media')
   const chrome = (el) => el.closest('.nd-foot, .nd-page, .ql-foot, .ql-foot-light, .ql-page, footer')
   const lead = /(^|\s)(cover|divider|closing|closing-photo|full)(\s|$)/.test(root.className)
   const label = (el) => `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : ''}`
@@ -49,7 +51,7 @@ function measure({ layoutClass }) {
     const out = (a, b) => Math.round(a - b)
     if (v.right > frame.right + 2) issues.push({ kind: 'overflows right', el: label(el), detail: `${out(v.right, frame.right)}px beyond the slide` })
     if (v.bottom > frame.bottom + 2) issues.push({ kind: 'overflows bottom', el: label(el), detail: `${out(v.bottom, frame.bottom)}px beyond the slide` })
-    if (!lead && v.bottom > frame.bottom - 56 && v.bottom <= frame.bottom + 2 && (el.children.length === 0 || ['CANVAS', 'IMG', 'VIDEO', 'IFRAME'].includes(el.tagName)))
+    if (!lead && !bleed(el) && v.bottom > frame.bottom - 56 && v.bottom <= frame.bottom + 2 && (el.children.length === 0 || ['CANVAS', 'IMG', 'VIDEO', 'IFRAME'].includes(el.tagName)))
       issues.push({ kind: 'enters footer zone', el: label(el), detail: `bottom at ${Math.round(frame.bottom - v.bottom)}px from the slide edge` })
   }
   return { frame: [Math.round(frame.width), Math.round(frame.height)], issues }
