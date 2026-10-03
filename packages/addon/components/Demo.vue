@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useSlideContext } from '@slidev/client'
 import { useNimbleConfig } from '../composables/useConfig'
 
 // <Demo name="compute" /> embeds a local marimo app. The port comes from nimbledeck.config.json,
 // the optional poster from public/posters/<name>.png. If the process is down, an offline panel shows.
 const props = withDefaults(defineProps<{ name: string; frame?: boolean }>(), { frame: false })
+const { $renderContext } = useSlideContext()
+const thumb = computed(() => $renderContext?.value === 'overview')   // a thumbnail must not probe or embed the demo
 const port = ref<number | null>(null)
 const src = computed(() => (port.value ? `http://127.0.0.1:${port.value}` : ''))
 const poster = computed(() => `${import.meta.env.BASE_URL}posters/${props.name}.png`)
@@ -19,6 +22,7 @@ async function probe() {
   catch { up.value = false }
 }
 onMounted(async () => {
+  if (thumb.value) return
   port.value = (await useNimbleConfig()).demos[props.name]?.port ?? null
   probe(); timer = setInterval(probe, 3000)
 })
