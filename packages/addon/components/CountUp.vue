@@ -3,10 +3,11 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { useActive } from '../composables/useActive'
 
 // A number that counts up when its slide appears: <CountUp :to="3200" suffix="K" />. Uses the display font.
-const props = withDefaults(defineProps<{ to: number; duration?: number; decimals?: number; prefix?: string; suffix?: string }>(), { duration: 1200, decimals: 0, prefix: '', suffix: '' })
+// `decimal` is the decimal separator: "." by default, "," for a French deck (<CountUp :to="3.5" :decimals="1" decimal="," />).
+const props = withDefaults(defineProps<{ to: number; duration?: number; decimals?: number; prefix?: string; suffix?: string; decimal?: string }>(), { duration: 1200, decimals: 0, prefix: '', suffix: '', decimal: '.' })
 const v = ref(0)
 let raf = 0
-const text = computed(() => props.prefix + v.value.toFixed(props.decimals).replace('.', ',') + props.suffix)
+const text = computed(() => props.prefix + v.value.toFixed(props.decimals).replace('.', props.decimal) + props.suffix)
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 function run() {
   cancelAnimationFrame(raf)
