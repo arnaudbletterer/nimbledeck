@@ -6,16 +6,20 @@ the numpy step runs in a worker thread so the event loop keeps serving the socke
 """
 import asyncio
 import json
+import math
 import sys
 import time
 
 import numpy as np
 from websockets.asyncio.server import serve
+from websockets.exceptions import ConnectionClosed
 
 PORT = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 18765
 # allowed origins come from the CLI (`--origin`, repeatable); the default is the usual deck address
 ORIGINS = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--origin"] or ["http://127.0.0.1:3030", "http://localhost:3030"]
 FRAME_S = 1 / 60
+N_MIN, N_MAX = 100, 2000   # the step is O(n^2): a client must not be able to ask for more
+MAX_MESSAGE = 1024        # bytes; the client only ever sends a few numbers
 
 
 class Sim:
@@ -35,13 +39,31 @@ class Sim:
         self.p += self.v * self.dt
 
 
+def parse_params(raw):
+    """Valid parameters from one client message, or {} for anything malformed. Missing keys are simply not updated."""
+    try:
+        msg = json.loads(raw)
+    except (TypeError, ValueError):
+        return {}
+    if not isinstance(msg, dict):
+        return {}
+    out = {}
+    for key in ("n", "dt", "g"):
+        v = msg.get(key)
+        if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
+            out[key] = v
+    if "n" in out:
+        out["n"] = min(max(int(out["n"]), N_MIN), N_MAX)
+    return out
+
+
 async def handler(ws):
     sim = Sim()
     pending = {}
 
     async def recv():
         async for msg in ws:
-            pending.update(json.loads(msg))   # applied between steps, never mid-step
+            pending.update(parse_params(msg))   # applied between steps, never mid-step
 
     task = asyncio.create_task(recv())
     try:
@@ -49,19 +71,21 @@ async def handler(ws):
             t0 = time.perf_counter()
             if pending:
                 m = dict(pending); pending.clear()
-                if int(m["n"]) != len(sim.p): sim.reset(int(m["n"]))
-                sim.dt, sim.g = float(m["dt"]), float(m["g"])
+                if "n" in m and m["n"] != len(sim.p): sim.reset(m["n"])
+                sim.dt, sim.g = float(m.get("dt", sim.dt)), float(m.get("g", sim.g))
             await asyncio.to_thread(sim.step)
             ms = (time.perf_counter() - t0) * 1000
             head = np.array([ms, len(sim.p)], dtype=np.float32)
             await ws.send(head.tobytes() + sim.p.astype(np.float32).tobytes())
             await asyncio.sleep(max(0, FRAME_S - (time.perf_counter() - t0)))
+    except ConnectionClosed:
+        pass   # the client left, or sent a message over the size cap
     finally:
         task.cancel()
 
 
 async def main():
-    async with serve(handler, "127.0.0.1", PORT, origins=ORIGINS):
+    async with serve(handler, "127.0.0.1", PORT, origins=ORIGINS, max_size=MAX_MESSAGE):
         print(f"stream nbody on ws://127.0.0.1:{PORT}", flush=True)
         await asyncio.Future()
 
