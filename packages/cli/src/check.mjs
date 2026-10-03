@@ -46,6 +46,11 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     const bullets = (body.match(/^\s*[-*] /gm) || []).length
     if (bullets > cfg.limits.maxBullets) warnings.push(`${where}: ${bullets} bullets > ${cfg.limits.maxBullets}, split the slide`)
     checkStages(body, layout, where, errors)
+    // An interactive quiz needs its answer to be one of its choices.
+    for (const q of body.matchAll(/<Quiz\b([^>]*)>([\s\S]*?)<\/Quiz>/g)) {
+      const ans = q[1].match(/\banswer="([^"]+)"/)?.[1]
+      if (ans && !new RegExp(`<Choice\\b[^>]*\\bletter="${ans}"`).test(q[2])) errors.push(`${where}: <Quiz answer="${ans}"> has no <Choice letter="${ans}">`)
+    }
     // Images must hold enough pixels for the box they fill, or they look soft on high-resolution screens.
     for (const m of body.matchAll(/(?:<At\b([^>]*)>\s*)?<Photo\b([^>]*?)\bsrc="(\/[^"]+)"/g)) {
       const file = join(root, cfg.publicDir, m[3].replace(/^\//, ''))

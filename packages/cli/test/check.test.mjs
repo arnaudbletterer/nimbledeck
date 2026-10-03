@@ -74,3 +74,10 @@ test('very text-heavy slides get a warning', () => {
   assert.equal(r.errors.length, 0)
   assert.match(r.warnings.join('\n'), /characters > 900/)
 })
+
+test('a quiz answer must be one of its choices', () => {
+  const ok = '---\ntheme: none\n---\n\n# A\n\n<Quiz answer="B">\n<Choice letter="A">x</Choice>\n<Choice letter="B">y</Choice>\n</Quiz>\n'
+  assert.deepEqual(run(ok).errors, [])
+  const bad = ok.replace('answer="B"', 'answer="Z"')
+  assert.match(run(bad).errors.join('\n'), /<Quiz answer="Z"> has no <Choice letter="Z">/)
+})
