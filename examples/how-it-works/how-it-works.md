@@ -139,7 +139,7 @@ transition: fade
 
 # A canvas scene
 
-<Orbit />
+<Orbit controls />
 
 ---
 layout: default
@@ -147,7 +147,7 @@ layout: default
 
 # A WebGL scene
 
-<Scene3D />
+<Scene3D controls hud />
 
 ---
 layout: default
@@ -155,7 +155,7 @@ layout: default
 
 # Python, streamed live
 
-<PyStream name="nbody" />
+<PyStream name="nbody" controls hud />
 
 <!--
 Python computes an N-body simulation and streams positions over a WebSocket.
@@ -168,7 +168,11 @@ layout: default
 
 # Heavy compute, in a subprocess
 
+<Stage>
+<At :w="1140" :h="460" bg="var(--nd-surface)">
 <Demo name="compute" />
+</At>
+</Stage>
 
 ---
 layout: default
@@ -176,7 +180,91 @@ layout: default
 
 # A video clip
 
+<Stage>
+<At :w="1140" :h="460">
 <Clip src="/clip.mp4" />
+</At>
+</Stage>
+
+---
+layout: default
+---
+
+# Everything is an element
+
+<Stage>
+<At :w="1140" :h="460" :z="0">
+<Clip src="/clip.mp4" fit="cover" />
+</At>
+<At :w="1140" :h="460" :z="1">
+<Orbit />
+</At>
+<At :x="40" :y="360" :z="2" bg="var(--nd-bg)">
+
+**A live canvas over a video, with text on top.** No frame, no background.
+
+</At>
+</Stage>
+
+<!--
+Every live component is a plain element. Stage and At layer them freely, and they work with v-click builds.
+-->
+
+---
+layout: default
+---
+
+# Transparent on any backdrop
+
+<Stage>
+<At :x="0" :y="0" :w="560" :h="460" bg="var(--nd-surface)">
+<Scene3D />
+</At>
+<At :x="580" :y="0" :w="560" :h="460" bg="var(--nd-ink)">
+<PyStream name="nbody" color="#ffffff" />
+</At>
+<At v-click :x="40" :y="400" :z="2">
+
+Click: this text appears over the live scenes.
+
+</At>
+</Stage>
+
+---
+layout: full
+---
+
+<Stage full>
+<At :w="1280" :h="720" :z="0">
+<Photo src="/hero.jpg" :dim="0.25" />
+</At>
+<At :x="90" :y="400" :w="1000" :z="1">
+<Headline>Slides that move, written in Markdown</Headline>
+</At>
+</Stage>
+
+<!--
+A full-frame slide: no title bar, no footer. An image with a headline, for impact.
+-->
+
+---
+layout: full
+---
+
+<Stage full>
+<At :w="1280" :h="720" :z="0">
+<Scene3D :ratio="1.78" />
+</At>
+<At :x="90" :y="560" :w="800" :z="1">
+<Headline size="l" tone="dark">A live 3D scene, full frame</Headline>
+</At>
+</Stage>
+
+---
+layout: full
+---
+
+<Site url="https://sli.dev" />
 
 ---
 layout: default
@@ -184,7 +272,11 @@ layout: default
 
 # A website, inside a slide
 
+<Stage>
+<At :w="1140" :h="460">
 <Site url="https://sli.dev" />
+</At>
+</Stage>
 
 ---
 layout: divider
