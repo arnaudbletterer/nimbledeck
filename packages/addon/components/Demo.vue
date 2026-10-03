@@ -27,7 +27,7 @@ onUnmounted(() => clearInterval(timer))
 
 <template>
   <div class="nd-demo" :class="{ 'nd-framed': frame }" data-kind="demo" :data-state="up ? 'live' : 'offline'">
-    <iframe v-if="up" :src="src" allowtransparency="true" />
+    <FrameGuard v-if="up"><iframe :src="src" allowtransparency="true" /></FrameGuard>
     <div v-else class="nd-down">
       <img v-if="posterOk" :src="poster" @error="posterOk = false">
       <p>Live demo offline. Start everything with <code>nimbledeck run</code></p>

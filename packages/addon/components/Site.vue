@@ -4,7 +4,7 @@ withDefaults(defineProps<{ url: string; frame?: boolean; caption?: boolean }>(),
 
 <template>
   <div class="nd-site" :class="{ 'nd-framed': frame }">
-    <iframe :src="url" referrerpolicy="no-referrer" />
+    <FrameGuard><iframe :src="url" referrerpolicy="no-referrer" /></FrameGuard>
     <div v-if="caption" class="nd-cap">Embedded site: {{ url }} <a :href="url" target="_blank">open in browser</a></div>
   </div>
 </template>
