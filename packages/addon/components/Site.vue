@@ -1,10 +1,10 @@
 <script setup lang="ts">
-defineProps<{ url: string }>()
+withDefaults(defineProps<{ url: string; frame?: boolean; caption?: boolean }>(), { frame: false, caption: false })
 </script>
 
 <template>
-  <div class="nd-site">
+  <div class="nd-site" :class="{ 'nd-framed': frame }">
     <iframe :src="url" referrerpolicy="no-referrer" />
-    <div class="nd-cap">Embedded site: {{ url }} <a :href="url" target="_blank">open in browser</a></div>
+    <div v-if="caption" class="nd-cap">Embedded site: {{ url }} <a :href="url" target="_blank">open in browser</a></div>
   </div>
 </template>

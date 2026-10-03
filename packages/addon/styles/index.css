@@ -11,21 +11,42 @@
   --nd-font-display: var(--nd-font-body);
 }
 
-.nd-scene { margin: 0 70px; position: relative; font-family: var(--nd-font-body); color: var(--nd-ink); }
-.nd-scene canvas, .nd-scene .nd-gl { border: 1px solid var(--nd-ink); display: block; width: 100%; }
-.nd-scene .nd-gl canvas { border: 0; width: 100% !important; }
-.nd-ctl { display: flex; gap: 18px; align-items: center; font-size: 18px; margin-top: 6px; flex-wrap: wrap; }
+/* Live components are plain elements: they fill the box they are placed in, have no frame or background by
+   default, and can be layered with <Stage> and <At>. `frame` adds a border, `controls` and `hud` add UI. */
+.nd-scene { position: relative; width: auto; max-height: 500px; aspect-ratio: var(--nd-ratio, 2.2); color: var(--nd-ink); font-family: var(--nd-font-body); }
+:where(.nd-at) > .nd-scene { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+.nd-scene canvas, .nd-scene .nd-gl, .nd-scene .nd-gl canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: contain; border: 0; background: transparent; }
+.nd-scene.nd-framed canvas, .nd-scene.nd-framed .nd-gl { outline: 1px solid var(--nd-ink); outline-offset: -1px; }
+.nd-ctl { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 18px; align-items: center; font-size: 18px; flex-wrap: wrap;
+  padding: 6px 10px; background: color-mix(in srgb, var(--nd-bg) 75%, transparent); }
 .nd-ctl button { border: 1px solid var(--nd-ink); padding: 2px 14px; background: var(--nd-surface); color: var(--nd-ink); }
 .nd-fps { margin-left: auto; color: var(--nd-muted); }
-.nd-off { position: absolute; top: 200px; left: 0; right: 0; text-align: center; background: color-mix(in srgb, var(--nd-bg) 80%, transparent); color: var(--nd-ink); }
-.nd-demo { position: relative; width: calc(100% - 140px); height: 470px; margin: 10px 70px; }
-.nd-demo iframe { width: 100%; height: 100%; border: 1px solid var(--nd-ink); background: #fff; }
-.nd-down { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px dashed var(--nd-accent-2); color: var(--nd-ink); }
+.nd-hud { position: absolute; right: 8px; top: 6px; font-size: 14px; color: var(--nd-muted); }
+.nd-off { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--nd-muted); }
+.nd-demo { position: relative; width: auto; height: 100%; min-height: 200px; background: transparent; }
+.nd-demo iframe { width: 100%; height: 100%; border: 0; background: transparent; color-scheme: normal; }
+.nd-demo.nd-framed iframe { border: 1px solid var(--nd-ink); }
+.nd-down { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--nd-muted); }
 .nd-down img { max-height: 70%; opacity: .5; }
-.nd-dot { position: absolute; top: 8px; right: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--nd-accent-2); }
+.nd-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--nd-accent-2); opacity: .6; }
 .nd-dot.on { background: var(--nd-ink); }
-.nd-site { margin: 10px 70px; height: 470px; }
-.nd-site iframe { width: 100%; height: 440px; border: 1px solid var(--nd-ink); }
+.nd-site { position: relative; width: auto; height: 100%; min-height: 200px; }
+.nd-site iframe { width: 100%; height: 100%; border: 0; background: transparent; }
+.nd-site.nd-framed iframe { border: 1px solid var(--nd-ink); }
 .nd-cap { font-size: 16px; color: var(--nd-muted); }
-.nd-clip { display: block; margin: 10px auto; height: 440px; }
+.nd-clip { display: block; width: 100%; height: 100%; background: transparent; }
 .nd-fly { display: inline-block; }
+.nd-stage { position: relative; }
+.nd-at { position: absolute; }
+.nd-stage { overflow: hidden; }
+.nd-stage-full { position: absolute; inset: 0; width: 1280px; height: 720px; }
+.nd-media { position: relative; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+.nd-media > .nd-clip, .nd-media > .nd-photo-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.nd-dim { position: absolute; inset: 0; background: #000; pointer-events: none; }
+.nd-headline { font-family: var(--nd-font-display); line-height: 1.1; letter-spacing: -0.01em; text-wrap: balance; }
+.nd-h-xl { font-size: 88px; } .nd-h-l { font-size: 64px; } .nd-h-m { font-size: 40px; }
+.nd-tone-light { color: #fff; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35); } .nd-tone-dark { color: var(--nd-ink); }
+.nd-headline p, .nd-headline h1, .nd-headline h2 { margin: 0; font: inherit; color: inherit; border: 0; padding: 0; text-transform: none; white-space: normal; }
+/* Full-frame layout support: a direct child fills the whole slide. */
+.nd-full > .nd-scene, .nd-full > .nd-site, .nd-full > .nd-demo, .nd-full > .nd-media { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; margin: 0; }
+.nd-at > .nd-demo, .nd-at > .nd-site, .nd-at > .nd-media { width: 100%; }
