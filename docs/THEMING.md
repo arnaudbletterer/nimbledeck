@@ -27,6 +27,16 @@ brand-repo/
 5. **Tune the checker** in `nimbledeck.config.json` (for example a shorter `maxTitle` if the brand's title bar is
    narrow).
 
+## Name your palette, and make emphasis controllable
+
+Convention used by the Quartier Latin theme (worth copying): define the brand palette once as named tokens
+(`--brand-noir`, `--brand-blue`, ...), define the `--nd-*` tokens from them, and make every rule refer to the names, never to hex
+values. Make recurring styling behaviour controllable through variables at three levels: a deck-wide headmatter key read in the
+theme's `setup/main.ts` (a `data-*` attribute on `<html>`), a per-slide `class:` that redefines the variables, and per-word classes
+(`[text]{.name}`, which works because Slidev's MDC syntax is on). The Quartier Latin theme does this for emphasis: **bold** and
+*italic* are highlight chips by default, switchable to plain or swapped. Keep rules low-specificity (`:where(...)`) so components
+can override them.
+
 ## Verified with a throwaway consumer
 
 A project with its own `slidev-theme-brand` (two layouts, its own colours and fonts), dependencies on `nimbledeck`
