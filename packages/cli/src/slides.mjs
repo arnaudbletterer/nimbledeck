@@ -1,7 +1,11 @@
 // Split a Slidev markdown file into slides, honoring per-slide frontmatter and fenced code.
 const YAML_LINE = /^[A-Za-z_][\w-]*:\s*.*$/
 
+// Decks written on Windows use CRLF: normalise so every pattern below can rely on "\n".
+export const normalize = (text) => text.replace(/\r\n?/g, '\n')
+
 export function parseHeadmatter(text) {
+  text = normalize(text)
   const m = text.match(/^---\n([\s\S]*?)\n---/)
   const out = {}
   if (m) for (const line of m[1].split('\n')) { const k = line.match(/^([\w-]+):\s*(.*)$/); if (k) out[k[1]] = k[2] }
@@ -9,7 +13,7 @@ export function parseHeadmatter(text) {
 }
 
 export function splitSlides(text) {
-  const lines = text.split('\n'), slides = []
+  const lines = normalize(text).split('\n'), slides = []
   let i = 0, cur = null, fence = false
   const flush = () => { if (cur) slides.push(cur) }
   while (i < lines.length) {
