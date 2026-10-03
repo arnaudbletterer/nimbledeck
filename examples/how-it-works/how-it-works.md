@@ -317,6 +317,16 @@ layout: default
 </Stage>
 
 ---
+layout: full
+---
+
+<Demo name="compute" />
+
+<!--
+A full-frame embedded page. Keys and clicks drive the deck until you click the page to interact; then use the bar.
+-->
+
+---
 layout: default
 ---
 
