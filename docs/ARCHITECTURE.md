@@ -24,6 +24,21 @@ A deck project needs: a Slidev entry file, `nimbledeck.config.json`, optional `d
 `uv run` (bound to 127.0.0.1), writes `public/nimbledeck.json` with the ports, starts the deck, and stops
 everything on exit. Components read `nimbledeck.json` at runtime, so they never import project files.
 
+## The live-code runner and its security model
+
+`runner/runner.py` executes Python typed on a slide. It runs code with the presenter's own rights, like a notebook, so it is
+strict about who can talk to it:
+
+- binds to 127.0.0.1 only; a connection needs the per-session random token (`?t=`), and any browser connection must come
+  from the deck's own origin, so another website open in the same browser cannot use it (both checked in tests and in a
+  real browser);
+- every run is a separate subprocess in a temporary folder and its own process group, with a wall-clock timeout, a CPU
+  limit and a memory limit (POSIX), killed as a whole at the end or when a newer run replaces it;
+- output and image sizes are capped.
+
+It is for the presenter's machine and the presenter's own code. Do not expose the port, and do not paste code you would
+not run anyway. Windows: the limits and process-group kill fall back to a plain kill; not tested.
+
 ## Failure model
 
 - Demo process down: the `Demo` component shows an offline panel (and a poster if `public/posters/<name>.png`

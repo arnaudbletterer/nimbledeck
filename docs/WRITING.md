@@ -105,6 +105,38 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 2. Register it under `streams` in the config, then use `<PyStream name="<name>" />`.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 
+## Live code
+
+`<LiveCode>` puts an editor and a result side by side. Edit the Python and the output (printed text and every open
+matplotlib figure) updates as you type. The starting code is a fenced block inside the component:
+
+````md
+<Stage>
+<At :w="1140" :h="460">
+<LiveCode>
+
+```python
+import numpy as np, matplotlib.pyplot as plt
+x = np.linspace(0, 6.28, 200)
+plt.plot(x, np.sin(x))
+```
+
+</LiveCode>
+</At>
+</Stage>
+````
+
+- Enable it with `"runner": { "port": 18800 }` in `nimbledeck.config.json`; `nimbledeck run` starts the runner. List the
+  packages the code needs (numpy, matplotlib...) in `demos/requirements.txt`.
+- Figures are drawn in the slide's colours on a transparent background and rendered at screen resolution.
+- `:auto="false"` stops re-running while you type (for heavy code): use the Run button or Ctrl+Enter. `:timeout="20"` sets
+  the time limit in seconds (default 10, at most 60).
+- Esc leaves the editor so the arrow keys drive the deck again. Reset restores the starting code. Edits are temporary:
+  the Markdown stays the source of truth.
+- A broken program shows its error and keeps the last good picture. A newer run replaces one still in progress.
+- Each run starts a fresh Python process (about 1 to 2 seconds for numpy and matplotlib). That is what makes it safe to
+  kill runaway code.
+
 ## Embedded pages never take the deck hostage
 
 `<Site>` and `<Demo>` put a page in an iframe, and an iframe that has focus swallows keys and clicks, which the deck
