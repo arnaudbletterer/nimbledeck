@@ -120,7 +120,8 @@
 .nd-shield { position: absolute; inset: 0; z-index: 5; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
 .nd-shield-hint { opacity: 0; transition: opacity .2s; background: color-mix(in srgb, var(--nd-ink) 82%, transparent); color: var(--nd-bg); font: 600 15px var(--nd-font-body); padding: 5px 14px; border-radius: 999px; pointer-events: none; }
 .nd-shield:hover .nd-shield-hint { opacity: 1; }
-.nd-bar { position: absolute; z-index: 6; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+/* Bottom right: Slidev's own (invisible) navigation overlay covers the bottom left half of the slide and eats clicks. */
+.nd-bar { position: absolute; z-index: 6; right: 12px; bottom: 12px; display: flex; gap: 4px; padding: 4px; border-radius: 999px;
   background: color-mix(in srgb, var(--nd-ink) 88%, transparent); box-shadow: 0 2px 12px rgba(0, 0, 0, .35); }
 .nd-bar button { color: var(--nd-bg); background: transparent; border: 0; font: 600 16px var(--nd-font-body); padding: 6px 14px; border-radius: 999px; cursor: pointer; }
 .nd-bar button:hover, .nd-bar button:focus-visible { background: color-mix(in srgb, var(--nd-bg) 22%, transparent); outline: none; }
