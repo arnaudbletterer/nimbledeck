@@ -1,14 +1,18 @@
 // End-to-end test of the interactive components, in a real browser against the running example
-// (start it with `npm run example`). Usage: node e2e-interactions.mjs [http://localhost:3030]
+// (start it with `npm run example`). Usage: node e2e-interactions.mjs [url] [deck.md]
+// Any deck with slides titled "An interactive quiz" and "Flip, compare, count up" can be tested, e.g. a brand gallery.
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { chromium } from 'playwright-chromium'
 import { splitSlides } from '../../packages/cli/src/slides.mjs'
 
 const base = process.argv[2] || 'http://localhost:3030'
-const slides = splitSlides(readFileSync(new URL('./how-it-works.md', import.meta.url), 'utf8'))
+const deck = process.argv[3] ? resolve(process.argv[3]) : new URL('./how-it-works.md', import.meta.url)
+const slides = splitSlides(readFileSync(deck, 'utf8'))
 const at = (title) => slides.findIndex((s) => s.body.includes(`# ${title}`)) + 1
 const quizSlide = at('An interactive quiz'), miscSlide = at('Flip, compare, count up')
 if (!quizSlide || !miscSlide) throw new Error('example slides not found')
+const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && /layout: full/.test(s.fm.layout ? 'layout: full' : '')) + 1
 
 const chrome = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => { try { readFileSync(p); return true } catch { return false } })
 const browser = await chromium.launch(chrome ? { executablePath: chrome } : {})
@@ -67,6 +71,27 @@ check('dragging moves the compare divider', pos >= 22 && pos <= 28, `at ${pos}%`
 await page.waitForTimeout(1500)
 check('number counts up to its target', Number(await attr('[data-kind=countup]', 'data-value')) === 3200)
 await page.screenshot({ path: 'e2e-misc.png' })
+
+// Full-frame embedded page: the presentation must stay controllable (needs a deck with a full-frame <Demo>)
+if (frameSlide) {
+  await go(frameSlide)
+  await page.waitForSelector('[data-kind=guard]', { timeout: 20000 })
+  check('embedded page starts guarded', (await attr('[data-kind=guard]', 'data-state')) === 'guarded')
+  await page.mouse.click(640, 360)                                    // click inside the frame: must NOT trap focus yet
+  check('click on the shield makes it interactive', (await attr('[data-kind=guard]', 'data-state')) === 'interactive')
+  check('the control bar is visible', await vis('.nd-bar').isVisible())
+  const before = page.url()
+  await vis('.nd-bar button[aria-label=Next]').click(); await page.waitForTimeout(1200)
+  check('the bar Next button navigates even from inside the frame', page.url() !== before, `${before.split('/').pop()} -> ${page.url().split('/').pop()}`)
+  await go(frameSlide)
+  await page.mouse.click(640, 360); await vis('.nd-bar .nd-bar-main').click(); await page.waitForTimeout(500)
+  check('Back to slides re-guards the page', (await attr('[data-kind=guard]', 'data-state')) === 'guarded')
+  const b2 = page.url(); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1200)
+  check('arrow keys drive the deck again', page.url() !== b2, `${b2.split('/').pop()} -> ${page.url().split('/').pop()}`)
+  await go(frameSlide)                                                  // guarded from the start: keys work immediately
+  const b3 = page.url(); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1200)
+  check('keys work immediately on a guarded full-frame slide', page.url() !== b3)
+} else console.log('SKIP  no full-frame <Demo> slide in this deck')
 
 check('no page errors', errors.length === 0, errors.join(' | '))
 await browser.close()
