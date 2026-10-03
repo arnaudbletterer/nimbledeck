@@ -1,0 +1,22 @@
+{
+  "name": "{{NAME}}",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nimbledeck run slides.md",
+    "check": "nimbledeck check slides.md",
+    "verify": "nimbledeck verify slides.md",
+    "build": "slidev build slides.md",
+    "export": "nimbledeck export slides.md"
+  },
+  "dependencies": {
+    "@slidev/cli": "53.0.0",
+    "nimbledeck": "file:{{SOURCE}}/packages/cli",
+    "playwright-chromium": "1.63.0",
+    "slidev-addon-nimbledeck": "file:{{SOURCE}}/packages/addon",
+    "slidev-theme-nimbledeck": "file:{{SOURCE}}/packages/theme"
+  },
+  "overrides": {
+    "slidev-addon-nimbledeck": "file:{{SOURCE}}/packages/addon"
+  }
+}
