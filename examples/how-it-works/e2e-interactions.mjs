@@ -107,7 +107,7 @@ if (liveSlide) {
   const probe = (origin, token) => page.evaluate(({ port, token }) => new Promise((res) => { const w = new WebSocket(`ws://127.0.0.1:${port}/?t=${token}`); w.onopen = () => { w.close(); res('connected') }; w.onerror = () => res('refused') }), { port: cfg.runner.port, token })
   check('the deck origin with the right token connects', (await probe(base, cfg.runner.token)) === 'connected')
   check('a wrong token is refused', (await probe(base, 'wrong')) === 'refused')
-  const other = await browser.newPage(); await other.goto('http://127.0.0.1:' + Object.values(cfg.demos)[0].port, { waitUntil: 'domcontentloaded' })
+  const other = await browser.newPage(); await other.goto('about:blank')   // a foreign page: its origin is not the deck's
   const foreign = await other.evaluate(({ port, token }) => new Promise((res) => { const w = new WebSocket(`ws://127.0.0.1:${port}/?t=${token}`); w.onopen = () => { w.close(); res('connected') }; w.onerror = () => res('refused') }), { port: cfg.runner.port, token: cfg.runner.token })
   check('another website with the right token is refused (origin check)', foreign === 'refused')
   await other.close()
