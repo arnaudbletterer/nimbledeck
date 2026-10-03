@@ -9,6 +9,10 @@
   --nd-line: #d1d5db;
   --nd-font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
   --nd-font-display: var(--nd-font-body);
+  --nd-chart-1: var(--nd-ink);
+  --nd-chart-2: var(--nd-accent-2);
+  --nd-chart-3: var(--nd-surface);
+  --nd-chart-4: var(--nd-accent);
 }
 
 /* Live components are plain elements: they fill the box they are placed in, have no frame or background by
@@ -50,3 +54,19 @@
 /* Full-frame layout support: a direct child fills the whole slide. */
 .nd-full > .nd-scene, .nd-full > .nd-site, .nd-full > .nd-demo, .nd-full > .nd-media { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; margin: 0; }
 .nd-at > .nd-demo, .nd-at > .nd-site, .nd-at > .nd-media { width: 100%; }
+
+/* Charts, filling their box (380px tall by default). */
+.nd-chart { position: relative; width: auto; height: 380px; max-height: 500px; }
+:where(.nd-at) > .nd-chart { width: 100%; height: 100%; max-height: none; }
+.nd-chart canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+.nd-chart-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--nd-font-display); font-size: 40px; color: var(--nd-ink); pointer-events: none; }
+/* Quiz: a letter badge beside plain text; the right answer's text panel is tinted. */
+.nd-quiz { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-top: 1.5em; }
+.nd-choice { display: flex; align-items: stretch; font-size: 22px; }
+.nd-choice strong { background: var(--nd-ink); color: var(--nd-bg); font-family: var(--nd-font-display); font-weight: normal; font-size: 32px; width: 70px; min-height: 70px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.nd-choice span { display: flex; align-items: center; flex: 1; padding: 0 1em; }
+.nd-choice.nd-correct span { background: var(--nd-surface); }
+.nd-explain { display: flex; align-items: stretch; margin-top: 1.5em; }
+.nd-explain strong { background: var(--nd-ink); color: var(--nd-bg); font-family: var(--nd-font-display); font-weight: normal; font-size: 40px; width: 90px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.nd-explain-body { background: var(--nd-surface); color: var(--nd-ink); padding: 1em 1.5em; flex: 1; }
+.nd-explain-body > :first-child { margin-top: 0; } .nd-explain-body > :last-child { margin-bottom: 0; }
