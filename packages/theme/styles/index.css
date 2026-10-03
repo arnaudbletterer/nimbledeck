@@ -41,6 +41,11 @@
 .slidev-layout thead th { background: var(--nd-ink); color: var(--nd-bg); }
 .slidev-layout tbody tr:nth-child(even) { background: var(--nd-surface); }
 
+/* Code: inline and blocks follow the tokens, so they stay readable in every variant. */
+:root { --slidev-code-background: var(--nd-surface); --slidev-code-foreground: var(--nd-ink); }
+.slidev-layout :not(pre) > code { background: var(--nd-surface); color: var(--nd-ink); border-radius: 4px; padding: 0.05em 0.35em; font-size: 0.9em; }
+.slidev-layout pre.slidev-code { background: var(--nd-surface) !important; color: var(--nd-ink); }
+.slidev-layout pre.slidev-code code { background: transparent; padding: 0; }
 /* Code blocks. */
 .slidev-layout pre.slidev-code, .slidev-layout pre.slidev-code code { font-size: 19px !important; line-height: 1.45; }
 

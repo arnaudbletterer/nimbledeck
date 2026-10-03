@@ -47,6 +47,9 @@ the deck stays responsive.
 5. Addon default tokens overrode theme variants (equal CSS priority, later load). Fix: `:where(:root)`.
 6. `--remote` on the Slidev CLI opens the dev server publicly. The CLI always binds to 127.0.0.1.
 7. A fixed port was already used by another application. The CLI refuses to start on a busy port.
+8. Inline code and code blocks were unreadable in the dark variant (light text on Slidev's fixed light code
+   background; light-mode syntax colours on a dark panel). Fix: code colours follow the tokens, and the `night`
+   variant switches Slidev to its dark syntax theme. Reported by the first user to try the dark variant.
 
 ## Known gaps
 
