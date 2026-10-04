@@ -276,3 +276,14 @@
 .nd-stat-label { margin-top: .5em; font: 500 26px/1.3 var(--nd-font-body); letter-spacing: 0; color: var(--nd-muted); opacity: 0; transform: translateY(14px); }
 .nd-stat.nd-on .nd-stat-label { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.16, 1, .3, 1) var(--nd-stat-wait), transform .8s cubic-bezier(.16, 1, .3, 1) var(--nd-stat-wait); }
 @media (prefers-reduced-motion: reduce) { .nd-stat-label { opacity: 1; transform: none; transition: none !important; } }
+
+/* ==== Motion toolkit: Marquee ==== */
+.nd-marquee { display: block; width: auto; overflow: hidden; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); }
+:where(.nd-at) > .nd-marquee { width: 100%; }
+.nd-mq-track { display: flex; width: max-content; will-change: transform; animation: nd-mq var(--nd-mq-t, 20s) linear infinite; animation-play-state: paused; }
+.nd-mq-run .nd-mq-track { animation-play-state: running; }
+.nd-mq-set { display: flex; flex: none; align-items: center; gap: var(--nd-mq-gap); padding-right: var(--nd-mq-gap); }
+.nd-mq-set > p { display: contents; margin: 0; }
+.nd-mq-set > * { flex: none; }
+@keyframes nd-mq { to { transform: translate3d(calc(-1 * var(--nd-mq-w, 800px)), 0, 0); } }
+@media (prefers-reduced-motion: reduce) { .nd-mq-track { animation: none; } }
