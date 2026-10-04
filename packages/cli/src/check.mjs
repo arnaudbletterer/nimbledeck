@@ -7,8 +7,9 @@ import { knownLayouts } from './layouts.mjs'
 import { parseHeadmatter, splitSlides } from './slides.mjs'
 
 // Slide canvas is 1280 x 720. Content area of a normal slide: 1140 wide, about 500 tall.
-// Layouts whose slot is the whole slide, so a <Stage> may be up to 1280 x 720.
-const FRAME = new Set(['full', 'hero', 'split', 'stage'])
+// Layouts with a slot that is the whole slide (the slot of full and stage, the ::bg:: slot of hero, split, statement and
+// closing), so a <Stage> may be up to 1280 x 720.
+const FRAME = new Set(['full', 'hero', 'split', 'stage', 'statement', 'closing'])
 // Display layouts wrap their title instead of cutting it off, so a title may be longer (but a sentence of 80 characters is the most that fits).
 const WRAPS = new Set(['hero', 'statement', 'split'])
 const CONTENT = { w: 1140, h: 500 }, SLIDE = { w: 1280, h: 720 }
