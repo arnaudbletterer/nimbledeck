@@ -73,10 +73,12 @@ test('accepts an existing empty folder', () => {
   assert.ok(scaffoldDeck(dir).length > 0)
 })
 
-test('the CLI command creates the deck and exits 1 on a non-empty folder', () => {
+test('the CLI command creates the deck, and refuses a non-empty folder with an error', () => {
   const dir = fresh()
   const bin = join(repo, 'packages', 'cli', 'bin', 'nimbledeck.mjs')
   assert.equal(spawnSync(process.execPath, [bin, 'new', dir]).status, 0)
   assert.ok(existsSync(join(dir, 'slides.md')))
-  assert.equal(spawnSync(process.execPath, [bin, 'new', dir]).status, 1)
+  const again = spawnSync(process.execPath, [bin, 'new', dir], { encoding: 'utf8' })
+  assert.equal(again.status, 2)                       // the CLI reports thrown errors as `error: ...` with exit code 2
+  assert.match(again.stderr, /^error: /)
 })
