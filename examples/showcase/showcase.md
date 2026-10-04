@@ -1,7 +1,8 @@
 ---
 theme: nimbledeck
 ndVariant: studio
-title: Slides that move
+title: "Nimbledeck: Markdown slides that run things"
+titleTemplate: "%s"
 layout: hero
 transition: fade
 ---
