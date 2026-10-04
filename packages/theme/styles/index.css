@@ -3,7 +3,7 @@
   --nd-bg: #ffffff; --nd-ink: #1f2328; --nd-muted: #6b7280; --nd-accent: #2563eb; --nd-accent-2: #9ca3af;
   --nd-surface: #f3f4f6; --nd-line: #d1d5db;
   --nd-cover-bg: #111827; --nd-cover-fg: #ffffff;
-  --nd-title-transform: none; --nd-title-size: 52px;
+  --nd-title-transform: none; --nd-title-size: 52px; --nd-gradient: var(--nd-accent);
 }
 [data-nd-variant="paper"] {
   --nd-bg: #faf6ee; --nd-ink: #2b2118; --nd-muted: #7a6a58; --nd-accent: #9a3412; --nd-accent-2: #b8a58c;
@@ -15,6 +15,28 @@
   --nd-bg: #0f172a; --nd-ink: #e5e7eb; --nd-muted: #94a3b8; --nd-accent: #38bdf8; --nd-accent-2: #64748b;
   --nd-surface: #1e293b; --nd-line: #334155;
   --nd-cover-bg: #020617; --nd-cover-fg: #f8fafc;
+}
+[data-nd-variant="studio"], [data-nd-variant="studio-light"] {
+  --nd-font-body: "SF Pro Text", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --nd-font-display: "SF Pro Display", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --nd-font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --slidev-code-font-family: var(--nd-font-mono); --slidev-slide-container-background: var(--nd-bg);
+  --nd-gradient: linear-gradient(90deg, var(--nd-accent), var(--nd-accent-2));
+  --nd-title-size: 54px;
+}
+[data-nd-variant="studio"] {
+  --nd-bg: #07090f; --nd-ink: #f2eee6; --nd-muted: #9aa3b8; --nd-accent: #22d3ee; --nd-accent-2: #a78bfa;
+  --nd-surface: #111627; --nd-line: #232b42; --nd-node-border: #3b4666;
+  --nd-cover-bg: #05060b; --nd-cover-fg: #f2eee6;
+  --nd-chart-1: #22d3ee; --nd-chart-2: #a78bfa; --nd-chart-3: #f472b6; --nd-chart-4: #fbbf24;
+  --nd-good: #12382a; --nd-bad: #3d1a1d; --nd-good-ink: #4ade80; --nd-bad-ink: #f87171;
+}
+[data-nd-variant="studio-light"] {
+  --nd-bg: #f7f6f2; --nd-ink: #0b0f1a; --nd-muted: #566074; --nd-accent: #6d28d9; --nd-accent-2: #0e7490;
+  --nd-surface: #ecebe5; --nd-line: #d8d6cc; --nd-node-border: #a9a79c;
+  --nd-cover-bg: #0b0f1a; --nd-cover-fg: #f7f6f2;
+  --nd-chart-1: #6d28d9; --nd-chart-2: #0e7490; --nd-chart-3: #be185d; --nd-chart-4: #b45309;
+  --nd-good: #cdebd9; --nd-bad: #f6d3d3; --nd-good-ink: #1f6b45; --nd-bad-ink: #a32a2a;
 }
 
 .slidev-layout { font-family: var(--nd-font-body); font-size: 24px; color: var(--nd-ink); background: var(--nd-bg); padding: 0; }
@@ -76,3 +98,22 @@
 
 /* Code blocks sit inside the side gutters like every other block. */
 .nd-body .slidev-code-wrapper, .nd-body > pre { margin-left: 70px !important; margin-right: 70px !important; }
+
+/* Studio look: heavier display type, hairline rules, a gradient accent. Tokens decide the colours. */
+[data-nd-variant^="studio"] .slidev-layout { letter-spacing: -0.011em; }
+[data-nd-variant^="studio"] .slidev-layout h1 { font-weight: 800; letter-spacing: -0.035em; border-bottom: 1px solid var(--nd-line); padding: 0.2em 70px; }
+[data-nd-variant^="studio"] .nd-body > h1 + * { margin-top: 32px !important; }
+[data-nd-variant^="studio"] .slidev-layout h4 { font-style: normal; font-weight: 500; letter-spacing: -0.02em; }
+[data-nd-variant^="studio"] .slidev-layout:not(.nd-lead):not(.nd-full):not(.nd-pane) {
+  background: radial-gradient(900px 480px at 88% -8%, color-mix(in srgb, var(--nd-accent) 11%, transparent), transparent 70%), var(--nd-bg); }
+[data-nd-variant^="studio"] .nd-lead { background: radial-gradient(1000px 520px at 15% 110%, color-mix(in srgb, var(--nd-accent-2) 26%, transparent), transparent 70%), var(--nd-cover-bg); }
+[data-nd-variant^="studio"] .nd-lead-inner h1 { font-size: 96px; border: 0; overflow: visible; padding: 0 0.04em; }
+[data-nd-variant^="studio"] .nd-lead-inner h4 { font-size: 30px; font-weight: 400; margin-top: 20px;
+  color: color-mix(in srgb, var(--nd-cover-fg) 72%, var(--nd-cover-bg)); }
+[data-nd-variant^="studio"] .nd-lead-inner h1::before { height: 3px; border-radius: 2px; background: var(--nd-gradient); }
+[data-nd-variant^="studio"] .slidev-layout blockquote { background: var(--nd-surface); border-left: 3px solid var(--nd-accent); border-radius: 10px; }
+[data-nd-variant^="studio"] .slidev-layout thead th { background: var(--nd-surface); color: var(--nd-accent); border-bottom: 1px solid var(--nd-line); }
+[data-nd-variant^="studio"] .slidev-layout tbody tr:nth-child(even) { background: color-mix(in srgb, var(--nd-surface) 55%, transparent); }
+[data-nd-variant^="studio"] .slidev-layout pre.slidev-code { border: 1px solid var(--nd-line); border-radius: 12px; }
+[data-nd-variant^="studio"] .slidev-layout code { font-family: var(--nd-font-mono); }
+[data-nd-variant^="studio"] .slidev-layout li::marker { color: var(--nd-accent); }
