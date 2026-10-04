@@ -15,3 +15,7 @@ out-*.png
 site/
 site-src/
 .docs-build.md
+.record-e2e.md
+examples/*/public/.record-e2e/
+# the example keeps WebM only; mp4 is made when ffmpeg is on the PATH
+examples/*/public/recordings/*.mp4
