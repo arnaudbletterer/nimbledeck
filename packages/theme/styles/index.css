@@ -162,7 +162,7 @@
 .nd-statement-inner, .nd-split-l { z-index: 2; }
 .nd-big .nd-kinetic + .nd-kinetic { margin-top: 28px; }
 .nd-lead-inner { position: relative; z-index: 2; }
-.nd-lead .nd-k-accent { color: var(--nd-accent); }
+.nd-lead .nd-k-accent, .nd-lead .nd-k-accent * { color: var(--nd-accent); }
 .nd-lead-inner .nd-kinetic + .nd-typewriter { margin-top: 40px; }
 /* Ghost display text for a faint band behind a title (use it inside a Marquee: `[words]{.nd-outline}`). It is filled at a few
    percent, not stroked: a stroke on a variable font draws its overlapping contours. */
