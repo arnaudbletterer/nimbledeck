@@ -15,6 +15,7 @@ nav = [
     { "Components gallery" = "components.md" },
     { "Themes and brands" = "THEMING.md" },
     { "Architecture" = "ARCHITECTURE.md" },
+    { "Performance" = "PERFORMANCE.md" },
   ] },
   { "Live demos" = "demos.md" },
 ]
