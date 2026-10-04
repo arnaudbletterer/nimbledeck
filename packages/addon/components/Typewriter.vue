@@ -6,10 +6,11 @@ import { highlight } from '../composables/highlight'
 // Types its content character by character with a blinking caret: <Typewriter lang="md" :speed="38"> and a fenced
 // block (or plain text) as the slot. `lang` is md, sh, py, json or html. With lang="sh" a line starting with "$ " is
 // typed and every other line appears at once as output. `keep` leaves the text on screen when it is done (false fades
-// it out after a moment). The root gets the class `nd-done` when the typing has finished, so a deck can chain on it.
+// it out after a moment). The root gets the class `nd-done` when the typing has finished, so a deck can chain on it; the events
+// `progress` (characters shown, total) and `source` (the full text) let a component such as <Livedeck> follow the typing.
 // `size` is the font size: a number in slide pixels (default 22) or any CSS length. `text` is an alternative to the slot (used by <Terminal>). Leaving the slide stops it and resets it.
 const props = withDefaults(defineProps<{ speed?: number; delay?: number; lang?: string; caret?: boolean; keep?: boolean; text?: string; size?: number | string }>(), { speed: 38, delay: 400, lang: 'md', caret: true, keep: true })
-const emit = defineEmits<{ (e: 'done', v: boolean): void }>()
+const emit = defineEmits<{ (e: 'done', v: boolean): void; (e: 'progress', typed: number, total: number): void; (e: 'source', text: string): void }>()
 
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 const active = useActive()
@@ -83,6 +84,8 @@ function begin() {
 }
 watch([active, source], ([a]) => { if (a) begin(); else reset() }, { immediate: true })
 watch(done, (d) => emit('done', d))
+watch(n, (v) => emit('progress', v, plan.value.times.length))   // characters shown so far, for a neighbour that follows the typing
+watch(source, (t) => emit('source', t), { immediate: true })
 onBeforeUnmount(stop)
 
 const fontSize = computed(() => (props.size == null ? undefined : typeof props.size === 'number' ? props.size + 'px' : props.size))
