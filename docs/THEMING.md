@@ -18,7 +18,7 @@ and a deck that uses them is portable only to themes that do. `nimbledeck check`
 
 The studio looks add a few things a deck can use by name, all in the theme's global stylesheet: `class: nd-grid` in a slide's
 frontmatter adds a faint drifting grid; `transition: nd-zoom` is a calm blur-and-scale transition; `statement`, `split` and
-`closing` take an optional `::bg::` slot like `hero`; the word classes `[text]{.nd-name}` (mono accent), `[text]{.nd-dim}` (muted) and
+`closing` take an optional `::bg::` slot like `hero`; the word classes `[text]{.nd-name}` (mono accent), `[text]{.nd-quiet}` (muted) and
 `[text]{.nd-outline}` (a ghost display word for a `<Marquee>` band) work in Markdown; a hairline along the bottom edge fills as the
 deck advances (`global-bottom.vue`, shown by the studio looks only); and the quiz and the `numbers` cards are restyled
 as large cards.

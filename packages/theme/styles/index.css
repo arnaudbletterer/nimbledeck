@@ -162,15 +162,17 @@
 .nd-statement-inner, .nd-split-l { z-index: 2; }
 .nd-big .nd-kinetic + .nd-kinetic { margin-top: 28px; }
 .nd-lead-inner { position: relative; z-index: 2; }
+.nd-lead .nd-k-accent { color: var(--nd-accent); }
+.nd-lead-inner .nd-kinetic + .nd-typewriter { margin-top: 40px; }
 /* Ghost display text for a faint band behind a title (use it inside a Marquee: `[words]{.nd-outline}`). It is filled at a few
    percent, not stroked: a stroke on a variable font draws its overlapping contours. */
 .nd-outline { font-family: var(--nd-font-display); font-size: 200px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;
   color: color-mix(in srgb, var(--nd-ink) 5%, transparent); }
 /* `class: nd-wide` on a slide stretches its table over the full content width. */
 .nd-wide .nd-body > table { width: calc(100% - 140px); }
-/* Word-level classes for Markdown: `[hero]{.nd-name}` is a mono accent name, `[text]{.nd-dim}` is muted. */
+/* Word-level classes for Markdown: `[hero]{.nd-name}` is a mono accent name, `[text]{.nd-quiet}` is muted. */
 .nd-name { display: inline-block; min-width: 6.2em; font-family: var(--nd-font-mono, ui-monospace, Menlo, monospace); font-weight: 700; color: var(--nd-accent); }
-.nd-dim { color: var(--nd-muted); font-size: 26px; letter-spacing: .02em; }
+.nd-quiet { color: var(--nd-muted); font-size: 26px; letter-spacing: .02em; }
 @media (prefers-reduced-motion: reduce) { .nd-grid::before { animation: none; } }
 
 /* Slide transition `nd-zoom`: the next slide settles in from slightly larger while the last one softens away. */
@@ -201,6 +203,7 @@
 [data-nd-variant^="studio"] .nd-revealed .nd-choice.nd-correct strong { color: var(--nd-good-ink); }
 [data-nd-variant^="studio"] .nd-choice.nd-wrong strong { color: var(--nd-bad-ink); }
 [data-nd-variant^="studio"] .nd-revealed .nd-choice.nd-correct span, [data-nd-variant^="studio"] .nd-choice.nd-wrong span { box-shadow: none; }
+[data-nd-variant^="studio"] .nd-choice.nd-faded { opacity: .6; }   /* still 4.5:1 on the dark page */
 [data-nd-variant^="studio"] .nd-verdict { font-size: 28px; font-weight: 600; border-radius: 16px; padding: .5em 1em; }
 [data-nd-variant^="studio"] .nd-explain { margin-top: 0; border-radius: 20px; overflow: hidden; border: 1px solid var(--nd-line); background: var(--nd-surface); }
 [data-nd-variant^="studio"] .nd-explain strong { background: transparent; color: var(--nd-accent); font-weight: 800; width: 118px; font-size: 48px; border-right: 1px solid var(--nd-line); }
