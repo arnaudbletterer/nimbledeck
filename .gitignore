@@ -12,3 +12,6 @@ e2e-*.png
 out-*.png
 .nimbledeck/
 *.pdf
+site/
+site-src/
+.docs-build.md
