@@ -166,7 +166,7 @@
 .nd-lead-inner .nd-kinetic + .nd-typewriter { margin-top: 40px; }
 /* Ghost display text for a faint band behind a title (use it inside a Marquee: `[words]{.nd-outline}`). It is filled at a few
    percent, not stroked: a stroke on a variable font draws its overlapping contours. */
-.nd-outline { font-family: var(--nd-font-display); font-size: 200px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+.nd-outline { font-family: var(--nd-font-display); font-size: 200px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15;
   color: color-mix(in srgb, var(--nd-ink) 5%, transparent); }
 /* `class: nd-wide` on a slide stretches its table over the full content width. */
 .nd-wide .nd-body > table { width: calc(100% - 140px); }
