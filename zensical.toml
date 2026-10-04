@@ -1,8 +1,9 @@
 [project]
 site_name = "Nimbledeck"
 site_description = "Markdown slides that run things: animation, 3D, Python and video, on top of Slidev."
-# Placeholder: set to the real GitHub Pages address once the repository is hosted there.
-site_url = "https://OWNER.github.io/nimbledeck/"
+site_url = "https://arnaudbletterer.github.io/nimbledeck/"
+repo_url = "https://github.com/arnaudbletterer/nimbledeck"
+repo_name = "arnaudbletterer/nimbledeck"
 # Staged from docs/ by website/build.mjs, which leaves out the contributor notes.
 docs_dir = "site-src"
 site_dir = "site"
