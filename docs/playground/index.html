@@ -3,35 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nimbledeck layout playground</title>
+<title>Nimbledeck playground</title>
 <link rel="stylesheet" href="playground.css">
 </head>
 <body>
-<header>
-  <strong>Layout playground</strong>
-  <span class="hint">Edit a layout or the slides. The slide updates as you type.</span>
-  <label>Look
-    <select id="variant"><option>plain</option><option>paper</option><option>night</option></select>
-  </label>
-  <button id="reset" title="Discard every edit and reload the originals">Reset all</button>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><b>Playground</b></div>
+  <div class="seg" id="looks" role="radiogroup" aria-label="Look"></div>
+  <span class="grow"></span>
+  <button class="ghost" id="reset" title="Discard every change">Start over</button>
 </header>
+
 <main>
-  <section class="editor">
-    <nav id="tabs" aria-label="Files"></nav>
-    <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Source"></textarea>
-    <div id="msg" role="status"></div>
-  </section>
-  <section class="preview">
-    <div class="bar">
-      <button id="prev" aria-label="Previous slide">&larr;</button>
-      <span id="count"></span>
-      <button id="next" aria-label="Next slide">&rarr;</button>
-      <button id="replay" title="Play the entrance animations again">Replay</button>
-      <span id="ms" class="ms"></span>
+  <aside class="strip" aria-label="Slides">
+    <ol id="thumbs"></ol>
+    <button class="add" id="addSlide">+ New slide</button>
+  </aside>
+
+  <section class="center">
+    <div class="stagewrap">
+      <div id="frame"><div id="stage" class="pg-root"><div id="mount"></div></div></div>
+      <div id="toast" role="status" hidden></div>
     </div>
-    <div id="frame"><div id="stage"><div id="mount"></div></div></div>
-    <p class="note">Approximation of a Slidev slide: same layouts, same theme CSS, no live components.</p>
+    <div class="bar">
+      <button class="icon" id="prev" aria-label="Previous slide">&#8592;</button>
+      <span id="count" class="muted"></span>
+      <button class="icon" id="next" aria-label="Next slide">&#8594;</button>
+      <button class="soft" id="replay">&#9654; Replay motion</button>
+      <span class="grow"></span>
+      <span class="chip" id="ms" title="Time to render the slide in your browser"></span>
+    </div>
   </section>
+
+  <aside class="inspector">
+    <div class="seg tabs" id="tabs" role="tablist">
+      <button role="tab" data-tab="slide">Slide</button>
+      <button role="tab" data-tab="style">Style</button>
+      <button role="tab" data-tab="code">Code</button>
+    </div>
+
+    <div class="panel" id="p-slide">
+      <h2>Layout</h2>
+      <p class="muted">Pick how this slide is arranged. Each card shows your text in that layout.</p>
+      <div id="cards" class="cards"></div>
+      <form id="newform" class="newform" hidden>
+        <label>Name <input id="newname" placeholder="my-layout" pattern="[a-zA-Z][\w-]*" required></label>
+        <label>Start from <select id="newbase"></select></label>
+        <button class="primary">Create</button>
+      </form>
+      <h2>Slide text</h2>
+      <p class="muted">This is the whole slide. The first lines choose the layout.</p>
+      <div class="ed" id="ed-slide"></div>
+    </div>
+
+    <div class="panel" id="p-style" hidden>
+      <h2>Colour</h2>
+      <div id="swatches" class="swatches"></div>
+      <h2>Title size <output id="o-title"></output></h2>
+      <input type="range" id="title" min="32" max="80" step="2" value="52">
+      <h2>Rounded corners <output id="o-radius"></output></h2>
+      <input type="range" id="radius" min="0" max="32" step="2" value="8">
+      <h2>Show</h2>
+      <label class="switch"><input type="checkbox" id="foot" checked><span></span>Footer title</label>
+      <label class="switch"><input type="checkbox" id="pagenum" checked><span></span>Page number</label>
+      <h2>Motion</h2>
+      <div class="seg" id="motion" role="radiogroup" aria-label="Motion"></div>
+      <h2>What this does</h2>
+      <p class="muted">Every control above is plain CSS. Paste it in your theme to keep the result.</p>
+      <div class="codeblock"><button class="soft copy" id="copycss">Copy</button><pre id="css"></pre></div>
+    </div>
+
+    <div class="panel" id="p-code" hidden>
+      <div class="filehead"><span class="chip file" id="fname"></span><span class="grow"></span>
+        <button class="soft" id="revert">Revert</button>
+        <button class="soft" id="dup">Save as new layout</button></div>
+      <p class="muted" id="codehint"></p>
+      <div class="ed tall" id="ed-code"></div>
+    </div>
+  </aside>
 </main>
 <script type="module" src="playground.js"></script>
 </body>

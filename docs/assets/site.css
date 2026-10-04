@@ -3,14 +3,16 @@
   --md-primary-fg-color: #2563eb;
   --md-primary-fg-color--light: #60a5fa;
   --md-primary-fg-color--dark: #1d4ed8;
-  --md-accent-fg-color: #2563eb;
+  --md-accent-fg-color: #1d4ed8;
+  --md-typeset-a-color: #1d4ed8;
   --nd-hero-from: #eff6ff;
   --nd-hero-to: #ffffff;
   --nd-card-line: var(--md-default-fg-color--lightest);
 }
 [data-md-color-scheme="slate"] {
   --md-primary-fg-color: #0f172a;
-  --md-accent-fg-color: #38bdf8;
+  --md-accent-fg-color: #7dd3fc;
+  --md-typeset-a-color: #7fb4ff;
   --md-hue: 222;
   --nd-hero-from: #0b1222;
   --nd-hero-to: #0f172a;
@@ -60,5 +62,5 @@
 
 
 /* The playground needs more room than a 16:9 frame */
-.nd-frame.nd-tall { aspect-ratio: auto; height: min(62rem, 92vh); }
-@media (max-width: 800px) { .nd-frame.nd-tall { height: 70rem; } }
+.nd-frame.nd-tall { aspect-ratio: auto; height: min(44rem, 92vh); }
+@media (max-width: 800px) { .nd-frame.nd-tall { height: 80rem; } }
