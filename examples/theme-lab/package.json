@@ -1,0 +1,18 @@
+{
+  "name": "nimbledeck-example-theme-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nimbledeck run lab.md",
+    "dev:plain": "nimbledeck run lab-plain.md",
+    "check": "nimbledeck check lab.md && nimbledeck check lab-plain.md",
+    "build": "slidev build lab.md",
+    "shots": "node shots.mjs"
+  },
+  "dependencies": {
+    "@slidev/cli": "53.0.0",
+    "nimbledeck": "0.1.0",
+    "slidev-theme-nimbledeck": "0.1.0",
+    "playwright-chromium": "1.63.0"
+  }
+}
