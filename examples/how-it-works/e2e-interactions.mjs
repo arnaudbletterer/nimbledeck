@@ -2,8 +2,10 @@
 // (start it with `npm run example`). Usage: node e2e-interactions.mjs [url] [deck.md]
 // Any deck with slides titled "An interactive quiz" and "Flip, compare, count up" can be tested, e.g. a brand gallery.
 import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { tmpdir } from 'node:os'
+import { join as pjoin, resolve } from 'node:path'
 import { chromium } from 'playwright-chromium'
+import { findChrome } from '../../packages/cli/src/chrome.mjs'
 import { splitSlides } from '../../packages/cli/src/slides.mjs'
 
 const base = process.argv[2] || 'http://localhost:3030'
@@ -16,7 +18,7 @@ const siteSlide = slides.findIndex((s) => /<Site url=/.test(s.body)) + 1
 const liveSlide = at('Live code'), manualSlide = at('Live code, run on demand')
 const frameSlide = slides.findIndex((s) => /<Demo name="compute" \/>/.test(s.body) && s.fm.layout === 'full') + 1
 
-const chrome = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => { try { readFileSync(p); return true } catch { return false } })
+const chrome = findChrome()
 const browser = await chromium.launch(chrome ? { executablePath: chrome } : {})
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
 const errors = []; page.on('pageerror', (e) => errors.push(String(e).slice(0, 160)))
@@ -41,7 +43,7 @@ const badMark = await mark('.nd-choice.nd-wrong span'), goodMark = await mark('.
 check('right and wrong differ by glyph and ink border, not colour alone', badMark.glyph !== goodMark.glyph && /2px/.test(badMark.ring) && /2px/.test(goodMark.ring) && badMark.ring !== goodMark.ring, `${goodMark.glyph} ${badMark.glyph}`)
 check('verdict names the answer', /answer is B/.test(await vis('.nd-verdict').innerText()))
 check('explanation appears', await vis('.nd-explain').isVisible())
-await page.screenshot({ path: 'e2e-quiz-wrong.png' })
+await page.screenshot({ path: pjoin(tmpdir(), 'e2e-quiz-wrong.png') })
 // answering again does nothing
 await vis('.nd-choice:has(strong:text-is("A"))').click()
 check('a second click does not change the result', await page.locator('.nd-choice.nd-wrong').count() === 1)
@@ -52,7 +54,7 @@ check('leaving and returning resets the quiz', (await attr('[data-kind=quiz]', '
 await vis('.nd-choice:has(strong:text-is("B"))').click(); await page.waitForTimeout(700)
 check('right answer -> good state', (await attr('[data-kind=quiz]', 'data-state')) === 'good')
 check('verdict says Correct', /Correct/.test(await vis('.nd-verdict').innerText()))
-await page.screenshot({ path: 'e2e-quiz-right.png' })
+await page.screenshot({ path: pjoin(tmpdir(), 'e2e-quiz-right.png') })
 // keyboard: number key
 await go(quizSlide); await page.mouse.click(640, 30); await page.keyboard.press('3'); await page.waitForTimeout(700)
 check('number key 3 picks C', await page.locator('.nd-choice.nd-wrong:has(strong:text-is("C"))').count() > 0)
@@ -85,7 +87,7 @@ const pos = Number(await attr('[data-kind=compare]', 'data-pos'))
 check('dragging moves the compare divider', pos >= 22 && pos <= 28, `at ${pos}%`)
 await page.waitForTimeout(1500)
 check('number counts up to its target', Number(await attr('[data-kind=countup]', 'data-value')) === 3200)
-await page.screenshot({ path: 'e2e-misc.png' })
+await page.screenshot({ path: pjoin(tmpdir(), 'e2e-misc.png') })
 
 // Command palette and shortcut help
 {
@@ -102,7 +104,7 @@ await page.screenshot({ path: 'e2e-misc.png' })
   check('/ opens the command palette', await vis('[data-kind=palette]').isVisible())
   check('the palette input has focus', await page.evaluate(() => document.activeElement?.classList.contains('nd-pal-input')))
   await page.waitForFunction(() => document.querySelectorAll('.nd-pal-card .slidev-layout').length > 0, null, { timeout: 20000 })
-  check('results show real slide thumbnails', true)
+  check('results show real slide thumbnails', (await page.locator('.nd-pal-card .slidev-layout').count()) > 0)
   await page.keyboard.type('adipiscing consectetur'); await page.waitForTimeout(700)   // words from a slide BODY, in reverse order
   const nos = await page.locator('.nd-pal-card').evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-no'))))
   check('body text is searched, words in any order: the quiz slide is among the hits', nos.includes(quizSlide), `hits: ${nos.join(', ')}`)
@@ -133,7 +135,7 @@ if (liveSlide) {
   const type = async (code) => { await vis(`${live} .cm-content`).click(); await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A'); await page.keyboard.insertText(code) }
   await type('import matplotlib.pyplot as plt\nplt.bar(["a", "b"], [3, 7])\nprint("edited", 6 * 7)')
   await page.waitForFunction((s) => /edited 42/.test(document.querySelector(s + ' .nd-live-stdout')?.textContent ?? ''), live, { timeout: 30000 })
-  check('editing the code changes the output', true)
+  check('editing the code changes the output', /edited 42/.test(await page.locator(`${live} .nd-live-stdout`).first().innerText()))
   check('editing the code changes the picture', (await attr(`${live} .nd-live-img`, 'src')) !== src0)
   await type('def broken(:\n  pass')
   await page.waitForFunction((s) => document.querySelector(s + '[data-state=error]'), live, { timeout: 30000 })
