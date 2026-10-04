@@ -48,10 +48,13 @@ await page.screenshot({ path: pjoin(tmpdir(), 'e2e-quiz-wrong.png') })
 await vis('.nd-choice:has(strong:text-is("A"))').click()
 check('a second click does not change the result', await page.locator('.nd-choice.nd-wrong').count() === 1)
 // leaving the slide resets
-await page.mouse.click(640, 30); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(800); await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(1200)
+await page.mouse.click(640, 30); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(800); await page.keyboard.press('ArrowLeft')
+// wait until the quiz slide is really back on screen and reset, instead of a fixed delay
+await page.waitForFunction(() => [...document.querySelectorAll('[data-kind=quiz]')].some((q) => q.getBoundingClientRect().width > 0 && q.dataset.state === 'open'), null, { timeout: 15000 })
 check('leaving and returning resets the quiz', (await attr('[data-kind=quiz]', 'data-state')) === 'open')
 // right answer
-await vis('.nd-choice:has(strong:text-is("B"))').click(); await page.waitForTimeout(700)
+await vis('.nd-choice:has(strong:text-is("B"))').click()
+await page.waitForFunction(() => [...document.querySelectorAll('[data-kind=quiz]')].some((q) => q.getBoundingClientRect().width > 0 && q.dataset.state === 'good'), null, { timeout: 15000 }).catch(() => {})
 check('right answer -> good state', (await attr('[data-kind=quiz]', 'data-state')) === 'good')
 check('verdict says Correct', /Correct/.test(await vis('.nd-verdict').innerText()))
 await page.screenshot({ path: pjoin(tmpdir(), 'e2e-quiz-right.png') })
