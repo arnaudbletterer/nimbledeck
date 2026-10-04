@@ -56,7 +56,8 @@ Three ideas keep it robust:
 - **Live components run only while their slide is on screen.** Slidev keeps neighbouring slides mounted, so every
   live component gates on `useActive()`.
 
-New here? Start with [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). Releasing and pinning:
+Source: `ssh://git@git.abletterer.synology.me:40001/abletterer/nimbledeck.git`. New here? Start with [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md);
+the current state and open items are in [docs/HANDOFF.md](docs/HANDOFF.md). Releasing and pinning:
 [docs/RELEASING.md](docs/RELEASING.md), [CHANGELOG.md](CHANGELOG.md).
 
 ## Quick start
