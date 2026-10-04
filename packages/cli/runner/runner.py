@@ -207,6 +207,9 @@ async def run_code(msg, memory_mb, rlimits=frozenset()):
                 with open(path, "rb") as f:
                     images.append(base64.b64encode(f.read()).decode())
         err_text = err.text()
+        # Where RLIMIT_AS is enforced (Linux) the allocation itself fails first: report it like the RSS watcher does.
+        if "as" in rlimits and proc.returncode and not mem_hit.is_set() and "\nMemoryError" in "\n" + err_text:
+            mem_hit.set()
         stopped = mem_hit.is_set() or flood.is_set() or timed_out
         if mem_hit.is_set():
             err_text += f"\nStopped: memory limit ({memory_mb} MB)."
