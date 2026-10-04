@@ -44,7 +44,7 @@ function fakes() {
   const spawned = [], killed = []
   const spawn = (cmd, args) => { const c = new EventEmitter(); Object.assign(c, { pid: 1, exitCode: null, cmd, args }); spawned.push(c); return c }
   const kill = (child, signal) => { killed.push([child.args.slice(-1)[0], signal]); child.exitCode = 0; child.emit('exit', 0, null) }
-  return { spawned, killed, deps: { spawn, kill, log: () => {}, exit: () => {} } }
+  return { spawned, killed, deps: { spawn, kill, log: () => {}, exit: () => {}, plan: async () => ({ flags: [], env: {}, skip: false }) } }
 }
 const busy = () => new Promise((res) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => res(s)) })
 
