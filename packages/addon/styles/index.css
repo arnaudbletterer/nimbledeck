@@ -186,3 +186,10 @@
 .nd-help-cols kbd { font: 600 12.5px ui-monospace, Menlo, Consolas, monospace; background: var(--nd-surface); border: 1px solid var(--nd-line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
 .nd-fade-enter-active, .nd-fade-leave-active { transition: opacity .15s ease; } .nd-fade-enter-from, .nd-fade-leave-to { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .nd-fade-enter-active, .nd-fade-leave-active { transition: none; } }
+/* A website that cannot be reached: same quiet look as the demo and stream offline notes, plus a Retry. */
+.nd-site-off { height: 100%; min-height: 200px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; border: 1px dashed var(--nd-accent-2); color: var(--nd-muted); font-family: var(--nd-font-body); }
+.nd-site-off p { margin: 0; font-size: 24px; }
+.nd-site-off code { font-size: 18px; color: var(--nd-ink); word-break: break-all; }
+.nd-site-off button { font: 600 16px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-ink); border: 0; border-radius: 999px; padding: 6px 20px; cursor: pointer; }
+.nd-site-off button:hover, .nd-site-off button:focus-visible { background: var(--nd-accent-2); outline: none; }
+.nd-media > .nd-site-off, .nd-compare > .nd-site-off { position: absolute; inset: 0; }
