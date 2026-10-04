@@ -5,6 +5,10 @@ has not had a tagged release yet, so everything below sits under Unreleased.
 
 ## Unreleased
 
+- Add docs/HANDOFF.md with the state of the work and the open items.
+
+## Unreleased
+
 State of the project at 0.1.0 (the version in every `package.json`; no tag has been cut).
 
 ### Added
