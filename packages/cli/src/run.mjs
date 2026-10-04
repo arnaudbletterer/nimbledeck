@@ -1,6 +1,7 @@
 import { spawn as nodeSpawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
-import { closeSync, existsSync, mkdirSync, openSync, writeFileSync } from 'node:fs'
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import net from 'node:net'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -28,6 +29,16 @@ export function killTree(child, signal = 'SIGTERM', spawnImpl = nodeSpawn) {
     if (isWin) spawnImpl('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
     else process.kill(-child.pid, signal)
   } catch { try { child.kill(signal) } catch { /* already gone */ } }
+}
+
+// The Slidev the deck project installed, started with node directly: `npx` costs about 0.6 s before Slidev even begins.
+// null when it cannot be found (then the caller falls back to npx).
+export function slidevBin(root) {
+  try {
+    const pkgFile = createRequire(join(root, 'package.json')).resolve('@slidev/cli/package.json')
+    const bin = JSON.parse(readFileSync(pkgFile, 'utf8')).bin
+    return join(dirname(pkgFile), typeof bin === 'string' ? bin : bin.slidev)
+  } catch { return null }
 }
 
 // Start every demo and stream from nimbledeck.config.json, the live-code runner, then the deck. Everything binds to 127.0.0.1.
@@ -107,8 +118,11 @@ export async function startDeck(deck, root, deps = {}) {
   }
   if (!(await free(cfg.port))) await fail(`port ${cfg.port} is already in use (deck)`)
   // The deck keeps the terminal (Slidev's own prompt and shortcuts); its end ends everything.
-  const slidev = launch('slidev', 'npx', ['slidev', deck, '--port', String(cfg.port), '--bind', '127.0.0.1', '--open', 'false'],
-    { inherit: true, onExit: (code) => { stop().then(() => exit(code ?? 0)) } })
+  const slidevArgs = [deck, '--port', String(cfg.port), '--bind', '127.0.0.1', '--open', 'false']
+  const bin = slidevBin(root)
+  const slidev = (bin ? launch('slidev', process.execPath, [bin, ...slidevArgs], { inherit: true, onExit: (code) => { stop().then(() => exit(code ?? 0)) } })
+    : launch('slidev', 'npx', ['slidev', ...slidevArgs],
+    { inherit: true, onExit: (code) => { stop().then(() => exit(code ?? 0)) } }))
   return { children, stop, slidev }
 }
 
