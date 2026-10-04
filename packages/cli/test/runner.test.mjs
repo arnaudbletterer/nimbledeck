@@ -41,7 +41,8 @@ before(async () => {
     proc.on('exit', () => { clearTimeout(t); reject(new Error('runner exited')) })
   })
 })
-after(() => proc?.kill())
+// On Windows killing `uv` leaves its Python child holding the pipes, which keeps the test process alive: kill the tree.
+after(() => { if (proc && process.platform === 'win32') spawnSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], { stdio: 'ignore' }); else proc?.kill() })
 
 test('a wrong token is refused', { skip: !hasUv }, async () => { await assert.rejects(open('nope'), /refused/) })
 test('a connection without an Origin header is refused', { skip: !hasUv }, async () => { await assert.rejects(open(TOKEN, null), /refused/) })
