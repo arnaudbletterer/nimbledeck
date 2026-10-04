@@ -117,3 +117,36 @@
 [data-nd-variant^="studio"] .slidev-layout pre.slidev-code { border: 1px solid var(--nd-line); border-radius: 12px; }
 [data-nd-variant^="studio"] .slidev-layout code { font-family: var(--nd-font-mono); }
 [data-nd-variant^="studio"] .slidev-layout li::marker { color: var(--nd-accent); }
+
+/* Showcase layouts (hero, statement, split, stage, numbers). Big type is shared through .nd-big. */
+.nd-hero, .nd-statement, .nd-split, .nd-pane { position: relative; height: 100%; overflow: hidden; background: var(--nd-bg); }
+.nd-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.nd-big h1 { font-size: 110px; line-height: 1; letter-spacing: -0.04em; font-weight: 800; white-space: normal; overflow: visible; text-overflow: clip;
+  border: 0; padding: 0; width: auto; text-wrap: balance; }
+.nd-big h4 { font-size: 30px; line-height: 1.3; font-weight: 400; color: var(--nd-muted); margin-top: 28px; }
+.nd-hero-inner { position: absolute; left: 96px; right: 96px; bottom: 88px; z-index: 1; max-width: 1000px; }
+.nd-hero-inner::before { content: ""; display: block; width: 96px; height: 4px; border-radius: 2px; background: var(--nd-gradient); margin-bottom: 36px; }
+.nd-statement-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 120px; }
+.nd-statement h1 { font-size: 88px; line-height: 1.08; font-weight: 700; letter-spacing: -0.035em; }
+.nd-statement h4 { order: -1; margin: 0 0 36px; font-size: 20px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; }
+.nd-split-l { position: absolute; left: 0; right: 50%; top: 0; bottom: 0; padding: 0 72px 0 88px; display: flex; flex-direction: column; justify-content: center; }
+.nd-split-l h1 { font-size: 68px; line-height: 1.05; }
+.nd-split-l h4 { font-size: 26px; }
+.nd-split-l p, .nd-split-l ul { font-size: 26px; line-height: 1.45; color: var(--nd-muted); margin: 28px 0 0; }
+.nd-split-r { position: absolute; left: 50%; right: 0; top: 0; bottom: 0; overflow: hidden; background: var(--nd-surface); }
+.nd-split::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; z-index: 2; pointer-events: none;
+  background: linear-gradient(transparent, var(--nd-accent) 30%, var(--nd-accent-2) 70%, transparent);
+  box-shadow: 0 0 28px 3px color-mix(in srgb, var(--nd-accent) 40%, transparent); }
+.nd-pane-in { position: absolute; inset: 0; padding: 40px 40px 76px; z-index: 1; }
+.nd-caption { position: absolute; left: 40px; bottom: 28px; z-index: 3; font-size: 18px; color: var(--nd-muted); }
+.nd-pill { position: absolute; right: 32px; bottom: 24px; z-index: 3; padding: 4px 16px; border-radius: 999px; font-size: 16px; color: var(--nd-muted);
+  background: color-mix(in srgb, var(--nd-surface) 80%, transparent); border: 1px solid var(--nd-line); font-variant-numeric: tabular-nums; }
+.nd-nums { position: absolute; left: 70px; right: 70px; top: 110px; bottom: 70px; align-content: center; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: 24px; }
+.nd-num { padding: 36px 28px 32px; border-radius: 16px; background: var(--nd-surface); border: 1px solid var(--nd-line); }
+.nd-num h2 { margin: 0; font-family: var(--nd-font-display); font-size: 72px; line-height: 1; padding-right: 0.08em; font-weight: 800; letter-spacing: -0.04em; white-space: nowrap;
+  background: var(--nd-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nd-num p { margin: 18px 0 0; font-size: 22px; line-height: 1.35; color: var(--nd-muted); }
+/* Display titles never carry the title bar rule, in any variant. Hero text sits on a scrim so a live background stays readable. */
+.slidev-layout .nd-big h1, .slidev-layout.nd-big h1 { border: 0; padding: 0; }
+.nd-hero .nd-bg::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--nd-bg) 92%, transparent) 0%, color-mix(in srgb, var(--nd-bg) 55%, transparent) 40%, transparent 75%); }
