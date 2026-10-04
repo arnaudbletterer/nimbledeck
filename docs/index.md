@@ -103,11 +103,13 @@ Full walkthrough in [Get started](GETTING-STARTED.md).
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-  A["deck.md<br/>Markdown + layouts + components"] -->|nimbledeck check| B["Slidev in the browser"]
-  B <-->|"HTTP / WebSocket"| C["Local Python processes<br/>demos, streams, live code"]
-  D["nimbledeck run"] -.starts and stops.-> C
+```text
+ deck.md  (Markdown + layout names + <Component /> tags)
+    |
+    |  nimbledeck check      known layouts, short titles, no inline HTML or CSS, assets exist
+    v
+ Slidev (browser)  <---- HTTP / WebSocket ---->  local Python processes (demos, streams, live code)
+                                                  started and stopped by `nimbledeck run`
 ```
 
 More in [Architecture](ARCHITECTURE.md).
