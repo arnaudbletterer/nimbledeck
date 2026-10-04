@@ -122,7 +122,8 @@ function mini(host, raw, index, layout, cls) {
 }
 
 // ---------- Look and style controls ----------
-const LOOKS = { plain: '#2563eb', paper: '#9a3412', night: '#38bdf8' }
+const LOOKS = { plain: '#2563eb', paper: '#9a3412', night: '#38bdf8', studio: '#22d3ee', 'studio-light': '#6d28d9' }
+const LOOK_NAMES = { plain: 'Plain', paper: 'Paper', night: 'Night', studio: 'Studio', 'studio-light': 'Studio light' }
 const SWATCHES = [null, '#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#0d9488']
 const MOTIONS = { none: 'None', fade: 'Fade up', slide: 'Slide in', zoom: 'Zoom' }
 const MOTION_CSS = {
@@ -256,7 +257,7 @@ function segment(host, items, get, set, dot) {
   const mark = () => host.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', b.dataset.k === get()))
   mark()
 }
-segment($('looks'), { plain: 'Plain', paper: 'Paper', night: 'Night' }, () => S.variant, (k) => { S.variant = k; save(); update() }, LOOKS)
+segment($('looks'), LOOK_NAMES, () => S.variant, (k) => { S.variant = k; save(); update() }, LOOKS)
 segment($('motion'), MOTIONS, () => S.tweaks.motion, (k) => { S.tweaks.motion = k; save(); update(); replay() })
 $('swatches').replaceChildren(...SWATCHES.map((c) => {
   const b = document.createElement('button'); b.className = 'sw' + (c ? '' : ' auto'); if (c) b.style.background = c
@@ -295,7 +296,7 @@ $('newform').onsubmit = (e) => {
   $('newform').hidden = true; $('newname').setCustomValidity(''); save(); update(); setTab('code'); codeEd.set(S.layouts[name])
 }
 $('newname').oninput = () => $('newname').setCustomValidity('')
-$('reset').onclick = () => { if (!confirm('Discard all your changes and start over?')) return; S = structuredClone(defaults); cache.clear(); save(); cur = 0; sync(); segment($('looks'), { plain: 'Plain', paper: 'Paper', night: 'Night' }, () => S.variant, (k) => { S.variant = k; save(); update() }, LOOKS); segment($('motion'), MOTIONS, () => S.tweaks.motion, (k) => { S.tweaks.motion = k; save(); update(); replay() }); setTab('slide'); update() }
+$('reset').onclick = () => { if (!confirm('Discard all your changes and start over?')) return; S = structuredClone(defaults); cache.clear(); save(); cur = 0; sync(); segment($('looks'), LOOK_NAMES, () => S.variant, (k) => { S.variant = k; save(); update() }, LOOKS); segment($('motion'), MOTIONS, () => S.tweaks.motion, (k) => { S.tweaks.motion = k; save(); update(); replay() }); setTab('slide'); update() }
 document.addEventListener('keydown', (e) => { if (/^(TEXTAREA|INPUT|SELECT)$/.test(e.target.tagName)) return; if (e.key === 'ArrowLeft') $('prev').click(); if (e.key === 'ArrowRight') $('next').click() })
 new ResizeObserver(() => { $('stage').style.transform = `scale(${$('frame').clientWidth / 1280})` }).observe($('frame'))
 
