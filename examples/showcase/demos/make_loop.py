@@ -21,7 +21,7 @@ RIBBONS = [
 ]
 
 with imageio.get_writer(out, fps=FPS, codec="libx264", macro_block_size=1, pixelformat="yuv420p",
-                        output_params=["-crf", "27", "-preset", "slow"]) as w:
+                        output_params=["-crf", "27", "-preset", "slow", "-movflags", "+faststart"]) as w:   # faststart: moov first, so playback starts after one request
     for i in range(N):
         p = 2 * np.pi * i / N
         img = np.zeros((H, W, 3), np.float32)
