@@ -9,7 +9,7 @@
 import { spawnSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { homePage, slideTitles, writeNotFound, writeRedirects, writeRobotsAndSitemap } from './home.mjs'
+import { firstSlidePreloads, homePage, slideTitles, writeNotFound, writeRedirects, writeRobotsAndSitemap } from './home.mjs'
 import { root, siteConfig } from './site.mjs'
 
 const cfg = siteConfig()
@@ -82,7 +82,7 @@ run('npm', ['run', 'build:web'], showcase, { WEB_BASE: siteBase, WEB_OUT: resolv
 cpSync(resolve(showcase, 'dist'), resolve(root, 'site'), { recursive: true })
 for (const f of ['_redirects', 'nimbledeck.json']) rmSync(resolve(root, 'site', f), { force: true })   // a Netlify file, and the runner token
 const index = resolve(root, 'site/index.html')
-writeFileSync(index, homePage(readFileSync(index, 'utf8'), { cfg, hasScience, titles: slideTitles(resolve(showcase, 'showcase.md')) }))
+writeFileSync(index, homePage(readFileSync(index, 'utf8'), { cfg, hasScience, titles: slideTitles(resolve(showcase, 'showcase.md')), preloads: firstSlidePreloads(resolve(root, 'site'), resolve(showcase, 'showcase.md'), siteBase) }))
 writeNotFound(resolve(root, 'site'), cfg)
 console.log(`redirects: ${writeRedirects(resolve(root, 'site'), cfg).join(' ')}`)
 writeRobotsAndSitemap(resolve(root, 'site'), cfg, hasScience)

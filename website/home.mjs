@@ -26,8 +26,17 @@ export function slideTitles(deckFile) {
     .map((t, i) => t ?? `Slide ${i + 1}`)
 }
 
+// The chunks of the components on the first slide, so the browser fetches them with the main script instead of after it.
+export function firstSlidePreloads(siteDir, deckFile, base) {
+  const first = splitSlides(readFileSync(deckFile, 'utf8'))[0].body
+  const names = new Set([...first.matchAll(/<([A-Z]\w+)/g)].map((m) => m[1]))
+  const assets = join(siteDir, 'assets')
+  return readdirSync(assets).filter((f) => f.endsWith('.js') && names.has(f.replace(/-[\w-]+\.js$/, '')))
+    .map((f) => `<link rel="modulepreload" crossorigin href="${base}assets/${f}">`)
+}
+
 // Takes the index.html that Slidev wrote and makes it the site's front door.
-export function homePage(html, { cfg, titles, hasScience }) {
+export function homePage(html, { cfg, titles, hasScience, preloads = [] }) {
   const url = cfg.url
   const links = { docs: `${cfg.base}docs/`, playground: `${cfg.base}playground/`, github: cfg.github, ...(hasScience ? { science: `${cfg.base}demos/science/` } : {}) }
   const head = `
@@ -47,6 +56,7 @@ export function homePage(html, { cfg, titles, hasScience }) {
 <meta name="twitter:description" content="${esc(DESCRIPTION)}">
 <meta name="twitter:image" content="${url}social.jpg">
 <meta name="theme-color" content="#07090f">
+${preloads.join('\n')}
 <script>window.__ND_SITE__=${JSON.stringify(links)};document.documentElement.classList.add('nd-site-bar')</script>
 <style>.nd-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}</style>
 `
