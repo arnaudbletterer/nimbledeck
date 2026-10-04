@@ -19,6 +19,7 @@ nav = [
     { "Performance" = "PERFORMANCE.md" },
   ] },
   { "Live demos" = "demos.md" },
+  { "Run it locally" = "run-locally.md" },
 ]
 
 [project.theme]

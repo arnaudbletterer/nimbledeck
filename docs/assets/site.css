@@ -64,3 +64,7 @@
 /* The playground needs more room than a 16:9 frame */
 .nd-frame.nd-tall { aspect-ratio: auto; height: min(44rem, 92vh); }
 @media (max-width: 800px) { .nd-frame.nd-tall { height: 80rem; } }
+
+/* Screenshot cards */
+.md-typeset .nd-shots { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.md-typeset .nd-shots img { border-radius: .5rem; border: 1px solid var(--nd-card-line); margin-bottom: .6rem; }
