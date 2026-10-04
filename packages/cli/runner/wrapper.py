@@ -81,4 +81,5 @@ if matplotlib is not None:
             plt.figure(num).savefig(os.path.join(work, f"fig-{i}.png"), bbox_inches="tight", transparent=True)
     except Exception as e:  # saving must never hide the user's own error
         print(f"(could not save figure: {e})", file=sys.stderr)
-sys.exit(status)
+sys.stdout.flush(); sys.stderr.flush()
+os._exit(status)   # skips the interpreter teardown of numpy and matplotlib, which is a visible part of a short run
