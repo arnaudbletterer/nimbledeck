@@ -58,7 +58,7 @@ One Apple Silicon Mac, Chrome with the GPU on. Medians; read them as ratios, not
 
 ## Extending PyStream
 
-The Lorenz slide needed more than the swarm demo, so `PyStream` gained four optional settings (documented in
+The Lorenz slide needed more than the swarm demo, so `PyStream` gained optional settings (documented in
 `docs/WRITING.md`): `:colors` (one colour per equal group of points), `:size` and `:fade` (dot size and trail length),
 `:w` and `:h` (canvas size) and `:sliders` (labels, ranges and starting values of the three sliders). Without them it
 looks and behaves as before.
