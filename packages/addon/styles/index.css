@@ -27,6 +27,8 @@
 .nd-scene.nd-framed canvas, .nd-scene.nd-framed .nd-gl { outline: 1px solid var(--nd-ink); outline-offset: -1px; }
 .nd-ctl { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 18px; align-items: center; font-size: 18px; flex-wrap: wrap;
   padding: 6px 10px; background: color-mix(in srgb, var(--nd-bg) 75%, transparent); }
+.nd-ctl label { color: var(--nd-muted); }
+.nd-ctl input[type="range"] { accent-color: var(--nd-accent); }
 .nd-ctl button { border: 1px solid var(--nd-ink); padding: 2px 14px; background: var(--nd-surface); color: var(--nd-ink); }
 .nd-fps { margin-left: auto; color: var(--nd-muted); }
 .nd-hud { position: absolute; right: 8px; top: 6px; font-size: 14px; color: var(--nd-muted); }

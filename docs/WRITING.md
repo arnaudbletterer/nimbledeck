@@ -125,6 +125,12 @@ click: `<At v-click>`.
 1. `demos/stream_<name>.py`: a WebSocket server (see `examples/how-it-works/demos/stream_nbody.py`). Frame format:
    binary float32 `[step_ms, n, x0, y0, x1, y1, ...]`. The client sends JSON parameters; apply them between steps.
 2. Register it under `streams` in the config, then use `<PyStream name="<name>" />`.
+3. Optional settings, all with the original look as default: `:colors="['--nd-accent', '#f472b6']"` cuts the points into
+   that many equal consecutive groups, one colour each (CSS colours or token names), so a trajectory keeps its colour;
+   `:size` is the dot size in logical pixels (2.2), `:fade` how much of the previous frame is erased per frame (0.25;
+   smaller gives longer trails); `:w` and `:h` set the logical canvas (1000 x 460), and the stream's x and y in
+   [-2, 2] map to its width and height; `:sliders` is three `{label, min, max, step, value}` objects for the `n`, `dt` and
+   `g` sliders that `controls` shows.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 
 ## Live code
