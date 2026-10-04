@@ -54,4 +54,9 @@ and `slidev-addon-nimbledeck`, and a deck using `<Orbit />`:
   and the font is `--nd-font-body`). It maps only the base colour, border, text, line and font to the tokens, and reads
   them when each diagram renders. A brand theme gets this only by shipping its own `setup/mermaid.ts`, since a theme
   does not inherit another theme's setup files. A deck can provide one too.
+- Fonts must be self-hosted. The base theme sets Slidev's `fonts.provider` to `none`, so no stylesheet is fetched from
+  Google Fonts and a deck opens with no internet (a hanging font stylesheet blocks the first paint). A brand that wants a
+  web font ships the files in its own `public/` folder, declares them with `@font-face` in `styles/index.css`, and keeps
+  a system font after them in `--nd-font-body`. Do not set `fonts.provider: google` in a brand or a deck. The default
+  favicon is inline for the same reason; a brand can point `favicon` at a file in its `public/` folder.
 - Brand fonts and logos keep their own licenses and stay in the brand repository, never in Nimbledeck.
