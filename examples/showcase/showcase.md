@@ -56,13 +56,11 @@ layout: statement
 
 ::right::
 
-<Stage>
-<At v-click :x="0" :y="0" :w="570" :h="500">
-<Aurora :intensity="0.8" />
-</At>
-<At v-click :x="60" :y="150" :w="480" :z="1">
-<Kinetic text="The plan" mode="letters" from="up" :stagger="40" size="s" />
-<Kinetic text="Ship it on Friday." mode="words" from="blur" :stagger="120" size="l" accent="Friday." />
+<Stage :w="640" :h="720">
+<At :w="640" :h="720"><Aurora :intensity="0.8" /></At>
+<At :x="70" :y="250" :w="520" :z="1">
+<Kinetic v-click hold text="The plan" mode="letters" from="up" :stagger="40" size="s" />
+<Kinetic v-click hold text="Ship it on Friday." mode="words" from="blur" :stagger="120" size="l" accent="Friday." />
 </At>
 </Stage>
 
@@ -75,14 +73,69 @@ layout: stage
 ---
 
 <Stage full>
-<At :x="90" :y="90" :w="1100">
+<At :x="80" :y="50" :w="1100">
 <Kinetic text="Layouts, not CSS." mode="words" from="mask" :stagger="160" size="l" accent="CSS." />
 </At>
-<At :x="0" :y="330" :w="1280" :h="90">
-<Marquee :speed="40">hero · statement · split · stage · numbers · cover · agenda · divider · default · two-cols · photo-right · closing · full ·</Marquee>
+<At :x="80" :y="200" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+
+### hero
+
+`layout: hero`
+
+Big title over a live background
+
 </At>
-<At :x="0" :y="450" :w="1280" :h="90">
-<Marquee :speed="28">layout: statement · layout: split · layout: numbers · layout: stage · layout: hero · layout: closing ·</Marquee>
+<At :x="460" :y="200" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+
+### statement
+
+`layout: statement`
+
+One sentence, huge
+
+</At>
+<At :x="840" :y="200" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+
+### split
+
+`layout: split`
+
+Words left, live element right
+
+</At>
+<At :x="80" :y="390" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+
+### stage
+
+`layout: stage`
+
+A full pane for one element
+
+</At>
+<At :x="460" :y="390" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+
+### numbers
+
+`layout: numbers`
+
+Four big stats
+
+</At>
+<At :x="840" :y="390" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+
+### closing
+
+`layout: closing`
+
+The last slide
+
+</At>
+<At :x="0" :y="600" :w="1280" :h="60">
+<Marquee :speed="40">
+
+## cover · agenda · divider · default · two-cols · photo-right · full ·
+
+</Marquee>
 </At>
 </Stage>
 
@@ -96,7 +149,7 @@ layout: statement
 
 #### Motion
 
-<Kinetic text="Type it. See it. Ship it." mode="words" from="blur" :stagger="220" size="xl" accent="See" />
+<Kinetic text="Type it. See it. Ship it." mode="words" from="blur" :stagger="260" size="l" accent="See" />
 
 <!--
 Text that moves is a tag, not a keyframe editor. Words, letters or lines; from any side.
@@ -108,7 +161,7 @@ layout: full
 
 <Stage full>
 <At :w="1280" :h="720" :z="0"><Orbit /></At>
-<At :x="90" :y="470" :w="1000" :z="1">
+<At :x="90" :y="40" :w="1000" :z="1">
 <Headline size="l">A canvas, built in.</Headline>
 </At>
 </Stage>
@@ -129,7 +182,9 @@ Drag the scene. It is WebGL, and it is a file in your deck.
 
 ::right::
 
-<Scene3D controls />
+<Stage :w="640" :h="720">
+<At :w="640" :h="720"><Scene3D controls /></At>
+</Stage>
 
 <!--
 Drag it. A three.js scene, loaded only on the slide that uses it.
@@ -151,21 +206,21 @@ layout: numbers
 
 ::c::
 
-<Stat value="132" suffix=" ms" label="one live plot run" />
+<Stat value="22" label="ms to run live code that prints" />
 
 ::d::
 
-<Stat value="60" suffix=" fps" label="canvas and 3D, GPU on" />
+<Stat value="60" label="frames per second, GPU on" />
 
 <!--
-Thirteen layout files in the theme. The checker refuses inline CSS. 132 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac.
+Thirteen layout files in the theme. The checker refuses inline CSS. 22 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac.
 -->
 
 ---
 layout: default
 ---
 
-# Live code got 4.7x faster
+# Live code, before and after
 
 <Stage>
 <At :w="1140" :h="460">
@@ -207,8 +262,8 @@ Click an answer, or press 1 to 4. Interaction is for the presenter and resets wh
 layout: stage
 ---
 
-<Stage full>
-<At :w="1280" :h="720"><Compare before="/before.jpg" after="/after.jpg" /></At>
+<Stage :w="1074" :h="604">
+<At :w="1074" :h="604"><Compare before="/before.jpg" after="/after.jpg" :start="35" /></At>
 </Stage>
 
 ::caption::
@@ -240,8 +295,8 @@ layout: default
 
 # Edit the code. The plot reruns.
 
-<Stage>
-<At :w="1140" :h="460">
+<Stage :h="500">
+<At :w="1140" :h="500">
 <LiveCode>
 
 ```python
@@ -269,7 +324,7 @@ layout: full
 <Stage full>
 <At :w="1280" :h="720" :z="0"><Aurora :intensity="0.6" /></At>
 <At :x="130" :y="40" :w="1020" :h="560" :z="1"><PyStream name="swarm" controls hud color="#ffffff" /></At>
-<At :x="90" :y="600" :w="1000" :z="2">
+<At :x="90" :y="625" :w="1100" :z="2">
 <Headline size="m">Python pushes the particles. The browser draws them.</Headline>
 </At>
 </Stage>
@@ -290,7 +345,11 @@ The checker gives it a pass or a fail.
 
 ::right::
 
-<Terminal title="nimbledeck" :lines="['$ nimbledeck check showcase.md', 'CHECK_RESULT', '$ nimbledeck verify showcase.md', 'VERIFY_RESULT']" />
+<Stage :w="640" :h="720">
+<At :x="30" :y="210" :w="580" :h="300">
+<Terminal title="nimbledeck" :lines="['$ nimbledeck check showcase.md', '18 slides, 0 errors, 0 warnings', '$ nimbledeck verify showcase.md', '18 slides verified, 0 placement problems']" />
+</At>
+</Stage>
 
 <!--
 check lints the Markdown. verify opens the running deck in Chrome and reports clipped or blurry content.
@@ -322,9 +381,9 @@ layout: stage
 <Typewriter :speed="30" :delay="900" lang="sh">
 
 ```sh
-node packages/cli/bin/nimbledeck.mjs new my-deck
-cd my-deck && npm install
-npm run dev
+$ node packages/cli/bin/nimbledeck.mjs new my-deck
+$ cd my-deck && npm install
+$ npm run dev
 ```
 
 </Typewriter>

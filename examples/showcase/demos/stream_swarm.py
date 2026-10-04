@@ -42,8 +42,8 @@ class Swarm:
             r2 = (d * d).sum(1, keepdims=True) + 0.08
             pull = d / r2 ** 1.5
             swirl = np.stack([-d[:, 1], d[:, 0]], 1) / r2 ** 1.25 * (1 if k == 0 else -1)
-            acc += self.g * (0.35 * pull + 0.5 * swirl)
-        self.v = (self.v + acc * self.dt) * 0.995
+            acc += self.g * (0.9 * pull + 0.7 * swirl)
+        self.v = (self.v + acc * self.dt) * 0.985
         np.clip(self.v, -3, 3, out=self.v)
         self.p += self.v * self.dt
         far = (np.abs(self.p) > 1.9).any(1)   # leave the frame: respawn near the centre

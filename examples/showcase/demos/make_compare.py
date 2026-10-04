@@ -27,7 +27,6 @@ for i, line in enumerate(LINES):
     y = 420 + i * 190
     d.ellipse((170, y + 40, 200, y + 70), fill="#222222")
     d.text((250, y), line, font=font("DejaVu Serif", 90), fill="#222222")
-d.text((160, H - 130), "Company  |  Confidential", font=font("DejaVu Serif", 50), fill="#888888")
 
 # After: the same words with the studio look.
 rng = np.random.default_rng(7)
