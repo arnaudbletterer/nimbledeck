@@ -79,7 +79,7 @@ npm run verify   # with the deck running: renders every slide in Chrome and repo
 npm run export   # writes slides.pdf next to slides.md, one page per build step
 ```
 
-In the browser: arrows move, `?` lists every shortcut, `/` searches slides, `O` is the overview, and the presenter view
+In the browser: arrows move, `?` lists every shortcut, `/` searches slides, `o` is the overview, and the presenter view
 is `http://localhost:3030/presenter/1`.
 
 Edit `slides.md` and the page reloads. To change the look of the whole deck, set `ndVariant` in the header to `plain`,
