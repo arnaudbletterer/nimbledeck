@@ -1,22 +1,20 @@
-// Builds the web edition of the showcase: the slides that need `nimbledeck run` (PyStream, Demo, LiveCode) are left out.
+// Builds the web edition of the showcase: the slides that need `nimbledeck run` (PyStream, Demo, LiveCode) are left out,
+// unless every live component on them has a recording in public/recordings.
 // Usage: npm run build:web            (env WEB_BASE sets the base path, WEB_OUT the output folder; default dist/)
 import { spawnSync } from 'node:child_process'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { disableUnrecorded } from '../../packages/cli/src/recordings.mjs'
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const base = process.env.WEB_BASE ?? '/nimbledeck/demos/showcase/'
 const out = resolve(dir, process.env.WEB_OUT ?? 'dist')
 const tmp = resolve(dir, '.web-build.md')
 
-const NEEDS_RUN = /<(PyStream|Demo|LiveCode)\b/
-let skipped = 0
 const src = readFileSync(resolve(dir, 'showcase.md'), 'utf8')
-const web = src.split(/\n---\n(?=layout:)/)
-  .map((slide, i) => (i > 0 && NEEDS_RUN.test(slide) ? (skipped++, `disabled: true\n${slide}`) : slide))
-  .join('\n---\n')
-console.log(`web edition: ${skipped} slides that need nimbledeck run are left out`)
+const { text: web, skipped, played } = disableUnrecorded(src, resolve(dir, 'public'))
+console.log(`web edition: ${skipped} slides that need nimbledeck run are left out, ${played} play a recording`)
 // A static host has no fallback to index.html for /3, so the web copy uses hash routes.
 writeFileSync(tmp, web.replace(/^---\n/, '---\nrouterMode: hash\n'))
 try {
