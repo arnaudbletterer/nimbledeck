@@ -1,13 +1,15 @@
 [project]
 site_name = "Nimbledeck"
 site_description = "Markdown slides that run things: animation, 3D, Python and video, on top of Slidev."
-site_url = "https://arnaudbletterer.github.io/nimbledeck/"
+# The documentation lives under /docs/; the deck is the front door of the site. website/site.mjs derives every
+# address of the site from this line.
+site_url = "https://arnaudbletterer.github.io/nimbledeck/docs/"
 # Staged from docs/ by website/build.mjs, which leaves out the contributor notes.
 docs_dir = "site-src"
-site_dir = "site"
+site_dir = "site/docs"
 extra_css = ["assets/site.css"]
 nav = [
-  { "Home" = "index.md" },
+  { "Documentation" = "index.md" },
   { "Get started" = "GETTING-STARTED.md" },
   { "Guide" = [
     { "Writing a deck" = "WRITING.md" },
