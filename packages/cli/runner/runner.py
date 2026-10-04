@@ -122,6 +122,43 @@ async def warm_matplotlib(env):
         pass
 
 
+class Standby:
+    """One wrapper process kept ready with numpy and matplotlib already imported (about 0.5 s of a run). A run takes it, sends
+    it the work folder on stdin, and a new one is started at once, so a process still serves exactly one run: separate, in
+    its own session, with the same limits, killed as a whole. If none is ready the run takes a plain new one, as before."""
+    def __init__(self, memory_mb, rlimits):
+        self.memory_mb, self.rlimits, self.proc = memory_mb, rlimits, None
+
+    async def spawn(self):
+        env = {k: v for k, v in os.environ.items() if k not in ("NIMBLEDECK_TOKEN",)}
+        if MPL["dir"]:
+            env["MPLCONFIGDIR"] = MPL["dir"]
+        # the CPU limit depends on the run's timeout, so the wrapper sets it itself once it has the job
+        kwargs = {"start_new_session": True, "preexec_fn": lambda: _set_limits(0, self.memory_mb, self.rlimits - {"cpu"})} if os.name == "posix" else {}
+        return await asyncio.create_subprocess_exec(sys.executable, "-I", os.path.join(HERE, "wrapper.py"), cwd=tempfile.gettempdir(), env=env,
+                                                    stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, **kwargs)
+
+    async def refill(self):
+        if self.proc is None or self.proc.returncode is not None:
+            self.proc = await self.spawn()
+
+    async def take(self):
+        proc, self.proc = self.proc, None
+        if proc is None or proc.returncode is not None:
+            proc = await self.spawn()
+        await self.refill()
+        return proc
+
+
+STANDBY = {"pool": None}
+
+
+async def warm_up():
+    """After the font cache exists, start the first standby."""
+    await MPL["warm"]
+    await STANDBY["pool"].refill()
+
+
 async def run_code(msg, memory_mb, rlimits=frozenset()):
     timeout = min(float(msg.get("timeout") or 10), MAX_TIMEOUT)
     work = tempfile.mkdtemp(prefix="nd-run-")
@@ -134,13 +171,17 @@ async def run_code(msg, memory_mb, rlimits=frozenset()):
         with open(os.path.join(work, "code.py"), "w", encoding="utf-8") as f:
             f.write(str(msg.get("code", "")))
         with open(os.path.join(work, "params.json"), "w") as f:
-            json.dump({"dpi": min(float(msg.get("dpi") or 100), 300), "theme": msg.get("theme") or {}}, f)
-        env = {k: v for k, v in os.environ.items() if k not in ("NIMBLEDECK_TOKEN",)}
-        if MPL["dir"]:
-            env["MPLCONFIGDIR"] = MPL["dir"]
-        kwargs = {"start_new_session": True, "preexec_fn": lambda: _set_limits(timeout, memory_mb, rlimits)} if os.name == "posix" else {}
-        proc = await asyncio.create_subprocess_exec(sys.executable, "-I", os.path.join(HERE, "wrapper.py"), work, cwd=work, env=env,
-                                                    stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, **kwargs)
+            json.dump({"dpi": min(float(msg.get("dpi") or 100), 300), "theme": msg.get("theme") or {},
+                       "cpu": int(timeout) + 2 if "cpu" in rlimits else 0}, f)
+        pool = STANDBY["pool"]
+        proc = await pool.take()
+        try:
+            proc.stdin.write((work + "\n").encode())
+            await proc.stdin.drain()
+        except (BrokenPipeError, ConnectionResetError):   # the standby died while it waited: use a plain new process
+            proc = await pool.spawn()
+            proc.stdin.write((work + "\n").encode())
+            await proc.stdin.drain()
         flood, mem_hit = asyncio.Event(), asyncio.Event()
         out, err = Capped(proc.stdout, flood), Capped(proc.stderr, flood)
         tasks = [asyncio.create_task(out.pump()), asyncio.create_task(err.pump())]
@@ -180,6 +221,8 @@ async def run_code(msg, memory_mb, rlimits=frozenset()):
             t.cancel()
         if proc and proc.returncode is None:
             kill(proc)
+        if proc and proc.stdin:
+            proc.stdin.close()
         shutil.rmtree(work, ignore_errors=True)
 
 
@@ -254,11 +297,13 @@ async def main():
     rlimits = probe_limits(args.memory_mb)
     MPL["dir"] = os.path.abspath(args.cache_dir) if args.cache_dir else tempfile.mkdtemp(prefix="nd-mpl-")
     os.makedirs(MPL["dir"], exist_ok=True)
+    STANDBY["pool"] = Standby(args.memory_mb, rlimits)
     MPL["warm"] = asyncio.create_task(warm_matplotlib({**{k: v for k, v in os.environ.items() if k != "NIMBLEDECK_TOKEN"}, "MPLCONFIGDIR": MPL["dir"]}))
     print(f"runner: memory limit {args.memory_mb} MB via " + ("RLIMIT_AS and RSS polling" if "as" in rlimits else "RSS polling"), file=sys.stderr, flush=True)
     async with serve(make_handler(token, args.memory_mb, rlimits), "127.0.0.1", args.port, origins=args.origin, process_request=process_request,
                      max_size=2_000_000):
         print(f"runner on ws://127.0.0.1:{args.port}", flush=True)
+        warming = asyncio.create_task(warm_up())
         await asyncio.Future()
 
 
