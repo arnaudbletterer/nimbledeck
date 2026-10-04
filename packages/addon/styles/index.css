@@ -192,3 +192,4 @@
 .nd-site-off code { font-size: 18px; color: var(--nd-ink); word-break: break-all; }
 .nd-site-off button { font: 600 16px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-ink); border: 0; border-radius: 999px; padding: 6px 20px; cursor: pointer; }
 .nd-site-off button:hover, .nd-site-off button:focus-visible { background: var(--nd-accent-2); outline: none; }
+.nd-media > .nd-site-off, .nd-compare > .nd-site-off { position: absolute; inset: 0; }
