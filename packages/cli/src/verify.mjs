@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
+import { findChrome } from './chrome.mjs'
 import { loadConfig } from './config.mjs'
 import { splitSlides } from './slides.mjs'
 
-const CHROME = [process.env.NIMBLEDECK_CHROME, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium',
-  'C:/Program Files/Google/Chrome/Application/chrome.exe'].filter(Boolean).find((p) => existsSync(p))
+const CHROME = findChrome()
 
 // Runs inside the page: measures the current slide against the 1280 x 720 frame.
 // Content clipped by an overflow:hidden ancestor is fine; content that reaches outside the slide, enters the footer zone,
