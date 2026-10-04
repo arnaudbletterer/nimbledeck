@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { computed, reactive, ref, watch, onUnmounted } from 'vue'
 import { useActive } from '../composables/useActive'
 import { useCrisp } from '../composables/useCrisp'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
+import { useRecording } from '../composables/useRecording'
 
 // Live Python animation: a Python process computes state and streams it over a WebSocket; this component
 // draws it on a canvas. Controls are sent back as JSON. See docs/WRITING.md for the wire format.
+// Without the process it plays the recording stream-<name> made by `nimbledeck record`.
 // Optional drawing and control settings (all default to the original look):
 //   colors  a list of colours (CSS colours or token names like "--nd-accent"); the points are cut into that many equal,
 //           consecutive groups and each group gets one colour, so a trajectory keeps its colour
@@ -14,7 +16,7 @@ import { useNimbleConfig, cssVar } from '../composables/useConfig'
 //   w, h    logical canvas size (default 1000 x 460); the stream's x and y in [-2, 2] map to the width and the height
 //   sliders three objects {label, min, max, step, value} for the n, dt and g sliders, in that order
 interface Slider { label: string; min: number; max: number; step: number; value: number }
-const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; sliders?: Slider[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
+const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; sliders?: Slider[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
 const LW = props.w, LH = props.h
 const SL: Slider[] = props.sliders ?? [
   { label: 'particles', min: 100, max: 2000, step: 100, value: 400 },
@@ -62,16 +64,18 @@ async function connect() {
 }
 function stop() { closed = true; clearTimeout(timer); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
 const active = useActive()
+const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
 watch(active, (a) => { stop(); if (a) { closed = false; connect() } }, { immediate: true })
 onUnmounted(stop)
 </script>
 
 <template>
-  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream">
+  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream" :data-rec-id="`stream-${name}`">
     <canvas ref="cv" :width="LW" :height="LH" />
-    <div v-if="state === 'offline'" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
-    <span v-if="hud" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
-    <div v-if="controls" class="nd-ctl">
+    <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
+    <div v-else-if="state === 'offline'" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
+    <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
+    <div v-if="controls && !rec.shown" class="nd-ctl">
       <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
       <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"></label>
       <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"></label>

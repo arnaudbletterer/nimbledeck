@@ -29,5 +29,23 @@
   },
   "runner": {
     "port": 18800
+  },
+  "recordings": {
+    "stream-nbody": {
+      "seconds": 9,
+      "steps": [{ "wait": 1500 }, { "set": "gravity", "value": 2.5 }, { "wait": 1500 }, { "set": "particles", "value": 1200 }]
+    },
+    "demo-compute": {
+      "seconds": 9,
+      "steps": [{ "wait": 1200 }, { "set": "Iterations", "value": 140 }, { "wait": 4000 }]
+    },
+    "live-19": {
+      "seconds": 12,
+      "steps": [{ "wait": 1200 }, { "type": "\nplt.plot(x, np.sin(2 * x))\nplt.grid(True)\n" }, { "wait": 1500 }]
+    },
+    "live-20": {
+      "seconds": 9,
+      "steps": [{ "wait": 800 }, { "type": "import numpy as np\nprint(np.arange(6) ** 2)", "replace": true }, { "wait": 600 }, { "key": "ControlOrMeta+Enter" }, { "wait": 1500 }]
+    }
   }
 }

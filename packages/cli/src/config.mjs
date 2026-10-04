@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { isAbsolute, relative, resolve } from 'node:path'
 
-export const DEFAULTS = { python: { version: '3.12', requirements: 'demos/requirements.txt' }, demos: {}, streams: {}, runner: null, publicDir: 'public', limits: { maxTitle: 40, maxBullets: 7, maxChars: 900, maxSubtitle: 55 }, port: 3030,
+export const DEFAULTS = { python: { version: '3.12', requirements: 'demos/requirements.txt' }, demos: {}, streams: {}, runner: null, recordings: {}, publicDir: 'public', limits: { maxTitle: 40, maxBullets: 7, maxChars: 900, maxSubtitle: 55 }, port: 3030,
   // Layouts whose slides need no '# title' and no text limits (cover-like slides).
   leadLayouts: ['cover', 'divider', 'closing', 'full', 'hero', 'statement', 'split', 'stage', 'end', 'section', 'intro', 'none'],
   // CSS selectors for `nimbledeck verify`: `chrome` is the slide furniture (footer, page number) that is exempt from the
@@ -56,6 +56,52 @@ export function validateConfig(cfg, root) {
   list('verify.bleed', cfg.verify.bleed)
   if (cfg.runner) {
     if (!port(cfg.runner.port)) errors.push(`runner.port: ${JSON.stringify(cfg.runner.port)} must be a port number`)
+  }
+  errors.push(...validateRecordings(cfg.recordings, cfg))
+  return errors
+}
+
+// `recordings` scripts what `nimbledeck record` does on a slide (docs/RECORDING.md):
+//   { "stream-nbody": { "seconds": 10, "steps": [ { "wait": 800 }, { "set": "gravity", "value": 2 } ] } }
+// A step has one action: wait (ms), type (text typed into a LiveCode editor, with "replace": true to clear it first),
+// key (a key press), set (a slider, found by its label, with a "value"), click (a button, found by its text).
+const ACTIONS = ['wait', 'type', 'key', 'set', 'click']
+const STEP_KEYS = { wait: ['wait'], type: ['type', 'replace'], key: ['key'], set: ['set', 'value'], click: ['click'] }
+export const MAX_SECONDS = 60
+export function validateRecordings(rec, cfg) {
+  const errors = []
+  if (rec === undefined || rec === null) return errors
+  if (typeof rec !== 'object' || Array.isArray(rec)) return ['recordings: must be an object keyed by recording name, like "stream-nbody"']
+  for (const [id, r] of Object.entries(rec)) {
+    const at = `recordings.${id}`
+    const m = id.match(/^(live|stream|demo)-([\w.-]+)$/)
+    if (!m) { errors.push(`${at}: the name must be live-<id>, stream-<name> or demo-<name>`); continue }
+    if (m[1] !== 'live' && !(cfg[`${m[1]}s`] ?? {})[m[2]]) errors.push(`${at}: no ${m[1]} called "${m[2]}" in ${m[1]}s`)
+    if (!r || typeof r !== 'object' || Array.isArray(r)) { errors.push(`${at}: must be an object with "seconds" and "steps"`); continue }
+    for (const k of Object.keys(r)) if (!['seconds', 'steps'].includes(k)) errors.push(`${at}.${k}: unknown key (use "seconds" and "steps")`)
+    if (r.seconds !== undefined && !(typeof r.seconds === 'number' && r.seconds >= 1 && r.seconds <= MAX_SECONDS)) errors.push(`${at}.seconds: ${JSON.stringify(r.seconds)} must be a number from 1 to ${MAX_SECONDS}`)
+    if (r.steps === undefined) continue
+    if (!Array.isArray(r.steps) || r.steps.length > 200) { errors.push(`${at}.steps: must be a list of at most 200 steps`); continue }
+    r.steps.forEach((s, i) => {
+      const sa = `${at}.steps[${i}]`
+      if (!s || typeof s !== 'object' || Array.isArray(s)) { errors.push(`${sa}: must be an object like { "wait": 800 }`); return }
+      const acts = ACTIONS.filter((a) => a in s)
+      if (acts.length !== 1) { errors.push(`${sa}: needs exactly one of ${ACTIONS.join(', ')} (found ${acts.length ? acts.join(' and ') : 'none'})`); return }
+      const a = acts[0]
+      for (const k of Object.keys(s)) if (!STEP_KEYS[a].includes(k)) errors.push(`${sa}.${k}: not used by "${a}"`)
+      if (a === 'wait' && !(typeof s.wait === 'number' && s.wait >= 0 && s.wait <= 30000)) errors.push(`${sa}.wait: must be a number of milliseconds from 0 to 30000`)
+      if (a === 'type') {
+        if (typeof s.type !== 'string' || !s.type || s.type.length > 5000) errors.push(`${sa}.type: must be a non-empty text of at most 5000 characters`)
+        if (m[1] !== 'live') errors.push(`${sa}.type: only a live-<id> recording has an editor to type into`)
+        if (s.replace !== undefined && typeof s.replace !== 'boolean') errors.push(`${sa}.replace: must be true or false`)
+      }
+      if (a === 'key' && !(typeof s.key === 'string' && /^[A-Za-z0-9]+(\+[A-Za-z0-9]+)*$/.test(s.key))) errors.push(`${sa}.key: ${JSON.stringify(s.key)} must look like "Enter" or "ControlOrMeta+Enter"`)
+      if (a === 'set') {
+        if (typeof s.set !== 'string' || !s.set.trim()) errors.push(`${sa}.set: must be the label text of a slider`)
+        if (typeof s.value !== 'number' || !Number.isFinite(s.value)) errors.push(`${sa}.value: a number is needed for "set"`)
+      }
+      if (a === 'click' && (typeof s.click !== 'string' || !s.click.trim())) errors.push(`${sa}.click: must be the text of a button`)
+    })
   }
   return errors
 }
