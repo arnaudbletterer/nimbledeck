@@ -11,13 +11,6 @@ transition: nd-zoom
 
 <Stage full>
 <At :w="1280" :h="720"><Shader :hue="0" /></At>
-<At :y="70" :w="1280" :h="210" :z="1" enter="fade" :delay="900">
-<Marquee :speed="34">
-
-[MARKDOWN IN · MOTION OUT ·]{.nd-outline}
-
-</Marquee>
-</At>
 </Stage>
 
 ::default::
@@ -133,7 +126,7 @@ layout: stage
 <At :x="0" :y="612" :w="1280" :h="52" enter="fade" :delay="900">
 <Marquee :speed="34">
 
-[cover · agenda · divider · default · two-cols · photo-right · full ·]{.nd-dim}
+[cover · agenda · divider · default · two-cols · photo-right · full ·]{.nd-quiet}
 
 </Marquee>
 </At>
@@ -180,7 +173,7 @@ layout: statement
 
 <Stage full>
 <At :w="1280" :h="720"><Aurora :intensity="0.55" :hue="70" :cx="0.25" :cy="0.5" /></At>
-<At :y="440" :w="1280" :h="240" :z="1" enter="fade" :delay="500">
+<At :y="430" :w="1280" :h="270" :z="1" enter="fade" :delay="500">
 <Marquee :speed="30">
 
 [WORDS · LETTERS · LINES · MASKS · BLUR ·]{.nd-outline}
@@ -327,11 +320,12 @@ layout: full
 ---
 
 <Stage full>
-<At :w="1280" :h="720" :z="0"><Clip src="/loop.mp4" webm="/loop.webm" fit="cover" /></At>
-<At :x="90" :y="450" :w="1000" :z="1">
+<At :w="1280" :h="720" :z="0"><Clip src="/loop.mp4" webm="/loop.webm" fit="cover" :dim="0.2" /></At>
+<At :y="340" :w="1280" :h="380" :z="1" bg="linear-gradient(0deg, color-mix(in srgb, var(--nd-bg) 92%, transparent) 15%, transparent)" />
+<At :x="90" :y="450" :w="1000" :z="2">
 <Kinetic text="Video is an element too." mode="words" from="mask" :stagger="120" size="l" tone="light" accent="element" />
 </At>
-<At :x="90" :y="600" :w="900" :z="1">
+<At :x="90" :y="600" :w="900" :z="2">
 <Kinetic text="A four second loop, 300 KB, made by a short numpy script." mode="words" from="up" :stagger="25" size="s" tone="light" :delay="800" />
 </At>
 </Stage>

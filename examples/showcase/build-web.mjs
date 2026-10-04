@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { splitSlides } from '../../packages/cli/src/slides.mjs'
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const base = process.env.WEB_BASE ?? '/nimbledeck/demos/showcase/'
@@ -11,14 +12,15 @@ const out = resolve(dir, process.env.WEB_OUT ?? 'dist')
 const tmp = resolve(dir, '.web-build.md')
 
 const NEEDS_RUN = /<(PyStream|Demo|LiveCode)\b/
-let skipped = 0
 const src = readFileSync(resolve(dir, 'showcase.md'), 'utf8')
-const web = src.split(/\n---\n(?=layout:)/)
-  .map((slide, i) => (i > 0 && NEEDS_RUN.test(slide) ? (skipped++, `disabled: true\n${slide}`) : slide))
-  .join('\n---\n')
-console.log(`web edition: ${skipped} slides that need nimbledeck run are left out`)
+// splitSlides knows fenced code (a Markdown example holding `---` is not a slide break) and reports the line of each slide's
+// opening `---`; `disabled: true` goes right after it.
+const lines = src.split('\n')
+const hits = splitSlides(src).map((s, i) => ({ i, line: s.line, body: s.body })).filter((s) => s.i > 0 && NEEDS_RUN.test(s.body))
+for (const { line } of hits.reverse()) lines.splice(line, 0, 'disabled: true')
+console.log(`web edition: ${hits.length} slides that need nimbledeck run are left out`)
 // A static host has no fallback to index.html for /3, so the web copy uses hash routes.
-writeFileSync(tmp, web.replace(/^---\n/, '---\nrouterMode: hash\n'))
+writeFileSync(tmp, lines.join('\n').replace(/^---\n/, '---\nrouterMode: hash\n'))
 try {
   const r = spawnSync('npx', ['slidev', 'build', '.web-build.md', '--base', base, '--out', out], { cwd: dir, stdio: 'inherit', shell: process.platform === 'win32' })
   if (r.status !== 0) process.exit(r.status ?? 1)
