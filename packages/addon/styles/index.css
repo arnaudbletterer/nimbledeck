@@ -226,3 +226,23 @@
 @keyframes nd-k-mask { from { transform: translateY(110%) } to { transform: none } }
 .nd-k-final .nd-k-u { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .nd-k-u { opacity: 1; transform: none; animation: none !important; } }
+
+/* ==== Motion toolkit: Typewriter ==== */
+/* A hidden copy of the full text reserves the final size, the typed text is laid over it, so nothing shifts while typing. */
+.nd-typewriter { display: grid; font: 22px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--nd-ink); text-align: left; }
+.nd-typewriter .nd-tw-src { display: none; }
+.nd-typewriter pre { grid-area: 1 / 1; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; font: inherit; color: inherit; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; overflow: visible; }
+.nd-typewriter .nd-tw-ghost { visibility: hidden; }
+.nd-tw-live { transition: opacity .6s ease; }
+.nd-tw-gone .nd-tw-live { opacity: 0; }
+.nd-t-k { color: var(--nd-accent); }
+.nd-t-s { color: color-mix(in srgb, var(--nd-accent) 55%, var(--nd-ink)); }
+.nd-t-n { color: var(--nd-accent-2); }
+.nd-t-c { color: var(--nd-muted); font-style: italic; }
+.nd-t-p { color: var(--nd-muted); }
+.nd-t-o { color: color-mix(in srgb, var(--nd-ink) 70%, var(--nd-bg)); }
+.nd-t-h { color: var(--nd-accent); font-weight: 700; }
+.nd-tw-caret { display: inline-block; width: .55em; height: 1.1em; margin-left: 2px; vertical-align: text-bottom; border-radius: 1px; background: var(--nd-accent); animation: nd-blink 1.05s steps(1) infinite; }
+.nd-tw-typing .nd-tw-caret { animation: none; }
+@keyframes nd-blink { 50% { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .nd-tw-caret { animation: none; } .nd-tw-live { transition: none; } }
