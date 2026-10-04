@@ -14,7 +14,7 @@ code = open(os.path.join(work, "code.py"), encoding="utf-8").read()
 os.chdir(work)
 
 os.environ.setdefault("MPLBACKEND", "Agg")
-os.environ["MPLCONFIGDIR"] = os.path.join(work, ".mpl")
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(work, ".mpl"))   # the runner passes a shared one
 try:
     import matplotlib
     matplotlib.use("Agg")

@@ -101,7 +101,7 @@ export async function startDeck(deck, root, deps = {}) {
   if (runner) {
     if (!(await free(runner.port))) await fail(`port ${runner.port} is already in use (live-code runner)`)
     const script = join(dirname(fileURLToPath(import.meta.url)), '..', 'runner', 'runner.py')
-    launch('runner', 'uv', ['run', '--python', cfg.python.version, '--with', 'websockets', ...req, 'python', script, '--port', String(runner.port), ...origins],
+    launch('runner', 'uv', ['run', '--python', cfg.python.version, '--with', 'websockets', ...req, 'python', script, '--port', String(runner.port), '--cache-dir', join(root, '.nimbledeck', 'cache', 'matplotlib'), ...origins],
       { env: { ...process.env, NIMBLEDECK_TOKEN: runner.token } })
     log(`runner -> ws://127.0.0.1:${runner.port} (live code)`)
   }
