@@ -41,3 +41,40 @@ test('the quiz key handler ignores editable targets', () => {
   assert.match(src, /isContentEditable/)
   assert.match(src, /INPUT\|TEXTAREA/)
 })
+
+// The motion toolkit (Kinetic, Typewriter, Terminal, Aurora, Stat, Marquee, Spotlight, Tilt): every piece gates on the slide,
+// labels itself, cleans up its frame loop, and respects reduced motion. Terminal only wraps Typewriter, which does all of that.
+const MOTION = { Kinetic: 'kinetic', Typewriter: 'typewriter', Terminal: 'terminal', Aurora: 'aurora', Stat: 'stat', Marquee: 'marquee', Spotlight: 'spotlight', Tilt: 'tilt' }
+const motionSrc = (name) => strip(readFileSync(new URL(`${name}.vue`, dir), 'utf8'))
+const sections = Object.fromEntries(readFileSync(new URL('../styles/index.css', import.meta.url), 'utf8').split('/* ==== Motion toolkit: ').slice(1).map((s) => [s.slice(0, s.indexOf(' ')), s]))
+
+test('every motion component exists, is labelled with data-kind, has its CSS section, and is gated by the slide', () => {
+  for (const [name, kind] of Object.entries(MOTION)) {
+    assert.ok(files.includes(`${name}.vue`), `${name}.vue is missing`)
+    assert.ok(sections[name], `${name} has no "Motion toolkit: ${name}" section in the stylesheet`)
+    const src = motionSrc(name)
+    assert.match(src, new RegExp(`data-kind="${kind}"`), `${name} needs data-kind="${kind}"`)
+    if (name !== 'Terminal') assert.match(src, /\buseActive\(/, `${name} must call useActive()`)
+  }
+})
+
+test('every frame loop of a motion component is cancelled on unmount', () => {
+  for (const name of Object.keys(MOTION)) {
+    if (/requestAnimationFrame|setInterval|setTimeout/.test(motionSrc(name))) assert.match(motionSrc(name), /(onBeforeUnmount|onUnmounted)\(/, `${name} must clean up its timers`)
+  }
+})
+
+test('motion components respect prefers-reduced-motion', () => {
+  for (const name of Object.keys(MOTION)) {
+    if (name === 'Terminal') continue
+    assert.ok(/prefers-reduced-motion/.test(motionSrc(name)) || /prefers-reduced-motion/.test(sections[name]), `${name} must handle reduced motion`)
+  }
+})
+
+test('motion components do not measure their own box, except where a pointer or the content width needs it', () => {
+  const MEASURES = { Marquee: 'it measures the width of its content (not its box) to size the loop', Spotlight: 'it maps the pointer into its box', Tilt: 'it maps the pointer into its box' }
+  for (const name of Object.keys(MOTION)) {
+    if (name in MEASURES) continue
+    assert.doesNotMatch(motionSrc(name), /getBoundingClientRect|clientWidth|offsetWidth|clientHeight|offsetHeight|ResizeObserver/, `${name} must use a fixed logical size`)
+  }
+})

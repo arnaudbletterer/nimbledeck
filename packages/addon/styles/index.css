@@ -193,3 +193,112 @@
 .nd-site-off button { font: 600 16px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-ink); border: 0; border-radius: 999px; padding: 6px 20px; cursor: pointer; }
 .nd-site-off button:hover, .nd-site-off button:focus-visible { background: var(--nd-accent-2); outline: none; }
 .nd-media > .nd-site-off, .nd-compare > .nd-site-off { position: absolute; inset: 0; }
+
+/* ==== Motion toolkit: Kinetic ==== */
+/* Fills its box, display font, tight and balanced. Every unit starts hidden and is animated by CSS; the component only
+   remounts the units (a new key) to replay, so the browser does the work off the main thread. */
+.nd-kinetic { --nd-k-ease: cubic-bezier(.16, 1, .3, 1); --nd-k-dur: 900ms; display: block; width: auto; font-family: var(--nd-font-display); font-weight: 700;
+  line-height: 1.02; letter-spacing: -0.03em; text-wrap: balance; color: var(--nd-ink); text-align: inherit; }
+.nd-k-xl { font-size: 120px; } .nd-k-l { font-size: 84px; } .nd-k-m { font-size: 56px; letter-spacing: -0.02em; } .nd-k-s { font-size: 36px; letter-spacing: -0.01em; line-height: 1.1; }
+.nd-k-tone-light { color: var(--nd-cover-fg, white); text-shadow: 0 2px 24px color-mix(in srgb, var(--nd-bg) 35%, transparent); }
+.nd-k-in { display: block; }
+.nd-k-word { display: inline-block; }
+.nd-k-letters { white-space: nowrap; }
+.nd-k-line { display: block; }
+.nd-k-accent { color: var(--nd-accent); }
+.nd-k-mask { display: inline-block; vertical-align: top; }
+.nd-k-line > .nd-k-mask { display: block; }
+.nd-k-u { display: inline-block; opacity: 0; will-change: transform, opacity; }
+.nd-k-line .nd-k-u { display: block; }
+.nd-k-from-mask .nd-k-mask { overflow: hidden; padding: .1em .06em .18em; margin: -.1em -.06em -.18em; }
+.nd-k-from-mask .nd-k-u { opacity: 1; transform: translateY(110%); }
+.nd-k-play .nd-k-u { animation: var(--nd-k-anim) var(--nd-k-dur) var(--nd-k-ease) both; animation-delay: calc(var(--i) * var(--nd-k-st)); }
+.nd-k-play.nd-k-mode-letters { --nd-k-dur: 760ms; }
+.nd-k-from-up { --nd-k-anim: nd-k-up; } .nd-k-from-down { --nd-k-anim: nd-k-down; } .nd-k-from-left { --nd-k-anim: nd-k-left; }
+.nd-k-from-right { --nd-k-anim: nd-k-right; } .nd-k-from-blur { --nd-k-anim: nd-k-blur; } .nd-k-from-scale { --nd-k-anim: nd-k-scale; } .nd-k-from-mask { --nd-k-anim: nd-k-mask; }
+.nd-k-from-scale { --nd-k-ease: cubic-bezier(.34, 1.4, .5, 1); }
+@keyframes nd-k-up { from { opacity: 0; transform: translateY(.5em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-down { from { opacity: 0; transform: translateY(-.5em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-left { from { opacity: 0; transform: translateX(-.55em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-right { from { opacity: 0; transform: translateX(.55em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-blur { from { opacity: 0; transform: scale(1.12); filter: blur(.28em) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-scale { from { opacity: 0; transform: scale(.55) } to { opacity: 1; transform: none } }
+@keyframes nd-k-mask { from { transform: translateY(110%) } to { transform: none } }
+.nd-k-final .nd-k-u { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .nd-k-u { opacity: 1; transform: none; animation: none !important; } }
+
+/* ==== Motion toolkit: Typewriter ==== */
+/* A hidden copy of the full text reserves the final size, the typed text is laid over it, so nothing shifts while typing. */
+.nd-typewriter { display: grid; font: 22px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--nd-ink); text-align: left; }
+.nd-typewriter .nd-tw-src { display: none; }
+.nd-typewriter pre { grid-area: 1 / 1; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; font: inherit; color: inherit; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; overflow: visible; }
+.nd-typewriter .nd-tw-ghost { visibility: hidden; }
+.nd-tw-live { transition: opacity .6s ease; }
+.nd-tw-gone .nd-tw-live { opacity: 0; }
+.nd-t-k { color: var(--nd-accent); }
+.nd-t-s { color: color-mix(in srgb, var(--nd-accent) 55%, var(--nd-ink)); }
+.nd-t-n { color: var(--nd-accent-2); }
+.nd-t-c { color: var(--nd-muted); font-style: italic; }
+.nd-t-p { color: var(--nd-muted); }
+.nd-t-o { color: color-mix(in srgb, var(--nd-ink) 70%, var(--nd-bg)); }
+.nd-t-h { color: var(--nd-accent); font-weight: 700; }
+.nd-tw-caret { display: inline-block; width: .55em; height: 1.1em; margin-left: 2px; vertical-align: text-bottom; border-radius: 1px; background: var(--nd-accent); animation: nd-blink 1.05s steps(1) infinite; }
+.nd-tw-typing .nd-tw-caret { animation: none; }
+@keyframes nd-blink { 50% { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .nd-tw-caret { animation: none; } .nd-tw-live { transition: none; } }
+
+/* ==== Motion toolkit: Terminal ==== */
+.nd-term { display: flex; flex-direction: column; width: auto; box-sizing: border-box; border-radius: 14px; overflow: hidden; background: var(--nd-surface); border: 1px solid var(--nd-line);
+  box-shadow: 0 30px 60px -28px color-mix(in srgb, black 55%, transparent), 0 2px 8px -2px color-mix(in srgb, black 25%, transparent); }
+:where(.nd-at) > .nd-term { width: 100%; height: 100%; }
+.nd-term-bar { position: relative; flex: none; display: flex; align-items: center; justify-content: center; height: 46px; border-bottom: 1px solid var(--nd-line); font: 600 15px var(--nd-font-body); color: var(--nd-muted); letter-spacing: .02em; }
+.nd-term-dots { position: absolute; left: 18px; display: flex; gap: 8px; }
+.nd-term-dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--nd-muted); opacity: .45; }
+.nd-term-dots i:first-child { background: var(--nd-accent); opacity: 1; } .nd-term-dots i:nth-child(2) { background: var(--nd-accent-2); opacity: .9; }
+.nd-term-body { flex: 1; min-height: 0; padding: 24px 28px; }
+
+/* ==== Motion toolkit: Aurora ==== */
+.nd-aurora { position: relative; width: 100%; height: 100%; min-height: 120px; overflow: hidden; background: var(--nd-bg); }
+.nd-aurora canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.4s cubic-bezier(.16, 1, .3, 1); }
+.nd-aurora.nd-on canvas { opacity: 1; }
+/* A soft vignette keeps the edges calm so text laid over the mesh stays readable. */
+.nd-aurora::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 40%, color-mix(in srgb, var(--nd-bg) 70%, transparent) 100%); }
+@media (prefers-reduced-motion: reduce) { .nd-aurora canvas { transition: none; } }
+
+/* ==== Motion toolkit: Stat ==== */
+.nd-stat { display: inline-block; text-align: left; font-family: var(--nd-font-display); }
+.nd-stat-num { display: flex; align-items: baseline; font-size: 150px; font-weight: 700; line-height: 1; letter-spacing: -0.04em; padding-right: .06em; font-variant-numeric: tabular-nums; color: var(--nd-ink);
+  background: linear-gradient(100deg, var(--nd-ink) 20%, var(--nd-accent) 95%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.nd-stat-val { display: inline-grid; }
+.nd-stat-val > * { grid-area: 1 / 1; justify-self: end; }
+.nd-stat-ghost { visibility: hidden; }
+.nd-stat-fix { font-size: .5em; font-weight: 600; letter-spacing: -0.02em; margin: 0 .04em; white-space: pre; }
+.nd-stat-label { margin-top: .5em; font: 500 26px/1.3 var(--nd-font-body); letter-spacing: 0; color: var(--nd-muted); opacity: 0; transform: translateY(14px); }
+.nd-stat.nd-on .nd-stat-label { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.16, 1, .3, 1) var(--nd-stat-wait), transform .8s cubic-bezier(.16, 1, .3, 1) var(--nd-stat-wait); }
+@media (prefers-reduced-motion: reduce) { .nd-stat-label { opacity: 1; transform: none; transition: none !important; } }
+
+/* ==== Motion toolkit: Marquee ==== */
+.nd-marquee { display: block; width: auto; overflow: hidden; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); }
+:where(.nd-at) > .nd-marquee { width: 100%; }
+.nd-mq-track { display: flex; width: max-content; will-change: transform; animation: nd-mq var(--nd-mq-t, 20s) linear infinite; animation-play-state: paused; }
+.nd-mq-run .nd-mq-track { animation-play-state: running; }
+.nd-mq-set { display: flex; flex: none; align-items: center; gap: var(--nd-mq-gap); padding-right: var(--nd-mq-gap); }
+.nd-mq-set > p { display: contents; margin: 0; }
+.nd-mq-set > * { flex: none; }
+@keyframes nd-mq { to { transform: translate3d(calc(-1 * var(--nd-mq-w, 800px)), 0, 0); } }
+@media (prefers-reduced-motion: reduce) { .nd-mq-track { animation: none; } }
+
+/* ==== Motion toolkit: Spotlight ==== */
+.nd-spotlight { position: relative; display: block; width: auto; }
+:where(.nd-at) > .nd-spotlight { width: 100%; height: 100%; }
+.nd-spot-glow { position: absolute; left: 0; top: 0; width: 800px; height: 800px; border-radius: 50%; pointer-events: none; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(circle closest-side, color-mix(in srgb, var(--nd-accent) 56%, transparent) 0%, color-mix(in srgb, var(--nd-accent) 34%, transparent) 22%, color-mix(in srgb, var(--nd-accent) 14%, transparent) 55%, color-mix(in srgb, var(--nd-accent) 2%, transparent) 85%, transparent 100%); }
+
+/* ==== Motion toolkit: Tilt ==== */
+.nd-tilt { display: block; width: auto; }
+:where(.nd-at) > .nd-tilt { width: 100%; height: 100%; }
+.nd-tilt-card { position: relative; height: 100%; transform-style: preserve-3d; will-change: transform; --nd-mx: 50%; --nd-my: 50%; --nd-lift: 0; }
+.nd-tilt-card > :not(.nd-tilt-sheen) { height: 100%; box-sizing: border-box; }
+.nd-tilt-sheen { position: absolute; inset: 0; border-radius: var(--nd-tilt-radius, 16px); pointer-events: none; opacity: calc(var(--nd-lift) * .9);
+  background: radial-gradient(circle at var(--nd-mx) var(--nd-my), color-mix(in srgb, var(--nd-accent) 30%, transparent) 0%, color-mix(in srgb, var(--nd-accent) 8%, transparent) 38%, transparent 62%); }
+@media (prefers-reduced-motion: reduce) { .nd-tilt-sheen { display: none; } }
