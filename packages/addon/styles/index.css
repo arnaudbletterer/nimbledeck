@@ -193,3 +193,36 @@
 .nd-site-off button { font: 600 16px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-ink); border: 0; border-radius: 999px; padding: 6px 20px; cursor: pointer; }
 .nd-site-off button:hover, .nd-site-off button:focus-visible { background: var(--nd-accent-2); outline: none; }
 .nd-media > .nd-site-off, .nd-compare > .nd-site-off { position: absolute; inset: 0; }
+
+/* ==== Motion toolkit: Kinetic ==== */
+/* Fills its box, display font, tight and balanced. Every unit starts hidden and is animated by CSS; the component only
+   remounts the units (a new key) to replay, so the browser does the work off the main thread. */
+.nd-kinetic { --nd-k-ease: cubic-bezier(.16, 1, .3, 1); --nd-k-dur: 900ms; display: block; width: auto; font-family: var(--nd-font-display); font-weight: 700;
+  line-height: 1.02; letter-spacing: -0.03em; text-wrap: balance; color: var(--nd-ink); text-align: inherit; }
+.nd-k-xl { font-size: 120px; } .nd-k-l { font-size: 84px; } .nd-k-m { font-size: 56px; letter-spacing: -0.02em; } .nd-k-s { font-size: 36px; letter-spacing: -0.01em; line-height: 1.1; }
+.nd-k-tone-light { color: var(--nd-cover-fg, white); text-shadow: 0 2px 24px color-mix(in srgb, var(--nd-bg) 35%, transparent); }
+.nd-k-in { display: block; }
+.nd-k-word { display: inline-block; }
+.nd-k-letters { white-space: nowrap; }
+.nd-k-line { display: block; }
+.nd-k-accent { color: var(--nd-accent); }
+.nd-k-mask { display: inline-block; vertical-align: top; }
+.nd-k-line > .nd-k-mask { display: block; }
+.nd-k-u { display: inline-block; opacity: 0; will-change: transform, opacity; }
+.nd-k-line .nd-k-u { display: block; }
+.nd-k-from-mask .nd-k-mask { overflow: hidden; padding: .1em .06em .18em; margin: -.1em -.06em -.18em; }
+.nd-k-from-mask .nd-k-u { opacity: 1; transform: translateY(110%); }
+.nd-k-play .nd-k-u { animation: var(--nd-k-anim) var(--nd-k-dur) var(--nd-k-ease) both; animation-delay: calc(var(--i) * var(--nd-k-st)); }
+.nd-k-play.nd-k-mode-letters { --nd-k-dur: 760ms; }
+.nd-k-from-up { --nd-k-anim: nd-k-up; } .nd-k-from-down { --nd-k-anim: nd-k-down; } .nd-k-from-left { --nd-k-anim: nd-k-left; }
+.nd-k-from-right { --nd-k-anim: nd-k-right; } .nd-k-from-blur { --nd-k-anim: nd-k-blur; } .nd-k-from-scale { --nd-k-anim: nd-k-scale; } .nd-k-from-mask { --nd-k-anim: nd-k-mask; }
+.nd-k-from-scale { --nd-k-ease: cubic-bezier(.34, 1.4, .5, 1); }
+@keyframes nd-k-up { from { opacity: 0; transform: translateY(.5em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-down { from { opacity: 0; transform: translateY(-.5em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-left { from { opacity: 0; transform: translateX(-.55em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-right { from { opacity: 0; transform: translateX(.55em); filter: blur(10px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-blur { from { opacity: 0; transform: scale(1.12); filter: blur(.28em) } to { opacity: 1; transform: none; filter: none } }
+@keyframes nd-k-scale { from { opacity: 0; transform: scale(.55) } to { opacity: 1; transform: none } }
+@keyframes nd-k-mask { from { transform: translateY(110%) } to { transform: none } }
+.nd-k-final .nd-k-u { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .nd-k-u { opacity: 1; transform: none; animation: none !important; } }
