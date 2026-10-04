@@ -37,3 +37,20 @@ test('md headings, py keywords and json keys get their own classes', () => {
   assert.equal(cls(j, '"key"'), 'k')
   assert.equal(cls(j, '"value"'), 's')
 })
+
+test('awkward input keeps every character: empty, unterminated, CRLF, unicode, unknown language', () => {
+  const cases = [['', 'md'], ['', 'py'], ['"unterminated', 'json'], ['a\r\nb\r\n$ x\r\n', 'sh'], ['x = """open', 'py'],
+    ['é 日本 😀 "ü"', 'json'], ['\n\n', 'sh'], ['<!-- never closed', 'md'], ['def', 'PY'], ['# x', undefined]]
+  for (const [src, lang] of cases) {
+    const t = highlight(src, lang)
+    assert.equal(join(t), src, JSON.stringify([src, lang]))
+    let at = 0
+    for (const x of t) { assert.equal(x.start, at); at += x.text.length }
+  }
+})
+
+test('sh: a CRLF script still treats "$ " lines as commands', () => {
+  const t = highlight('$ ls\r\nout\r\n', 'sh')
+  assert.equal(cls(t, '$ '), 'p')
+  assert.equal(cls(t, 'ls'), 'k')
+})
