@@ -4,7 +4,7 @@
 
 ```
 packages/addon   slidev-addon-nimbledeck   components + design tokens + composables
-packages/theme   slidev-theme-nimbledeck   eight layouts, three variants, pulls in the addon by default
+packages/theme   slidev-theme-nimbledeck   thirteen layouts, five variants, pulls in the addon by default
 packages/cli     nimbledeck                run, check, verify
 examples/        decks that exercise everything (also the integration test)
 ```
@@ -44,9 +44,9 @@ and `publicDir` path must stay inside the project folder and contain no shell ch
 | `port`, `publicDir` | `3030`, `public` | the deck's port, and where its assets live |
 | `limits.maxTitle`, `limits.maxSubtitle` | 40, 55 | longest `# title` (error) and `#### subtitle` (warning) before the theme cuts it off |
 | `limits.maxBullets`, `limits.maxChars` | 7, 900 | bullets per slide, and characters of prose per slide (warnings) |
-| `leadLayouts` | `cover, divider, closing, full, end, section, intro, none` | layouts that need no `# title` and skip the text limits |
-| `verify.chrome` | `.nd-foot, .nd-page, footer` | CSS selectors of slide furniture, exempt from `verify`'s placement checks |
-| `verify.bleed` | `.nd-photo, .nd-media` | CSS selectors of media meant to reach the slide edge |
+| `leadLayouts` | `cover, divider, closing, full, hero, statement, split, stage, end, section, intro, none` | layouts that need no `# title` and skip the text limits |
+| `verify.chrome` | `.nd-foot, .nd-page, .nd-caption, .nd-pill, footer` | CSS selectors of slide furniture, exempt from `verify`'s placement checks |
+| `verify.bleed` | `.nd-photo, .nd-media, .nd-bg, .nd-split-r` | CSS selectors of media meant to reach the slide edge |
 
 A list given in the config replaces the default list; it is not merged. A brand theme with its own classes and layout
 names sets `leadLayouts` and `verify`, so the generic CLI carries no brand names.
@@ -131,7 +131,9 @@ Option 2 is the proper fix and needs a change in the addon first.
 Defined with zero CSS priority (`:where(:root)`) in the addon, so any theme overrides them. Tokens:
 `--nd-bg --nd-ink --nd-muted --nd-accent --nd-accent-2 --nd-surface --nd-line --nd-font-body --nd-font-display`, the chart
 palette `--nd-chart-1` to `--nd-chart-4` (used by `Chart`), and the quiz feedback tints `--nd-good` and `--nd-bad`.
-The base theme adds `--nd-cover-bg --nd-cover-fg --nd-title-transform --nd-title-size`.
+The base theme adds `--nd-cover-bg --nd-cover-fg --nd-title-transform --nd-title-size`, and `--nd-gradient` (accent line and
+number fill; a solid accent except in `studio`). The studio looks also set `--nd-font-mono` and `--nd-node-border` (the
+border of a Mermaid node).
 The variant is chosen by the headmatter key `ndVariant`, applied as `data-nd-variant` on `<html>`.
 
 ## The CLI checker

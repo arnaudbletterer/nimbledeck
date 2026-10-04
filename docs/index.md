@@ -65,7 +65,7 @@ Three built-in looks, and brand themes that restyle every live component through
     ````md
     ---
     theme: nimbledeck
-    ndVariant: night        # plain | paper | night
+    ndVariant: night        # plain | paper | night | studio | studio-light
     title: My talk
     layout: cover
     ---

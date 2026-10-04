@@ -83,7 +83,7 @@ In the browser: arrows move, `?` lists every shortcut, `/` searches slides, `o` 
 is `http://localhost:3030/presenter/1`.
 
 Edit `slides.md` and the page reloads. To change the look of the whole deck, set `ndVariant` in the header to `plain`,
-`paper` or `night`. The slide syntax is in [WRITING.md](WRITING.md).
+`paper`, `night`, `studio` or `studio-light`. The slide syntax is in [WRITING.md](WRITING.md).
 
 ## Troubleshooting
 

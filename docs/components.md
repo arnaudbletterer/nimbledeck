@@ -173,5 +173,5 @@ layout: full
 
 ## Three looks
 
-Set `ndVariant` in the deck header to `plain`, `paper` or `night`. Layouts do not change, only the tokens do.
+Set `ndVariant` in the deck header to `plain`, `paper`, `night`, `studio` or `studio-light`. Layouts do not change, only the tokens do.
 To build your own brand look, see [Themes and brands](THEMING.md).
