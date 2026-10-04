@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { computed, reactive, ref, watch, onUnmounted } from 'vue'
 import { useActive } from '../composables/useActive'
 import { useCrisp } from '../composables/useCrisp'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
+import { useRecording } from '../composables/useRecording'
 
 // Live Python animation: a Python process computes state and streams it over a WebSocket; this component
 // draws it on a canvas. Controls are sent back as JSON. See docs/WRITING.md for the wire format.
-const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string }>(), { controls: false, hud: false, frame: false })
+// Without the process it plays the recording stream-<name> made by `nimbledeck record`.
+const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string }>(), { controls: false, hud: false, frame: false })
 const LW = 1000, LH = 460
 const root = ref<HTMLElement>()
 const cv = ref<HTMLCanvasElement>()
@@ -44,16 +46,18 @@ async function connect() {
 }
 function stop() { closed = true; clearTimeout(timer); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
 const active = useActive()
+const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
 watch(active, (a) => { stop(); if (a) { closed = false; connect() } }, { immediate: true })
 onUnmounted(stop)
 </script>
 
 <template>
-  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream">
+  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream" :data-rec-id="`stream-${name}`">
     <canvas ref="cv" :width="LW" :height="LH" />
-    <div v-if="state === 'offline'" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
-    <span v-if="hud" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
-    <div v-if="controls" class="nd-ctl">
+    <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
+    <div v-else-if="state === 'offline'" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
+    <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
+    <div v-if="controls && !rec.shown" class="nd-ctl">
       <label>particles <input v-model.number="n" type="range" min="100" max="2000" step="100" @change="send"> {{ n }}</label>
       <label>time step <input v-model.number="dt" type="range" min="0.005" max="0.05" step="0.005" @change="send"></label>
       <label>gravity <input v-model.number="g" type="range" min="0.2" max="3" step="0.1" @change="send"></label>
