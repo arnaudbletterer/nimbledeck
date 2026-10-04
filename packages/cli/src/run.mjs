@@ -6,6 +6,7 @@ import net from 'node:net'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadConfig, validateConfig } from './config.mjs'
+import { planUv } from './offline.mjs'
 
 const isWin = process.platform === 'win32'
 
@@ -44,7 +45,7 @@ export function slidevBin(root) {
 // Start every demo and stream from nimbledeck.config.json, the live-code runner, then the deck. Everything binds to 127.0.0.1.
 // Returns { children, stop }. On a startup problem it stops what it started and throws. `deps` exist for tests.
 export async function startDeck(deck, root, deps = {}) {
-  const { spawn = nodeSpawn, free = portFree, log = console.log, exit = process.exit } = deps
+  const { spawn = nodeSpawn, free = portFree, log = console.log, exit = process.exit, plan = planUv } = deps
   const kill = deps.kill ?? ((child, signal) => killTree(child, signal))
   const cfg = loadConfig(root)
   const problems = validateConfig(cfg, root)
@@ -67,7 +68,13 @@ export async function startDeck(deck, root, deps = {}) {
   const logDir = join(root, '.nimbledeck', 'logs')
   mkdirSync(logDir, { recursive: true })
   // One place to start a child: its output goes to a log file, a missing program is explained, a death is reported.
+  let uvPlan = { flags: [], env: {}, skip: false }   // how `uv run` starts: from the cache when it can, never waiting on a dead network
   const launch = (name, cmd, args, { inherit = false, env, onExit } = {}) => {
+    if (cmd === 'uv') {
+      if (uvPlan.skip) return null
+      args = ['run', ...uvPlan.flags, ...args.slice(1)]
+      env = { ...(env ?? process.env), ...uvPlan.env }
+    }
     const logFile = join(logDir, `${name}.log`)
     const fd = inherit ? null : openSync(logFile, 'w')
     const opts = { cwd: root, stdio: inherit ? 'inherit' : ['ignore', fd, fd], detached: !isWin, env }
@@ -97,6 +104,10 @@ export async function startDeck(deck, root, deps = {}) {
   mkdirSync(pub, { recursive: true })
   writeFileSync(join(pub, 'nimbledeck.json'), JSON.stringify({ demos: cfg.demos, streams: cfg.streams, runner }, null, 2))
 
+  if (cfg.runner || Object.keys(cfg.demos).length || Object.keys(cfg.streams).length) {
+    uvPlan = await plan(cfg, root)
+    if (uvPlan.message) console.error(uvPlan.message)
+  }
   const origins = [`http://localhost:${cfg.port}`, `http://127.0.0.1:${cfg.port}`].flatMap((o) => ['--origin', o])
   const req = existsSync(join(root, cfg.python.requirements)) ? ['--with-requirements', cfg.python.requirements] : []
   const uv = (name, args, opts) => launch(name, 'uv', ['run', '--python', cfg.python.version, ...req, ...args], opts)

@@ -11,6 +11,8 @@
       "canvasWidth": 1280,
       "mdc": true,
       "transition": "slide-left",
+      "fonts": { "provider": "none" },
+      "favicon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f2328'/%3E%3Cpath d='M9 21a4 4 0 0 1 1.4-7.7A6 6 0 0 1 22 14.5a3.2 3.2 0 0 1 0 6.5z' fill='%23fff'/%3E%3C/svg%3E",
       "addons": ["slidev-addon-nimbledeck"]
     }
   }
