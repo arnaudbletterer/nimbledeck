@@ -22,6 +22,8 @@ nav = [
 
 [project.theme]
 language = "en"
+# System fonts only: the site must load with no connection (no Google Fonts).
+font = false
 features = [
   "content.code.copy",
   "content.tabs.link",
