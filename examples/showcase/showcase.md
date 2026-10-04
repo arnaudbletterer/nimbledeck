@@ -78,7 +78,7 @@ layout: closing
 Type the Markdown. The slides appear as you finish them.
 
 <!--
-Seventeen lines of Markdown, three slides. The preview on the right is a sketch of the theme layouts, drawn from the same colour tokens.
+Fourteen lines of Markdown, three slides. The preview on the right is a sketch of the theme layouts, drawn from the same colour tokens.
 -->
 
 ---

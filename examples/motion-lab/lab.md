@@ -88,3 +88,57 @@ layout: full
 <Stage full>
 <At :x="290" :y="130" :w="700" :h="420"><Tilt><Terminal title="tilt" :lines="['$ hover me', 'the card leans toward the pointer']" /></Tilt></At>
 </Stage>
+
+---
+layout: full
+---
+
+<Stage full>
+<At :x="0" :y="0" :w="1280" :h="720"><Shader /></At>
+<At :x="90" :y="260" :w="1100" :h="200" :z="2"><Kinetic text="A shader behind the words." mode="words" from="up" :stagger="90" size="l" accent="shader" /></At>
+</Stage>
+
+---
+layout: default
+---
+
+# Looks
+
+<Stage :h="64">
+<At :w="1140" :h="64"><Looks :delay="60000" /></At>
+</Stage>
+
+- Press 1 to 5 to pick a look
+- Leaving the slide puts the deck's look back
+
+---
+layout: stage
+---
+
+<Stage full>
+<At :w="1280" :h="720">
+<Livedeck :speed="12" :delay="200" :size="22">
+
+````md
+---
+layout: hero
+---
+# Slides that **move.**
+---
+layout: statement
+---
+# Ship it **Friday.**
+````
+
+</Livedeck>
+</At>
+</Stage>
+
+---
+layout: full
+---
+
+<Stage full>
+<At :x="90" :y="100" :w="500" :h="120" enter="up" :delay="1200" bg="var(--nd-surface)" frame pad="30px"><Headline size="m">Arrives late</Headline></At>
+<At :x="90" :y="300" :w="500" :h="120" bg="var(--nd-surface)" frame pad="30px"><Headline size="m">Always there</Headline></At>
+</Stage>

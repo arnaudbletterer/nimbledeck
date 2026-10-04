@@ -40,3 +40,15 @@ Made by the scripts in `demos/`, nothing is fetched at run time:
 
 About three minutes at a steady pace. Slides 1, 2, 5, 6 and 17 move by themselves; 3 types and builds by itself; the quiz
 (11) and the compare slider (12) are the places to pause. Slide 5 steps through the looks on its own, keys 1 to 5 pick one.
+
+## Testing the web edition
+
+`e2e-web.mjs` walks the built web edition in Chrome and asserts that every request succeeds under a sub-path base, the
+video plays, the compare images decode, no offline panel shows and the two `nimbledeck run` slides are left out
+(`npm run e2e:web -- <url>`):
+
+```sh
+WEB_BASE=/nimbledeck/demos/showcase/ WEB_OUT=/tmp/site/nimbledeck/demos/showcase npm run build:web
+# serve /tmp/site with any static server, then:
+node e2e-web.mjs http://localhost:8123/nimbledeck/demos/showcase/
+```
