@@ -28,7 +28,7 @@ layout: statement
 
 #### The problem
 
-# A paper freezes the result.
+<Kinetic text="A paper freezes the result." mode="words" from="mask" :stagger="170" size="l" accent="freezes" />
 
 A figure is a photograph of an experiment.
 
@@ -175,7 +175,6 @@ layout: stage
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-
 rng = np.random.default_rng(0)
 a, y = rng.uniform(0, 6.3, 200), np.arange(200) // 100
 r = 1 + y + rng.normal(0, .12, 200)     # two rings
@@ -184,7 +183,7 @@ X = np.c_[r * np.cos(a), r * np.sin(a), np.ones(200)]
 H = 6                                   # hidden units
 W1 = rng.normal(size=(3, H))
 W2 = rng.normal(size=(H, 1))
-for _ in range(3000):                   # gradient descent
+for _ in range(3000):                   # train
     h = np.tanh(X @ W1)
     d = (1 / (1 + np.exp(-h @ W2)) - y[:, None]) / 200
     W1 -= 1.5 * X.T @ ((d @ W2.T) * (1 - h ** 2))
@@ -218,22 +217,18 @@ layout: numbers
 
 ::a::
 
-<Stat value="0.6" suffix=" ms" :decimals="1" label="Python step, 200 trajectories" />
+<Stat value="0.9" suffix=" ms" :decimals="1" label="Python step for 200 trajectories, drawn at 56 fps" />
 
 ::b::
 
-<Stat value="60" label="frames per second to the canvas" />
+<Stat value="1.3" suffix=" s" :decimals="1" label="to recompute a 192 by 192 pattern" />
 
 ::c::
 
-<Stat value="2.8" suffix=" s" :decimals="1" label="256 by 256, 4,000 steps" />
-
-::d::
-
-<Stat value="1" label="Markdown file for the slides" />
+<Stat value="0.2" suffix=" s" :decimals="1" label="to rerun the code you just edited" />
 
 <!--
-PLACEHOLDER numbers, to be replaced by the final measurements.
+Medians on one Apple Silicon Mac, Chrome with the GPU on: 0.9 ms Python step and 56 fps over 20 s of the Lorenz slide; 1.3 s for 3,000 steps of Gray-Scott on 192 by 192 cells (a subprocess, including its start); 0.12 to 0.29 s per live-code run (three slides, four loads each). Read them as one machine, not as a promise.
 -->
 
 ---
@@ -248,8 +243,8 @@ layout: split
 <LiveCode id="fit">
 
 ```python
-deg = 3
-plt.plot(xs, fit(x))
+deg = 3                  # try 8
+plt.fill_between(xs, lo, hi)
 ```
 
 </LiveCode>
