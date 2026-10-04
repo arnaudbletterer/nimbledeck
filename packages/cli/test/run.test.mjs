@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import net from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import { loadConfig, validateConfig } from '../src/config.mjs'
 import { slidevBin, startDeck, winCommand } from '../src/run.mjs'
@@ -96,7 +97,7 @@ test('a missing program is explained and everything stops', async () => {
   try {
     await startDeck('deck.md', root, { ...f.deps, free: async () => true, exit: (c) => { code = c } })
     const e = Object.assign(new Error('spawn npx ENOENT'), { code: 'ENOENT' })
-    f.spawned.find((c) => c.cmd === 'npx').emit('error', e)
+    f.spawned.find((c) => String(c.cmd).startsWith('npx')).emit('error', e)
     await new Promise((r) => setTimeout(r, 20))
     assert.match(errors[0], /cannot start slidev: 'npx' was not found, install Node.js/)
     assert.equal(code, 1)
@@ -104,6 +105,6 @@ test('a missing program is explained and everything stops', async () => {
 })
 
 test('Slidev is found in the deck project and started with node, not npx; a project without it falls back', () => {
-  assert.match(slidevBin(new URL('../../../examples/how-it-works', import.meta.url).pathname), /@slidev[\\/]cli[\\/]bin[\\/]slidev\.mjs$/)
+  assert.match(slidevBin(fileURLToPath(new URL('../../../examples/how-it-works', import.meta.url))), /@slidev[\\/]cli[\\/]bin[\\/]slidev\.mjs$/)
   assert.equal(slidevBin(mkdtempSync(join(tmpdir(), 'nd-noslidev-'))), null)
 })

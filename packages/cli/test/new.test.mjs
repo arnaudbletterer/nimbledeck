@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { checkDeck } from '../src/check.mjs'
@@ -33,7 +33,7 @@ test('package.json has the scripts, a valid name and links to this checkout', ()
   for (const s of ['dev', 'check', 'verify', 'export']) assert.ok(pkg.scripts[s], s)
   assert.doesNotMatch(readFileSync(join(dir, 'package.json'), 'utf8'), /\{\{/)
   const link = pkg.dependencies['slidev-theme-nimbledeck'].replace(/^file:/, '')
-  assert.ok(existsSync(join(dir, link, 'package.json')), `${link} resolves to the theme`)
+  assert.ok(existsSync(resolve(dir, link, 'package.json')), `${link} resolves to the theme`)
 })
 
 test('dependency versions are exact and match the example', () => {
