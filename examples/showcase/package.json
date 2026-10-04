@@ -1,0 +1,19 @@
+{
+  "name": "nimbledeck-example-showcase",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nimbledeck run showcase.md",
+    "check": "nimbledeck check showcase.md",
+    "verify": "nimbledeck verify showcase.md",
+    "build": "slidev build showcase.md",
+    "build:web": "node build-web.mjs",
+    "export": "slidev export showcase.md --with-clicks"
+  },
+  "dependencies": {
+    "@slidev/cli": "53.0.0",
+    "nimbledeck": "0.1.0",
+    "slidev-theme-nimbledeck": "0.1.0",
+    "playwright-chromium": "1.63.0"
+  }
+}
