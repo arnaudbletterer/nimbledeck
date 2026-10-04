@@ -12,9 +12,9 @@ only says **where things go**.
 
 ## Try it now
 
-<div class="nd-frame nd-tall"><iframe src="playground/" title="Nimbledeck playground" loading="lazy"></iframe></div>
+<div class="nd-frame nd-tall"><iframe src="../playground/" title="Nimbledeck playground" loading="lazy"></iframe></div>
 
-[Open the playground full screen](playground/){ .md-button .md-button--primary target="_blank" }
+[Open the playground full screen](../playground/){ .md-button .md-button--primary target="_blank" }
 
 - **Pick a layout.** The **Slide** tab shows your slide in every layout. One click re-arranges it. The slide text
   below the cards is the whole slide: its first lines name the layout.

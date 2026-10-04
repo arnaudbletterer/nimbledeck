@@ -1,21 +1,41 @@
 ---
-title: Nimbledeck
+title: Nimbledeck documentation
 hide:
   - navigation
   - toc
 ---
 
-<div class="nd-hero" markdown>
+# Nimbledeck documentation
 
-# Slides that run things
+Nimbledeck writes slides that run things: plain Markdown for the story, plus live animation, 3D, Python, video and
+websites, presented from one browser tab.
 
-<p class="nd-tagline">Write the story in plain Markdown. Add live animation, 3D, Python, video and websites. Present it all from one browser tab.</p>
+The [home page](../){ .md-button .md-button--primary } is a Nimbledeck deck, written in one Markdown file. Watch it first, or
+[start writing your own](GETTING-STARTED.md){ .md-button }.
 
-[Try the live deck](demos/how-it-works/){ .md-button .md-button--primary target="_blank" }
-[Get started](GETTING-STARTED.md){ .md-button }
+## Find your way
 
-<div class="nd-frame"><iframe src="demos/how-it-works/" title="The Nimbledeck example deck, running" loading="lazy" allow="fullscreen"></iframe></div>
-<p class="nd-caption">This is a real Nimbledeck deck. Click it, then use the arrow keys. <a href="demos/">About this demo</a>, and <a href="run-locally/">what only runs locally</a>.</p>
+<div class="nd-cards" markdown>
+
+<div markdown>
+### Get started
+Install, make a deck, run it. [Get started](GETTING-STARTED.md).
+</div>
+
+<div markdown>
+### Write a deck
+The syntax, the layouts and the rules `nimbledeck check` enforces. [Writing a deck](WRITING.md), [Layouts](layouts.md).
+</div>
+
+<div markdown>
+### Look and feel
+Live components and brand themes. [Components](components.md), [Themes](THEMING.md).
+</div>
+
+<div markdown>
+### See it run
+The example decks and what needs Python. [Live demos](demos.md), [Run it locally](run-locally.md).
+</div>
 
 </div>
 
