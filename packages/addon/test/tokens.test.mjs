@@ -21,3 +21,12 @@ test('CountUp takes its decimal separator from a prop, "." by default', () => {
   assert.match(src, /decimal: '\.'/)
   assert.doesNotMatch(src, /replace\('\.', ','\)/)
 })
+
+test('the motion toolkit takes every colour from the tokens', () => {
+  const css = read('../styles/index.css').split('/* ==== Motion toolkit')[1] ?? ''
+  assert.ok(css.length > 0, 'the motion toolkit section is missing from the stylesheet')
+  assert.doesNotMatch(css, /#[0-9a-f]{3,8}\b|\brgba?\(|\bhsla?\(/i, 'use var(--nd-*) and color-mix() in the motion CSS')
+  for (const f of ['Kinetic', 'Typewriter', 'Terminal', 'Aurora', 'Stat', 'Marquee', 'Spotlight', 'Tilt']) {
+    assert.doesNotMatch(read(`../components/${f}.vue`), /['"`]#[0-9a-f]{3,8}['"`]/i, `${f} must read its colours from the tokens, not hard-code a hex value`)
+  }
+})
