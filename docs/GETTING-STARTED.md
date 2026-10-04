@@ -53,7 +53,7 @@ cd nimbledeck
 npm install
 ```
 
-To use an exact release, check out its tag first (`git checkout v0.1.0`, see [RELEASING.md](RELEASING.md)). The
+To use an exact release, check out its tag first (`git checkout v0.1.0`, see RELEASING.md in the repository). The
 `npm install` prints a `npm warn install-scripts` message; it is harmless (see Troubleshooting).
 
 ## 3. Create a deck

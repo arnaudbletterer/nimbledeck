@@ -4,6 +4,8 @@
   "workspaces": ["packages/*", "examples/*"],
   "scripts": {
     "test": "node --test \"packages/cli/test/**/*.test.mjs\" \"packages/addon/test/**/*.test.mjs\"",
-    "example": "npm --workspace examples/how-it-works run dev"
+    "example": "npm --workspace examples/how-it-works run dev",
+    "docs:build": "node website/build.mjs",
+    "docs:serve": "node website/build.mjs --serve"
   }
 }

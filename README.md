@@ -56,6 +56,9 @@ Three ideas keep it robust:
 - **Live components run only while their slide is on screen.** Slidev keeps neighbouring slides mounted, so every
   live component gates on `useActive()`.
 
+Documentation site (also the home of the live example deck): `npm run docs:serve` previews it, `npm run docs:build`
+builds it into `site/` (needs [uv](https://docs.astral.sh/uv/)); `.github/workflows/docs.yml` publishes it to GitHub Pages.
+
 Source: `ssh://git@git.abletterer.synology.me:40001/abletterer/nimbledeck.git`. New here? Start with [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md);
 the current state and open items are in [docs/HANDOFF.md](docs/HANDOFF.md). Releasing and pinning:
 [docs/RELEASING.md](docs/RELEASING.md), [CHANGELOG.md](CHANGELOG.md).
