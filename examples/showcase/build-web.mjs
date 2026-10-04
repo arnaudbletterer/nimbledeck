@@ -4,21 +4,18 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { webEdition } from '../../packages/cli/src/webedition.mjs'
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const base = process.env.WEB_BASE ?? '/nimbledeck/demos/showcase/'
 const out = resolve(dir, process.env.WEB_OUT ?? 'dist')
 const tmp = resolve(dir, '.web-build.md')
 
-const NEEDS_RUN = /<(PyStream|Demo|LiveCode)\b/
-let skipped = 0
 const src = readFileSync(resolve(dir, 'showcase.md'), 'utf8')
-const web = src.split(/\n---\n(?=layout:)/)
-  .map((slide, i) => (i > 0 && NEEDS_RUN.test(slide) ? (skipped++, `disabled: true\n${slide}`) : slide))
-  .join('\n---\n')
-console.log(`web edition: ${skipped} slides that need nimbledeck run are left out`)
 // A static host has no fallback to index.html for /3, so the web copy uses hash routes.
-writeFileSync(tmp, web.replace(/^---\n/, '---\nrouterMode: hash\n'))
+const { markdown, skipped } = webEdition(src)
+console.log(`web edition: ${skipped.length} slides that need nimbledeck run are left out`)
+writeFileSync(tmp, markdown)
 try {
   const r = spawnSync('npx', ['slidev', 'build', '.web-build.md', '--base', base, '--out', out], { cwd: dir, stdio: 'inherit', shell: process.platform === 'win32' })
   if (r.status !== 0) process.exit(r.status ?? 1)

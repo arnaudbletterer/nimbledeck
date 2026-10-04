@@ -1,4 +1,6 @@
 // Split a Slidev markdown file into slides, honoring per-slide frontmatter and fenced code.
+// Each slide has `line` (1-based line of its opening `---`, or 1 for a first slide without one), `fmEnd` (1-based line of the
+// `---` that closes its frontmatter, 0 when it has none), `fm` (the frontmatter keys) and `body` (the text after it).
 const YAML_LINE = /^[A-Za-z_][\w-]*:\s*.*$/
 
 // Decks written on Windows use CRLF: normalise so every pattern below can rely on "\n".
@@ -25,11 +27,11 @@ export function splitSlides(text) {
       if (j < lines.length && lines[j].trim() === '---' && j > i + 1) {
         const fm = {}
         for (const l of lines.slice(i + 1, j)) { const k = l.match(/^([\w-]+):\s*(.*)$/); if (k) fm[k[1]] = k[2] }
-        flush(); cur = { line: i + 1, fm, body: [] }; i = j + 1; continue
+        flush(); cur = { line: i + 1, fmEnd: j + 1, fm, body: [] }; i = j + 1; continue
       }
-      flush(); cur = { line: i + 1, fm: {}, body: [] }; i++; continue
+      flush(); cur = { line: i + 1, fmEnd: 0, fm: {}, body: [] }; i++; continue
     }
-    if (!cur) cur = { line: 1, fm: {}, body: [] }
+    if (!cur) cur = { line: 1, fmEnd: 0, fm: {}, body: [] }
     cur.body.push(ln); i++
   }
   flush()
