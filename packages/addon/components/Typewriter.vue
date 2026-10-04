@@ -7,8 +7,8 @@ import { highlight } from '../composables/highlight'
 // block (or plain text) as the slot. `lang` is md, sh, py, json or html. With lang="sh" a line starting with "$ " is
 // typed and every other line appears at once as output. `keep` leaves the text on screen when it is done (false fades
 // it out after a moment). The root gets the class `nd-done` when the typing has finished, so a deck can chain on it.
-// `text` is an alternative to the slot (used by <Terminal>). Leaving the slide stops it and resets it.
-const props = withDefaults(defineProps<{ speed?: number; delay?: number; lang?: string; caret?: boolean; keep?: boolean; text?: string }>(), { speed: 38, delay: 400, lang: 'md', caret: true, keep: true })
+// `size` is the font size: a number in slide pixels (default 22) or any CSS length. `text` is an alternative to the slot (used by <Terminal>). Leaving the slide stops it and resets it.
+const props = withDefaults(defineProps<{ speed?: number; delay?: number; lang?: string; caret?: boolean; keep?: boolean; text?: string; size?: number | string }>(), { speed: 38, delay: 400, lang: 'md', caret: true, keep: true })
 const emit = defineEmits<{ (e: 'done', v: boolean): void }>()
 
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -85,11 +85,12 @@ watch([active, source], ([a]) => { if (a) begin(); else reset() }, { immediate: 
 watch(done, (d) => emit('done', d))
 onBeforeUnmount(stop)
 
+const fontSize = computed(() => (props.size == null ? undefined : typeof props.size === 'number' ? props.size + 'px' : props.size))
 const shown = computed(() => tokens.value.filter((t) => t.start < n.value).map((t) => ({ ...t, text: t.text.slice(0, n.value - t.start) })))
 </script>
 
 <template>
-  <div class="nd-typewriter" :class="{ 'nd-done': done, 'nd-tw-typing': !done && n > 0, 'nd-tw-gone': fading }" :data-lang="lang" data-kind="typewriter">
+  <div class="nd-typewriter" :class="{ 'nd-done': done, 'nd-tw-typing': !done && n > 0, 'nd-tw-gone': fading }" :data-lang="lang" :style="fontSize ? { '--nd-tw-size': fontSize } : undefined" data-kind="typewriter">
     <div ref="srcEl" class="nd-tw-src"><slot /></div>
     <pre class="nd-tw-ghost" aria-hidden="true">{{ source }}</pre>
     <pre class="nd-tw-live" :aria-label="source"><span v-for="(t, i) in shown" :key="i" :class="t.cls ? `nd-t-${t.cls}` : undefined">{{ t.text }}</span><i v-if="caret" class="nd-tw-caret" /></pre>

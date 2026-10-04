@@ -229,7 +229,7 @@
 
 /* ==== Motion toolkit: Typewriter ==== */
 /* A hidden copy of the full text reserves the final size, the typed text is laid over it, so nothing shifts while typing. */
-.nd-typewriter { display: grid; font: 22px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--nd-ink); text-align: left; }
+.nd-typewriter { display: grid; font: var(--nd-tw-size, 22px)/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--nd-ink); text-align: left; }
 .nd-typewriter .nd-tw-src { display: none; }
 .nd-typewriter pre { grid-area: 1 / 1; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; font: inherit; color: inherit; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; overflow: visible; }
 .nd-typewriter .nd-tw-ghost { visibility: hidden; }

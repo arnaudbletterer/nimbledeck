@@ -61,7 +61,7 @@ clipping line. `accent` colours chosen words. Replays on re-entry; `hold` waits 
 <div markdown>
 ### `<Typewriter lang="md">`
 Types a fenced block or plain text with a blinking caret and simple highlighting. The root gets `nd-done` when it is
-finished, so a build can follow.
+finished, so a build can follow. `size` sets the font size in slide pixels (22 by default).
 </div>
 
 <div markdown>
