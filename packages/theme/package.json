@@ -1,7 +1,7 @@
 {
   "name": "slidev-theme-nimbledeck",
   "version": "0.1.0",
-  "description": "Nimbledeck base themes: plain, paper and night. Same eight layouts, different design tokens.",
+  "description": "Nimbledeck base themes: plain, paper, night, studio and studio-light. The eight base layouts plus five showcase layouts.",
   "keywords": ["slidev-theme", "slidev"],
   "engines": { "slidev": ">=0.50.0" },
   "dependencies": { "slidev-addon-nimbledeck": "0.1.0" },
@@ -10,7 +10,7 @@
       "aspectRatio": "16/9",
       "canvasWidth": 1280,
       "mdc": true,
-      "transition": "slide-left",
+      "transition": "fade-out",
       "fonts": { "provider": "none" },
       "favicon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f2328'/%3E%3Cpath d='M9 21a4 4 0 0 1 1.4-7.7A6 6 0 0 1 22 14.5a3.2 3.2 0 0 1 0 6.5z' fill='%23fff'/%3E%3C/svg%3E",
       "addons": ["slidev-addon-nimbledeck"]

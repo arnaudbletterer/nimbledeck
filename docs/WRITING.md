@@ -40,6 +40,16 @@ layout: two-cols
 | `photo-right` | idea plus photo | `image:` frontmatter, `::title::`, `::default::` |
 | `full` | a full-frame element: website, animation, video, photo with text | no title bar or footer; the slot fills the 1280 x 720 slide |
 
+Showcase layouts, for keynote-style decks (they look best with `ndVariant: studio` or `studio-light`, and work in every look):
+
+| Layout | Use for | Content |
+|---|---|---|
+| `hero` | an opening or big-picture slide | `::bg::` for a background (`<Stage full>` with a live component or a video), then `# Title` and `#### subtitle` at the bottom left |
+| `statement` | one sentence, very large | `#### kicker` (small, above), then `# The sentence` (up to about 70 characters) |
+| `split` | words on the left, a live component on the right | `# Title`, `#### kicker`, a paragraph; `::right::` fills the right half (use `<Stage :w="640" :h="720">`) |
+| `stage` | a live component with almost no chrome | the slot (`<Stage full>` or a 1200 x 604 `<Stage>`), `::caption::` bottom left, page pill bottom right |
+| `numbers` | 2 to 4 big figures | `# Title`, then `::a::`, `::b::`, `::c::`, `::d::`, each `## 60 fps` plus one line of text |
+
 Diagrams: a fenced `mermaid` block. Builds: wrap a list in `<v-clicks>`. Speaker notes: an HTML comment at the end of
 a slide.
 

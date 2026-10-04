@@ -3,10 +3,10 @@ import { isAbsolute, relative, resolve } from 'node:path'
 
 export const DEFAULTS = { python: { version: '3.12', requirements: 'demos/requirements.txt' }, demos: {}, streams: {}, runner: null, publicDir: 'public', limits: { maxTitle: 40, maxBullets: 7, maxChars: 900, maxSubtitle: 55 }, port: 3030,
   // Layouts whose slides need no '# title' and no text limits (cover-like slides).
-  leadLayouts: ['cover', 'divider', 'closing', 'full', 'end', 'section', 'intro', 'none'],
+  leadLayouts: ['cover', 'divider', 'closing', 'full', 'hero', 'statement', 'split', 'stage', 'end', 'section', 'intro', 'none'],
   // CSS selectors for `nimbledeck verify`: `chrome` is the slide furniture (footer, page number) that is exempt from the
   // placement checks, `bleed` is media that is meant to reach the slide edge. A theme with its own classes lists them here.
-  verify: { chrome: ['.nd-foot', '.nd-page', 'footer'], bleed: ['.nd-photo', '.nd-media'] } }
+  verify: { chrome: ['.nd-foot', '.nd-page', '.nd-caption', '.nd-pill', 'footer'], bleed: ['.nd-photo', '.nd-media', '.nd-bg', '.nd-split-r'] } }
 
 // NIMBLEDECK_PORT_OFFSET shifts every port (deck, demos, streams, runner) so several decks, or several agents on one machine,
 // can run side by side without clashing. The browser components read the shifted ports from public/nimbledeck.json.

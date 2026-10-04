@@ -6,7 +6,7 @@ hide:
 
 # Layouts: read one, change one, make one
 
-A layout is a small Vue file with slots. The theme ships eight of them, each between 5 and 15 lines. Everything they
+A layout is a small Vue file with slots. The theme ships thirteen of them (eight base layouts and five for showcase decks), each between 5 and 15 lines. Everything they
 share (fonts, title bar, tables, colours) lives in one global stylesheet that reads the `--nd-*` tokens, so a layout
 only says **where things go**.
 

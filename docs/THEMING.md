@@ -3,6 +3,22 @@
 A brand lives in its own repository and depends on Nimbledeck. Nimbledeck never contains brand fonts, logos or
 company content.
 
+## Looks and showcase layouts in the base theme
+
+`ndVariant` picks the look: `plain`, `paper`, `night`, and the keynote pair `studio` (near-black blue, warm off-white
+ink, cyan to violet accent) and `studio-light` (the same identity on a warm white page). Both use system font stacks
+only (SF Pro, Inter, system-ui, with a tight tracking and heavy weight for display type), so a deck works offline.
+`studio` is dark: the theme switches Slidev to its dark code theme for it, and Mermaid follows. Text contrast is at least
+7:1 for body and muted text on `studio`, and at least 4.5:1 everywhere on `studio-light`.
+
+Besides the eight base layouts the theme ships five for showcase decks: `hero`, `statement`, `split`, `stage` and
+`numbers` (slots and content in [WRITING.md](WRITING.md)). They are extras: a brand theme does not have to implement them,
+and a deck that uses them is portable only to themes that do. `nimbledeck check` and `verify` know their classes and treat
+`hero`, `statement`, `split` and `stage` as lead layouts (no title bar, no footer).
+
+`package.json` sets the slide transition to `fade-out`, a short cross-fade. A deck can override it with `transition:` in
+its headmatter. Live components still gate on `useActive()`, which follows the current page, not the transition.
+
 ## Layout of a brand repository
 
 ```

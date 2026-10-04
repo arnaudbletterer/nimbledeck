@@ -3,7 +3,7 @@
   --nd-bg: #ffffff; --nd-ink: #1f2328; --nd-muted: #6b7280; --nd-accent: #2563eb; --nd-accent-2: #9ca3af;
   --nd-surface: #f3f4f6; --nd-line: #d1d5db;
   --nd-cover-bg: #111827; --nd-cover-fg: #ffffff;
-  --nd-title-transform: none; --nd-title-size: 52px;
+  --nd-title-transform: none; --nd-title-size: 52px; --nd-gradient: var(--nd-accent);
 }
 [data-nd-variant="paper"] {
   --nd-bg: #faf6ee; --nd-ink: #2b2118; --nd-muted: #7a6a58; --nd-accent: #9a3412; --nd-accent-2: #b8a58c;
@@ -15,6 +15,28 @@
   --nd-bg: #0f172a; --nd-ink: #e5e7eb; --nd-muted: #94a3b8; --nd-accent: #38bdf8; --nd-accent-2: #64748b;
   --nd-surface: #1e293b; --nd-line: #334155;
   --nd-cover-bg: #020617; --nd-cover-fg: #f8fafc;
+}
+[data-nd-variant="studio"], [data-nd-variant="studio-light"] {
+  --nd-font-body: "SF Pro Text", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --nd-font-display: "SF Pro Display", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --nd-font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --slidev-code-font-family: var(--nd-font-mono); --slidev-slide-container-background: var(--nd-bg);
+  --nd-gradient: linear-gradient(90deg, var(--nd-accent), var(--nd-accent-2));
+  --nd-title-size: 54px;
+}
+[data-nd-variant="studio"] {
+  --nd-bg: #07090f; --nd-ink: #f2eee6; --nd-muted: #9aa3b8; --nd-accent: #22d3ee; --nd-accent-2: #a78bfa;
+  --nd-surface: #111627; --nd-line: #232b42; --nd-node-border: #3b4666;
+  --nd-cover-bg: #05060b; --nd-cover-fg: #f2eee6;
+  --nd-chart-1: #22d3ee; --nd-chart-2: #a78bfa; --nd-chart-3: #f472b6; --nd-chart-4: #fbbf24;
+  --nd-good: #12382a; --nd-bad: #3d1a1d; --nd-good-ink: #4ade80; --nd-bad-ink: #f87171;
+}
+[data-nd-variant="studio-light"] {
+  --nd-bg: #f7f6f2; --nd-ink: #0b0f1a; --nd-muted: #566074; --nd-accent: #6d28d9; --nd-accent-2: #0e7490;
+  --nd-surface: #ecebe5; --nd-line: #d8d6cc; --nd-node-border: #a9a79c;
+  --nd-cover-bg: #0b0f1a; --nd-cover-fg: #f7f6f2;
+  --nd-chart-1: #6d28d9; --nd-chart-2: #0e7490; --nd-chart-3: #be185d; --nd-chart-4: #b45309;
+  --nd-good: #cdebd9; --nd-bad: #f6d3d3; --nd-good-ink: #1f6b45; --nd-bad-ink: #a32a2a;
 }
 
 .slidev-layout { font-family: var(--nd-font-body); font-size: 24px; color: var(--nd-ink); background: var(--nd-bg); padding: 0; }
@@ -76,3 +98,55 @@
 
 /* Code blocks sit inside the side gutters like every other block. */
 .nd-body .slidev-code-wrapper, .nd-body > pre { margin-left: 70px !important; margin-right: 70px !important; }
+
+/* Studio look: heavier display type, hairline rules, a gradient accent. Tokens decide the colours. */
+[data-nd-variant^="studio"] .slidev-layout { letter-spacing: -0.011em; }
+[data-nd-variant^="studio"] .slidev-layout h1 { font-weight: 800; letter-spacing: -0.035em; border-bottom: 1px solid var(--nd-line); padding: 0.2em 70px; }
+[data-nd-variant^="studio"] .nd-body > h1 + * { margin-top: 32px !important; }
+[data-nd-variant^="studio"] .slidev-layout h4 { font-style: normal; font-weight: 500; letter-spacing: -0.02em; }
+[data-nd-variant^="studio"] .slidev-layout:not(.nd-lead):not(.nd-full):not(.nd-pane) {
+  background: radial-gradient(900px 480px at 88% -8%, color-mix(in srgb, var(--nd-accent) 11%, transparent), transparent 70%), var(--nd-bg); }
+[data-nd-variant^="studio"] .nd-lead { background: radial-gradient(1000px 520px at 15% 110%, color-mix(in srgb, var(--nd-accent-2) 26%, transparent), transparent 70%), var(--nd-cover-bg); }
+[data-nd-variant^="studio"] .nd-lead-inner h1 { font-size: 96px; border: 0; overflow: visible; padding: 0 0.04em; }
+[data-nd-variant^="studio"] .nd-lead-inner h4 { font-size: 30px; font-weight: 400; margin-top: 20px;
+  color: color-mix(in srgb, var(--nd-cover-fg) 72%, var(--nd-cover-bg)); }
+[data-nd-variant^="studio"] .nd-lead-inner h1::before { height: 3px; border-radius: 2px; background: var(--nd-gradient); }
+[data-nd-variant^="studio"] .slidev-layout blockquote { background: var(--nd-surface); border-left: 3px solid var(--nd-accent); border-radius: 10px; }
+[data-nd-variant^="studio"] .slidev-layout thead th { background: var(--nd-surface); color: var(--nd-accent); border-bottom: 1px solid var(--nd-line); }
+[data-nd-variant^="studio"] .slidev-layout tbody tr:nth-child(even) { background: color-mix(in srgb, var(--nd-surface) 55%, transparent); }
+[data-nd-variant^="studio"] .slidev-layout pre.slidev-code { border: 1px solid var(--nd-line); border-radius: 12px; }
+[data-nd-variant^="studio"] .slidev-layout code { font-family: var(--nd-font-mono); }
+[data-nd-variant^="studio"] .slidev-layout li::marker { color: var(--nd-accent); }
+
+/* Showcase layouts (hero, statement, split, stage, numbers). Big type is shared through .nd-big. */
+.nd-hero, .nd-statement, .nd-split, .nd-pane { position: relative; height: 100%; overflow: hidden; background: var(--nd-bg); }
+.nd-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.nd-big h1 { font-size: 110px; line-height: 1; letter-spacing: -0.04em; font-weight: 800; white-space: normal; overflow: visible; text-overflow: clip;
+  border: 0; padding: 0; width: auto; text-wrap: balance; }
+.nd-big h4 { font-size: 30px; line-height: 1.3; font-weight: 400; color: var(--nd-muted); margin-top: 28px; }
+.nd-hero-inner { position: absolute; left: 96px; right: 96px; bottom: 88px; z-index: 1; max-width: 1000px; }
+.nd-hero-inner::before { content: ""; display: block; width: 96px; height: 4px; border-radius: 2px; background: var(--nd-gradient); margin-bottom: 36px; }
+.nd-statement-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 120px; }
+.nd-statement h1 { font-size: 88px; line-height: 1.08; font-weight: 700; letter-spacing: -0.035em; }
+.nd-statement h4 { order: -1; margin: 0 0 36px; font-size: 20px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; }
+.nd-split-l { position: absolute; left: 0; right: 50%; top: 0; bottom: 0; padding: 0 72px 0 88px; display: flex; flex-direction: column; justify-content: center; }
+.nd-split-l h1 { font-size: 68px; line-height: 1.05; }
+.nd-split-l h4 { font-size: 26px; }
+.nd-split-l p, .nd-split-l ul { font-size: 26px; line-height: 1.45; color: var(--nd-muted); margin: 28px 0 0; }
+.nd-split-r { position: absolute; left: 50%; right: 0; top: 0; bottom: 0; overflow: hidden; background: var(--nd-surface); }
+.nd-split::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; z-index: 2; pointer-events: none;
+  background: linear-gradient(transparent, var(--nd-accent) 30%, var(--nd-accent-2) 70%, transparent);
+  box-shadow: 0 0 28px 3px color-mix(in srgb, var(--nd-accent) 40%, transparent); }
+.nd-pane-in { position: absolute; inset: 0; padding: 40px 40px 76px; z-index: 1; }
+.nd-caption { position: absolute; left: 40px; bottom: 28px; z-index: 3; font-size: 18px; color: var(--nd-muted); }
+.nd-pill { position: absolute; right: 32px; bottom: 24px; z-index: 3; padding: 4px 16px; border-radius: 999px; font-size: 16px; color: var(--nd-muted);
+  background: color-mix(in srgb, var(--nd-surface) 80%, transparent); border: 1px solid var(--nd-line); font-variant-numeric: tabular-nums; }
+.nd-nums { position: absolute; left: 70px; right: 70px; top: 110px; bottom: 70px; align-content: center; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: 24px; }
+.nd-num { padding: 36px 28px 32px; border-radius: 16px; background: var(--nd-surface); border: 1px solid var(--nd-line); }
+.nd-num h2 { margin: 0; font-family: var(--nd-font-display); font-size: 72px; line-height: 1; padding-right: 0.08em; font-weight: 800; letter-spacing: -0.04em; white-space: nowrap;
+  background: var(--nd-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nd-num p { margin: 18px 0 0; font-size: 22px; line-height: 1.35; color: var(--nd-muted); }
+/* Display titles never carry the title bar rule, in any variant. Hero text sits on a scrim so a live background stays readable. */
+.slidev-layout .nd-big h1, .slidev-layout.nd-big h1 { border: 0; padding: 0; }
+.nd-hero .nd-bg::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--nd-bg) 92%, transparent) 0%, color-mix(in srgb, var(--nd-bg) 55%, transparent) 40%, transparent 75%); }
