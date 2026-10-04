@@ -1,6 +1,7 @@
 # UNVERIFIED: this workflow has never run on GitHub. `npm run docs:build` was run by hand on macOS and the result
 # served and walked in Chrome. Before the first run, enable Pages with "GitHub Actions" as the source. The site
-# address (https://arnaudbletterer.github.io/nimbledeck/) is set in zensical.toml, and its path in website/build.mjs.
+# address (https://arnaudbletterer.github.io/nimbledeck/) is derived from `site_url` in zensical.toml by website/site.mjs.
+# `npm run docs:build` also crawls the built site and fails on a broken link (website/check-links.mjs).
 name: docs
 
 on:
