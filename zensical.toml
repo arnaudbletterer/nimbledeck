@@ -12,6 +12,7 @@ nav = [
   { "Get started" = "GETTING-STARTED.md" },
   { "Guide" = [
     { "Writing a deck" = "WRITING.md" },
+    { "Layouts and playground" = "layouts.md" },
     { "Components gallery" = "components.md" },
     { "Themes and brands" = "THEMING.md" },
     { "Architecture" = "ARCHITECTURE.md" },
@@ -68,6 +69,8 @@ pymdownx.highlight.line_spans = "__span"
 pymdownx.highlight.pygments_lang_class = true
 pymdownx.inlinehilite = {}
 pymdownx.keys = {}
+pymdownx.snippets.base_path = ["."]
+pymdownx.snippets.check_paths = true
 pymdownx.superfences.custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
 ]

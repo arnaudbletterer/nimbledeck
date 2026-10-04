@@ -58,3 +58,7 @@
   .md-typeset .nd-cards > div:hover { transform: none; }
 }
 
+
+/* The playground needs more room than a 16:9 frame */
+.nd-frame.nd-tall { aspect-ratio: auto; height: min(62rem, 92vh); }
+@media (max-width: 800px) { .nd-frame.nd-tall { height: 70rem; } }

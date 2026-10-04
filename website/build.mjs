@@ -1,7 +1,7 @@
 // Builds the documentation site into site/: the Zensical pages, then the example deck under site/demos/.
 // Usage: node website/build.mjs        (env DEMO_BASE overrides the site's base path)
 import { spawnSync } from 'node:child_process'
-import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -18,6 +18,19 @@ const run = (cmd, args, cwd = root) => {
 const hidden = ['HANDOFF.md', 'RELEASING.md', 'DECISIONS.md']
 rmSync(resolve(root, 'site-src'), { recursive: true, force: true })
 cpSync(resolve(root, 'docs'), resolve(root, 'site-src'), { recursive: true, filter: (p) => !hidden.some((h) => p.endsWith(h)) })
+
+// The playground edits the real layouts: pack them with the theme CSS and its presets, and ship Vue next to it.
+const read = (...p) => readFileSync(resolve(root, ...p), 'utf8')
+const layoutDir = resolve(root, 'packages/theme/layouts')
+const layouts = Object.fromEntries(readdirSync(layoutDir).sort().map((f) => [f.replace(/\.vue$/, ''), read('packages/theme/layouts', f)]))
+layouts['my-layout'] = read('website/presets/my-layout.vue')
+const tokens = read('packages/addon/styles/index.css').match(/:where\(:root\) \{[^}]*\}/)[0]
+mkdirSync(resolve(root, 'site-src/playground'), { recursive: true })
+writeFileSync(resolve(root, 'site-src/playground/data.json'), JSON.stringify({
+  layouts, slides: read('website/presets/slides.md'), css: `${tokens}\n${read('packages/theme/styles/index.css')}`,
+}))
+cpSync(resolve(root, 'node_modules/vue/dist/vue.esm-browser.prod.js'), resolve(root, 'site-src/playground/vue.js'))
+
 if (process.argv.includes('--serve')) { run('uvx', ['zensical@0.0.67', 'serve']); process.exit(0) }
 run('uvx', ['zensical@0.0.67', 'build', '--clean'])
 
