@@ -42,6 +42,8 @@ before(async () => {
   })
 })
 // On Windows killing `uv` leaves its Python child holding the pipes, which keeps the test process alive: kill the tree.
+// A cold machine builds matplotlib's font cache on the first run (minutes on a CI runner): do it once, before the tests.
+before(async () => { if (hasUv) { const ws = await open(TOKEN); await run(ws, { id: 0, code: 'import matplotlib.pyplot', timeout: 60 }, 120000); ws.close() } }, { timeout: 180000 })
 after(() => { if (proc && process.platform === 'win32') spawnSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], { stdio: 'ignore' }); else proc?.kill() })
 
 test('a wrong token is refused', { skip: !hasUv }, async () => { await assert.rejects(open('nope'), /refused/) })
