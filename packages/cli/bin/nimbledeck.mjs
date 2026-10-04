@@ -3,11 +3,13 @@ import { basename, dirname, resolve } from 'node:path'
 import { checkDeck } from '../src/check.mjs'
 import { exportDeck } from '../src/export.mjs'
 import { scaffoldDeck } from '../src/new.mjs'
+import { loadConfig } from '../src/config.mjs'
+import { prepareDeck } from '../src/offline.mjs'
 import { runDeck } from '../src/run.mjs'
 import { verifyDeck } from '../src/verify.mjs'
 
 const [cmd, deck, ...rest] = process.argv.slice(2)
-const usage = () => { console.error('usage: nimbledeck new <dir> | run <deck.md> | check <deck.md> | verify <deck.md> [--url http://localhost:3030] | export <deck.md> [slidev export options]'); process.exit(2) }
+const usage = () => { console.error('usage: nimbledeck new <dir> | run <deck.md> | check <deck.md> | verify <deck.md> [--url http://localhost:3030] | prepare <deck.md> | export <deck.md> [slidev export options]'); process.exit(2) }
 
 try {
   // Slidev takes public/, layouts/ and components/ from the folder that contains the deck file, so the
@@ -20,6 +22,8 @@ try {
     process.exit(errors.length ? 1 : 0)
   } else if (cmd === 'run' && deck) {
     await runDeck(basename(deck), dirname(resolve(deck)))
+  } else if (cmd === 'prepare' && deck) {
+    process.exit(prepareDeck(loadConfig(dirname(resolve(deck))), dirname(resolve(deck))))
   } else if (cmd === 'verify' && deck) {
     const u = rest.indexOf('--url')
     process.exit(await verifyDeck(resolve(deck), dirname(resolve(deck)), u >= 0 ? rest[u + 1] : undefined))
