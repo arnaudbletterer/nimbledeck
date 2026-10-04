@@ -2,8 +2,6 @@
 site_name = "Nimbledeck"
 site_description = "Markdown slides that run things: animation, 3D, Python and video, on top of Slidev."
 site_url = "https://arnaudbletterer.github.io/nimbledeck/"
-repo_url = "https://github.com/arnaudbletterer/nimbledeck"
-repo_name = "arnaudbletterer/nimbledeck"
 # Staged from docs/ by website/build.mjs, which leaves out the contributor notes.
 docs_dir = "site-src"
 site_dir = "site"
@@ -59,6 +57,11 @@ toggle.name = "Switch to light mode"
 [project.theme.icon]
 logo = "lucide/layers"
 
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/arnaudbletterer/nimbledeck"
+name = "Nimbledeck on GitHub"
+
 
 [project.markdown_extensions]
 admonition = {}
@@ -74,9 +77,7 @@ pymdownx.highlight.line_spans = "__span"
 pymdownx.highlight.pygments_lang_class = true
 pymdownx.inlinehilite = {}
 pymdownx.keys = {}
+pymdownx.superfences = {}
 pymdownx.snippets.base_path = ["."]
 pymdownx.snippets.check_paths = true
-pymdownx.superfences.custom_fences = [
-  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
-]
 pymdownx.tabbed.alternate_style = true
