@@ -79,7 +79,7 @@ const links = computed(() => [
 </script>
 
 <template>
-  <template v-if="site && !isPrintMode">
+  <Teleport v-if="site && !isPrintMode" to="body">
     <nav ref="bar" class="ndb" :class="{ 'ndb-idle': idle && !playing, 'ndb-calm': reduced }" aria-label="Nimbledeck site">
       <a class="ndb-brand" :href="site.docs.replace(/docs\/$/, '')" aria-label="Nimbledeck, first slide">
         <svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><rect width="32" height="32" rx="7" fill="currentColor" opacity=".16" /><path d="M9 21a4 4 0 0 1 1.4-7.7A6 6 0 0 1 22 14.5a3.2 3.2 0 0 1 0 6.5z" fill="currentColor" /></svg>
@@ -105,12 +105,12 @@ const links = computed(() => [
       <span class="ndb-line" aria-hidden="true"><i :style="{ width: progress }" /></span>
     </nav>
     <p v-if="showHint" class="ndb-hint" role="note">{{ touch ? 'Swipe left to begin' : 'Press the right arrow to begin' }}</p>
-  </template>
+  </Teleport>
 </template>
 
 <style>
 .ndb {
-  position: fixed; inset: 0 0 auto 0; height: var(--nd-bar-h, 40px); z-index: 60;
+  position: fixed; inset: 0 0 auto 0; height: var(--nd-site-bar-h, 40px); z-index: 60;
   display: flex; align-items: center; gap: 4px; padding: 0 10px 1px 12px; box-sizing: border-box;
   font: 500 13px/1 var(--nd-font-body, system-ui, sans-serif); color: var(--nd-ink, #e5e7eb);
   background: color-mix(in srgb, var(--nd-bg, #07090f) 78%, transparent);
@@ -136,12 +136,12 @@ const links = computed(() => [
 .ndb-menu a:hover { background: color-mix(in srgb, var(--nd-ink, #fff) 8%, transparent); }
 .ndb-grow { flex: 1; }
 .ndb-count { min-width: 3.6em; text-align: center; color: var(--nd-muted, #9aa3b8); font-variant-numeric: tabular-nums; }
-.ndb-btn { font: inherit; color: inherit; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
-.ndb-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--nd-ink, #fff) 8%, transparent); }
-.ndb-btn:disabled { opacity: .35; cursor: default; }
-.ndb-tour { margin-left: 6px; color: var(--nd-bg, #07090f); background: var(--nd-accent, #22d3ee); font-weight: 600; border-radius: 999px; padding: 7px 14px; }
-.ndb-tour:hover:not(:disabled) { background: var(--nd-accent, #22d3ee); filter: brightness(1.12); }
-.ndb-tour[aria-pressed="true"] { background: transparent; color: var(--nd-ink, #e5e7eb); border-color: var(--nd-accent, #22d3ee); }
+.ndb .ndb-btn { font: inherit; color: inherit; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+.ndb .ndb-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--nd-ink, #fff) 8%, transparent); }
+.ndb .ndb-btn:disabled { opacity: .35; cursor: default; }
+.ndb .ndb-tour { margin-left: 6px; color: var(--nd-bg, #07090f); background: var(--nd-accent, #22d3ee); font-weight: 600; border-radius: 999px; padding: 7px 14px; }
+.ndb .ndb-tour:hover:not(:disabled) { background: var(--nd-accent, #22d3ee); filter: brightness(1.12); }
+.ndb .ndb-tour[aria-pressed="true"] { background: transparent; color: var(--nd-ink, #e5e7eb); border-color: var(--nd-accent, #22d3ee); }
 .ndb a:focus-visible, .ndb button:focus-visible, .ndb summary:focus-visible { outline: 2px solid var(--nd-accent, #22d3ee); outline-offset: 2px; }
 .ndb-line { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; }
 .ndb-line i { display: block; height: 100%; background: var(--nd-gradient, var(--nd-accent, #22d3ee)); transition: width .6s ease; }
@@ -154,18 +154,18 @@ const links = computed(() => [
 @media (prefers-reduced-motion: reduce) { .ndb-hint { animation: none; } }
 
 @media (max-width: 760px) {
-  .ndb-wide { display: none; }
+  .ndb .ndb-links > .ndb-wide { display: none; }
   .ndb-more { display: block; }
   .ndb-brand span { display: none; }
   .ndb-brand { margin-right: 2px; }
 }
 @media (max-width: 480px) {
   .ndb { padding-left: 8px; padding-right: 6px; gap: 0; }
-  .ndb-count { min-width: 3.2em; }
-  .ndb-tour { padding: 7px 11px; margin-left: 2px; }
-  .ndb-tour { font-size: 0; }          /* the icon alone, the label stays for screen readers */
-  .ndb-tour span { font-size: 13px; }
+  .ndb .ndb-btn.ndb-arrow, .ndb .ndb-count { display: none; }   /* Slidev shows its own arrows on a narrow screen */
+  .ndb .ndb-tour { padding: 7px 11px; margin-left: 2px; }
+  .ndb .ndb-tour { font-size: 0; }          /* the icon alone, the label stays for screen readers */
+  .ndb .ndb-tour span { font-size: 13px; }
 }
-@media (pointer: coarse) { .ndb-btn, .ndb-links > a, .ndb-more > summary { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; min-width: 38px; } }
+@media (pointer: coarse) { .ndb-hint { bottom: 64px; } .ndb .ndb-btn, .ndb-links > a, .ndb-more > summary { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; } }
 @media print { .ndb, .ndb-hint { display: none; } }
 </style>
