@@ -114,7 +114,7 @@ watch(active, (a) => {
   cancelAnimationFrame(raf); last = 0
   if (!a) return
   palette()
-  if (reduce) { t = 14; draw(); return }
+  if (reduce) { t = 14; draw(); raf = requestAnimationFrame(() => { draw(); raf = 0 }); return }   // one still frame (a second draw once the canvas has its size)
   raf = requestAnimationFrame(loop)
 }, { immediate: true, flush: 'post' })
 onBeforeUnmount(() => { cancelAnimationFrame(raf); gl?.getExtension('WEBGL_lose_context')?.loseContext(); gl = null })
