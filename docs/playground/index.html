@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nimbledeck layout playground</title>
+<link rel="stylesheet" href="playground.css">
+</head>
+<body>
+<header>
+  <strong>Layout playground</strong>
+  <span class="hint">Edit a layout or the slides. The slide updates as you type.</span>
+  <label>Look
+    <select id="variant"><option>plain</option><option>paper</option><option>night</option></select>
+  </label>
+  <button id="reset" title="Discard every edit and reload the originals">Reset all</button>
+</header>
+<main>
+  <section class="editor">
+    <nav id="tabs" aria-label="Files"></nav>
+    <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Source"></textarea>
+    <div id="msg" role="status"></div>
+  </section>
+  <section class="preview">
+    <div class="bar">
+      <button id="prev" aria-label="Previous slide">&larr;</button>
+      <span id="count"></span>
+      <button id="next" aria-label="Next slide">&rarr;</button>
+      <button id="replay" title="Play the entrance animations again">Replay</button>
+      <span id="ms" class="ms"></span>
+    </div>
+    <div id="frame"><div id="stage"><div id="mount"></div></div></div>
+    <p class="note">Approximation of a Slidev slide: same layouts, same theme CSS, no live components.</p>
+  </section>
+</main>
+<script type="module" src="playground.js"></script>
+</body>
+</html>
