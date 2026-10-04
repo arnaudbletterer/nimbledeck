@@ -83,6 +83,19 @@ A warm worker pool would cut the per-run start-up but would make killing runaway
     iframe. Fix: a shield over the page (the deck keeps control) plus an in-slide control bar once the presenter chooses
     to interact. Covered by the end-to-end test.
 
+## Bugs found while polishing the showcase deck (fixed)
+
+14. A deck built for a sub-path (`slidev build --base /demos/showcase/`) asked for `/loop.mp4` and `/before.jpg` at the
+    server root and got 404s: the video and the compare images did not show. Fix: `Clip`, `Photo`, `Compare` and the
+    `photo-right` layout put the base path in front of an address that starts with `/`; `Clip` takes an optional `webm`.
+    Covered by `examples/showcase/e2e-web.mjs`.
+15. `Orbit` drew rings taller than its canvas, so the outer ones were cut flat at the top and bottom. Fix: the rings are
+    scaled to the logical height, and `full` draws for a whole 16:9 slide.
+16. Text on a slide that was being left vanished at once while its background faded, which made every transition look
+    broken. Fix: `useActive()` stays true for 650 ms after the page changes (see `ARCHITECTURE.md`).
+17. The live code editor used the colours of a white page, so its keywords and numbers had a contrast of 1.6 to 2.6 on a
+    dark look. Fix: the highlight colours come from the tokens.
+
 ## Known gaps
 
 - An early `verify` run did not flag a title truncated by an ellipsis in a deliberately broken deck (`check` rejects it by

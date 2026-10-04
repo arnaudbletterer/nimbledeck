@@ -114,6 +114,10 @@ Option 2 is the proper fix and needs a change in the addon first.
 
 1. **Gate on `useActive()`.** Slidev keeps neighbouring slides mounted. Without the gate, timers, sockets and WebGL
    keep running off screen.
+   `useActive()` stays true for 650 ms after the slide is left, so that what is on it keeps its look while the slide
+   transition fades it out (text that vanished at once made the transition look broken). Reset and cleanup therefore
+   run 650 ms after the page changes, not at once. A component that must react to the page itself, such as `Looks` putting
+   the deck's look back before the next slide appears, reads `useNav().currentPage` and `useSlideContext().$page`.
 2. **Never trust a 0 measurement.** A mounted but hidden slide reports width 0, so a measured size of 0 means "not
    visible", not "empty". Use a fixed logical size (the slide canvas is 1280 wide).
 3. **Colours come from tokens**, via `cssVar('--nd-ink')`, never hard-coded.

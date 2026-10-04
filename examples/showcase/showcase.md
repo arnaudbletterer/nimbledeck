@@ -151,13 +151,13 @@ class: nd-wide
 <At :w="1140" :h="64"><Looks /></At>
 </Stage>
 
-| Look | Made for |
+| Look | What it looks like |
 |---|---|
-| Plain | Handouts and documents |
-| Paper | Essays and long reads |
-| Night | Dark rooms and screens |
-| Studio light | Bright rooms |
-| Studio | Keynotes and demos |
+| Plain | White page, blue accent |
+| Paper | Serif type on a warm page |
+| Night | Slate page, sky blue accent |
+| Studio light | Warm white page, violet accent |
+| Studio | Near black page, cyan to violet accent |
 
 > `ndVariant: studio`
 
@@ -235,7 +235,7 @@ Drag it. A three.js scene, loaded only on the slide that uses it.
 layout: numbers
 ---
 
-# Measured on one laptop
+# Measured on one Mac
 
 ::a::
 
@@ -251,10 +251,10 @@ layout: numbers
 
 ::d::
 
-<Stat value="60" suffix=" fps" label="drawn on a laptop GPU" :delay="620" />
+<Stat value="60" suffix=" fps" label="drawn with a real GPU" :delay="620" />
 
 <!--
-Thirteen layout files in the theme. 0.13 s, 22 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac: read them as what one machine did, not as a promise.
+Thirteen layout files in the theme. 0.13 s, 22 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac, the 60 fps with a real GPU: read them as what one machine did, not as a promise.
 -->
 
 ---
@@ -304,7 +304,7 @@ layout: stage
 ---
 
 <Stage :w="1200" :h="604">
-<At :w="1200" :h="604"><Compare before="/source.jpg" after="/slide.jpg" :start="56" before-label="Markdown" after-label="Slide" sweep label="The Markdown of a slide and the slide it makes, drag to compare" /></At>
+<At :w="1200" :h="604"><Compare before="/source.jpg" after="/slide.jpg" :start="56" before-label="Markdown" after-label="Slide, sketched" sweep label="The Markdown of a slide and a sketch of the slide it makes, drag to compare" /></At>
 </Stage>
 
 ::caption::
@@ -312,7 +312,7 @@ layout: stage
 Same words, two forms. Drag the divider.
 
 <!--
-Left: the Markdown. Right: the slide it makes. The divider glides once by itself; drag it or use the arrow keys.
+Left: the Markdown. Right: a sketch of the slide in the studio colours, drawn by a script, not a screenshot. The divider glides once by itself; drag it or use the arrow keys.
 -->
 
 ---
