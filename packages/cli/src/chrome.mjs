@@ -1,13 +1,12 @@
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
 
 // Where Chrome (or a Chromium build) usually lives, most likely first. Windows paths are joined with '/', which Windows accepts.
 export function chromeCandidates({ platform = process.platform, env = process.env, home = homedir() } = {}) {
   if (platform === 'darwin') {
     return [
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      join(home, 'Applications/Google Chrome.app/Contents/MacOS/Google Chrome'),
+      `${home}/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`,
       '/Applications/Chromium.app/Contents/MacOS/Chromium',
     ]
   }
