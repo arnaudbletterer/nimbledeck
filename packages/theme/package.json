@@ -1,7 +1,7 @@
 {
   "name": "slidev-theme-nimbledeck",
   "version": "0.1.0",
-  "description": "Nimbledeck base themes: plain, paper and night. Same seven layouts, different design tokens.",
+  "description": "Nimbledeck base themes: plain, paper and night. Same eight layouts, different design tokens.",
   "keywords": ["slidev-theme", "slidev"],
   "engines": { "slidev": ">=0.50.0" },
   "dependencies": { "slidev-addon-nimbledeck": "0.1.0" },

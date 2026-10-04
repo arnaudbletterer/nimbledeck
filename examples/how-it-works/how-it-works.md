@@ -12,7 +12,7 @@ layout: cover
 
 <!--
 This deck is itself built with the system it describes. Every animation you see is live.
-Press ? for all shortcuts, / to search slides, O for the overview, arrow keys to move. Presenter view: /presenter/1 in the address bar.
+Press ? for all shortcuts, / to search slides, o for the overview, arrow keys to move. Presenter view: /presenter/1 in the address bar.
 -->
 
 ---
@@ -97,7 +97,7 @@ No CSS. No HTML. A new look means a new layout, written once.
 layout: default
 ---
 
-# Seven layouts, one theme
+# Eight layouts, one theme
 
 | Layout | Use it for |
 |---|---|
@@ -107,6 +107,7 @@ layout: default
 | default | bullets, tables, callouts |
 | two-cols | two parallel columns |
 | photo-right | an idea plus a photo |
+| full | a full-frame element, no title bar |
 
 ---
 layout: divider

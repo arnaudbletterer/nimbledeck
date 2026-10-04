@@ -56,6 +56,9 @@ Three ideas keep it robust:
 - **Live components run only while their slide is on screen.** Slidev keeps neighbouring slides mounted, so every
   live component gates on `useActive()`.
 
+New here? Start with [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). Releasing and pinning:
+[docs/RELEASING.md](docs/RELEASING.md), [CHANGELOG.md](CHANGELOG.md).
+
 ## Quick start
 
 Requirements: Node 20+ (tested on 22 and 26), [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12 for demos by
@@ -76,7 +79,7 @@ Notes:
 - `nimbledeck run` writes logs to `.nimbledeck/logs/` and a session file to `public/nimbledeck.json` in the deck
   folder: add `.nimbledeck/` and `public/nimbledeck.json` to the deck project's `.gitignore`.
 - `nimbledeck verify` uses Chrome at its usual location. Set `NIMBLEDECK_CHROME` to its path if it is elsewhere.
-- PDF export: `npx slidev export <deck.md> --with-clicks --executable-path "<path to Chrome>"`.
+- PDF export: `nimbledeck export <deck.md>` (one page per build step, Chrome found automatically).
 
 Write a deck:
 
