@@ -2,9 +2,9 @@
 
 ## The example deck
 
-<div class="nd-frame"><iframe src="how-it-works/" title="The Nimbledeck example deck, running" loading="lazy" allow="fullscreen"></iframe></div>
+<div class="nd-frame"><iframe src="demos/how-it-works/" title="The Nimbledeck example deck, running" loading="lazy" allow="fullscreen"></iframe></div>
 
-[Open it full screen](how-it-works/){ .md-button .md-button--primary target="_blank" }
+[Open it full screen](demos/how-it-works/){ .md-button .md-button--primary target="_blank" }
 
 *How a Nimbledeck deck works* is built with Nimbledeck itself. It walks through the writing loop, the layouts, builds,
 a canvas scene, a WebGL scene, Python, video, a quiz and live code. Its source is
