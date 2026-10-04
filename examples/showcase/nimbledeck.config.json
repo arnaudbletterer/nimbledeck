@@ -1,0 +1,19 @@
+{
+  "python": {
+    "version": "3.12",
+    "requirements": "demos/requirements.txt"
+  },
+  "streams": {
+    "swarm": {
+      "file": "demos/stream_swarm.py",
+      "port": 18865
+    }
+  },
+  "limits": {
+    "maxTitle": 40,
+    "maxBullets": 7
+  },
+  "runner": {
+    "port": 18900
+  }
+}
