@@ -45,7 +45,8 @@ export function measure({ chrome: chromeSelectors, bleed: bleedSelectors, lead: 
     // Crispness: the backing store must hold the pixels the screen will show (2x device pixel ratio in `verify`).
     const dpr = window.devicePixelRatio || 1
     const soft = (what, have, need) => issues.push({ kind: 'soft (pixelated on high-resolution screens)', el: label(el), detail: `${what} ${have}px for ${need}px needed` })
-    if (el.tagName === 'CANVAS' && el.width > 0) { const drawn = Math.min(r.width, (r.height * el.width) / el.height); if (el.width < drawn * dpr * 0.9) soft('canvas', el.width, Math.round(drawn * dpr)) }
+    // Aurora paints a blurred gradient on a small canvas on purpose: more pixels would show nothing.
+    if (el.tagName === 'CANVAS' && el.width > 0 && !el.closest('[data-kind="aurora"]')) { const drawn = Math.min(r.width, (r.height * el.width) / el.height); if (el.width < drawn * dpr * 0.9) soft('canvas', el.width, Math.round(drawn * dpr)) }
     if (el.tagName === 'IMG' && el.naturalWidth > 0 && el.naturalWidth < r.width * dpr * 0.9) soft('image', el.naturalWidth, Math.round(r.width * dpr))
     if (el.tagName === 'VIDEO' && el.videoWidth > 0 && el.videoWidth < r.width * 0.9) soft('video', el.videoWidth, Math.round(r.width))   // video: 1x is the floor, 2x is advisory
     if (chrome(el)) continue
