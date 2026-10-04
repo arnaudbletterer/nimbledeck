@@ -16,6 +16,13 @@ Besides the eight base layouts the theme ships five for showcase decks: `hero`, 
 and a deck that uses them is portable only to themes that do. `nimbledeck check` and `verify` know their classes and treat
 `hero`, `statement`, `split` and `stage` as lead layouts (no title bar, no footer).
 
+The studio looks add a few things a deck can use by name, all in the theme's global stylesheet: `class: nd-grid` in a slide's
+frontmatter adds a faint drifting grid; `transition: nd-zoom` is a calm blur-and-scale transition; `statement`, `split` and
+`closing` take an optional `::bg::` slot like `hero`; the word classes `[text]{.nd-name}` (mono accent), `[text]{.nd-dim}` (muted) and
+`[text]{.nd-outline}` (a ghost display word for a `<Marquee>` band) work in Markdown; a hairline along the bottom edge fills as the
+deck advances (`global-bottom.vue`, shown by the studio looks only); and the quiz and the `numbers` cards are restyled
+as large cards.
+
 `package.json` sets the slide transition to `fade-out`, a short cross-fade. A deck can override it with `transition:` in
 its headmatter. Live components still gate on `useActive()`, which follows the current page, not the transition.
 

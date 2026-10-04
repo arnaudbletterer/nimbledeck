@@ -150,3 +150,70 @@
 .slidev-layout .nd-big h1, .slidev-layout.nd-big h1 { border: 0; padding: 0; }
 .nd-hero .nd-bg::after { content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(0deg, color-mix(in srgb, var(--nd-bg) 92%, transparent) 0%, color-mix(in srgb, var(--nd-bg) 55%, transparent) 40%, transparent 75%); }
+
+/* Studio polish: ambient depth, a calmer slide transition, a progress hairline, cards that breathe.
+   Slides opt in with `class: nd-grid` (a faint drifting grid) in their own frontmatter. */
+.nd-grid::before { content: ""; position: absolute; inset: -64px; z-index: 1; pointer-events: none;
+  background-image: linear-gradient(color-mix(in srgb, var(--nd-ink) 9%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--nd-ink) 9%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 65% 70% at 62% 38%, black, transparent 78%); mask-image: radial-gradient(ellipse 65% 70% at 62% 38%, black, transparent 78%);
+  animation: nd-grid-drift 24s linear infinite; }
+@keyframes nd-grid-drift { to { transform: translate3d(64px, 64px, 0); } }
+.nd-statement-inner, .nd-split-l { z-index: 2; }
+.nd-big .nd-kinetic + .nd-kinetic { margin-top: 28px; }
+.nd-lead-inner { position: relative; z-index: 2; }
+/* Ghost display text for a faint band behind a title (use it inside a Marquee: `[words]{.nd-outline}`). It is filled at a few
+   percent, not stroked: a stroke on a variable font draws its overlapping contours. */
+.nd-outline { font-family: var(--nd-font-display); font-size: 200px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+  color: color-mix(in srgb, var(--nd-ink) 5%, transparent); }
+/* `class: nd-wide` on a slide stretches its table over the full content width. */
+.nd-wide .nd-body > table { width: calc(100% - 140px); }
+/* Word-level classes for Markdown: `[hero]{.nd-name}` is a mono accent name, `[text]{.nd-dim}` is muted. */
+.nd-name { display: inline-block; min-width: 6.2em; font-family: var(--nd-font-mono, ui-monospace, Menlo, monospace); font-weight: 700; color: var(--nd-accent); }
+.nd-dim { color: var(--nd-muted); font-size: 26px; letter-spacing: .02em; }
+@media (prefers-reduced-motion: reduce) { .nd-grid::before { animation: none; } }
+
+/* Slide transition `nd-zoom`: the next slide settles in from slightly larger while the last one softens away. */
+.nd-zoom-enter-active, .nd-zoom-leave-active { transition: opacity calc(var(--slidev-transition-duration, 500ms) * 1.1) cubic-bezier(.16, 1, .3, 1), transform calc(var(--slidev-transition-duration, 500ms) * 1.6) cubic-bezier(.16, 1, .3, 1), filter calc(var(--slidev-transition-duration, 500ms) * 1.1) ease; }
+.nd-zoom-enter-from { opacity: 0; transform: scale(1.035); filter: blur(8px); }
+.nd-zoom-leave-to { opacity: 0; transform: scale(.985); filter: blur(5px); }
+@media (prefers-reduced-motion: reduce) { .nd-zoom-enter-active, .nd-zoom-leave-active { transition: opacity .2s linear; } .nd-zoom-enter-from, .nd-zoom-leave-to { transform: none; filter: none; } }
+
+/* Progress hairline along the bottom edge (studio looks only). */
+.nd-progress { display: none; }
+[data-nd-variant^="studio"] .nd-progress { display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 40; pointer-events: none; }
+.nd-progress i { display: block; height: 100%; transform-origin: 0 50%; background: var(--nd-gradient); transition: transform .9s cubic-bezier(.16, 1, .3, 1);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--nd-accent) 60%, transparent); }
+@media (prefers-reduced-motion: reduce) { .nd-progress i { transition: none; } }
+
+/* Quiz: big answer cards. The whole card carries the state, not only the text. */
+[data-nd-variant^="studio"] .nd-quiz { gap: 20px; margin-top: 0; }
+[data-nd-variant^="studio"] .nd-choice { min-height: 136px; font-size: 36px; background: var(--nd-surface); border: 1px solid var(--nd-line); border-radius: 20px; overflow: hidden;
+  transition: opacity .35s ease, transform .25s cubic-bezier(.16, 1, .3, 1), border-color .25s ease, box-shadow .25s ease, background-color .35s ease; }
+[data-nd-variant^="studio"] .nd-choice strong { width: 118px; min-height: 0; background: transparent; color: var(--nd-accent); font-weight: 800; font-size: 48px; border-right: 1px solid var(--nd-line); }
+[data-nd-variant^="studio"] .nd-choice span { background: transparent; box-shadow: none; padding: 0 1em 0 .9em; font-weight: 600; letter-spacing: -0.02em; }
+[data-nd-variant^="studio"] .nd-choice.nd-interactive:hover, [data-nd-variant^="studio"] .nd-choice.nd-interactive:focus-visible { border-color: var(--nd-accent); transform: translateY(-3px);
+  box-shadow: 0 14px 34px -14px color-mix(in srgb, var(--nd-accent) 60%, transparent); }
+[data-nd-variant^="studio"] .nd-choice.nd-interactive:hover strong, [data-nd-variant^="studio"] .nd-choice.nd-interactive:focus-visible strong { background: var(--nd-accent); color: var(--nd-bg); }
+[data-nd-variant^="studio"] .nd-choice:focus-visible { outline: 3px solid var(--nd-accent); outline-offset: 3px; }
+[data-nd-variant^="studio"] .nd-revealed .nd-choice.nd-correct { background: var(--nd-good); border-color: var(--nd-good-ink); }
+[data-nd-variant^="studio"] .nd-choice.nd-wrong { background: var(--nd-bad); border-color: var(--nd-bad-ink); }
+[data-nd-variant^="studio"] .nd-revealed .nd-choice.nd-correct strong { color: var(--nd-good-ink); }
+[data-nd-variant^="studio"] .nd-choice.nd-wrong strong { color: var(--nd-bad-ink); }
+[data-nd-variant^="studio"] .nd-revealed .nd-choice.nd-correct span, [data-nd-variant^="studio"] .nd-choice.nd-wrong span { box-shadow: none; }
+[data-nd-variant^="studio"] .nd-verdict { font-size: 28px; font-weight: 600; border-radius: 16px; padding: .5em 1em; }
+[data-nd-variant^="studio"] .nd-explain { margin-top: 0; border-radius: 20px; overflow: hidden; border: 1px solid var(--nd-line); background: var(--nd-surface); }
+[data-nd-variant^="studio"] .nd-explain strong { background: transparent; color: var(--nd-accent); font-weight: 800; width: 118px; font-size: 48px; border-right: 1px solid var(--nd-line); }
+[data-nd-variant^="studio"] .nd-explain-body { font-size: 30px; line-height: 1.3; padding: .8em 1.2em; background: transparent; }
+
+/* Numbers: four figures sit in a 2 x 2 grid and every card enters in turn, when its Stat starts. */
+.nd-nums.nd-n4 { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 28px; align-content: stretch; top: 112px; bottom: 74px; }
+.nd-num { position: relative; display: flex; flex-direction: column; justify-content: center; padding: 36px 44px;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--nd-accent) 7%, var(--nd-surface)), var(--nd-surface) 60%); border-radius: 22px; }
+.nd-num::before { content: ""; position: absolute; left: 44px; top: 0; width: 56px; height: 3px; border-radius: 0 0 3px 3px; background: var(--nd-gradient); }
+@supports selector(:has(a)) {
+  .nd-num:has(.nd-stat) { opacity: 0; transform: translateY(26px) scale(.97); }
+  .nd-num:has(.nd-stat.nd-on) { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .9s cubic-bezier(.16, 1, .3, 1); }
+  .nd-num:nth-child(2):has(.nd-stat.nd-on) { transition-delay: .14s; } .nd-num:nth-child(3):has(.nd-stat.nd-on) { transition-delay: .28s; } .nd-num:nth-child(4):has(.nd-stat.nd-on) { transition-delay: .42s; }
+}
+@media (prefers-reduced-motion: reduce) { .nd-num { opacity: 1 !important; transform: none !important; transition: none !important; } }
