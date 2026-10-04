@@ -39,7 +39,7 @@ const valuePlugin = {
   afterDatasetsDraw(c: Chart) {
     if (!props.values) return
     const ctx = c.ctx
-    ctx.save(); ctx.font = `600 18px ${cssVar('--nd-font-body', 'sans-serif')}`; ctx.fillStyle = cssVar('--nd-ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.save(); ctx.font = `600 22px ${cssVar('--nd-font-body', 'sans-serif')}`; ctx.fillStyle = cssVar('--nd-ink'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     c.data.datasets.forEach((ds, di) => c.getDatasetMeta(di).data.forEach((el: any, i) => {
       const v = ds.data[i] as number
       const pos = el.tooltipPosition ? el.tooltipPosition(true) : { x: el.x, y: el.y }
@@ -75,10 +75,10 @@ function build() {
       animation: { duration: 700 },
       indexAxis: props.horizontal ? 'y' : 'x',
       cutout: props.type === 'doughnut' ? '62%' : undefined,
-      plugins: { legend: { display: props.legend ?? (round || series().length > 1), labels: { color: ink, font: { family: font, size: 16 } } }, tooltip: { enabled: true } },
+      plugins: { legend: { display: props.legend ?? (round || series().length > 1), labels: { color: ink, font: { family: font, size: 20 } } }, tooltip: { enabled: true } },
       scales: round ? {} : {
-        x: { stacked: props.stacked, grid: { color: line }, ticks: { color: ink, font: { family: font, size: 16 } } },
-        y: { stacked: props.stacked, grid: { color: line }, ticks: { color: ink, font: { family: font, size: 16 } }, beginAtZero: true },
+        x: { stacked: props.stacked, grid: { color: line }, ticks: { color: ink, font: { family: font, size: 20 } } },
+        y: { stacked: props.stacked, grid: { color: line }, ticks: { color: ink, font: { family: font, size: 20 } }, beginAtZero: true },
       },
     },
     plugins: [valuePlugin],

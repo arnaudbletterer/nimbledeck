@@ -6,9 +6,9 @@ import { useEntered } from '../composables/useEntered'
 import { fromHsl, hueShift, luma, mix, rgbOf, rgba, toHsl, type RGB } from '../composables/color'
 
 // An animated gradient mesh that fills its box: soft blobs of the accent colours drifting on slow orbits. Use it inside
-// <Stage full> with <At>. `intensity` scales the glow, `speed` the drift. It renders at half resolution (the blobs are
+// <Stage full> with <At>. `intensity` scales the glow, `speed` the drift, `hue` turns the colours (degrees), `cx` and `cy` move the centre of the drift (0 to 1, 0.5 by default) so neighbouring slides do not repeat one picture. It renders at half resolution (the blobs are
 // blurry by nature, so nothing is lost) and sleeps while its slide is not on screen.
-const props = withDefaults(defineProps<{ intensity?: number; speed?: number }>(), { intensity: 1, speed: 1 })
+const props = withDefaults(defineProps<{ intensity?: number; speed?: number; hue?: number; cx?: number; cy?: number }>(), { intensity: 1, speed: 1, hue: 0, cx: 0.5, cy: 0.5 })
 const LW = 1280, LH = 720, SCALE = 0.5
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 const root = ref<HTMLElement>()
@@ -27,8 +27,9 @@ function sprite(c: RGB): HTMLCanvasElement {
 interface Blob { img: HTMLCanvasElement; fx: number; fy: number; px: number; py: number; ph: number; r: number; a: number }
 let blobs: Blob[] = [], bg = '', dark = true
 function build() {
-  const a1 = rgbOf('--nd-accent'), bgc = rgbOf('--nd-bg')
-  let a2 = rgbOf('--nd-accent-2')
+  const shift = (c: RGB): RGB => (props.hue ? hueShift(c, props.hue) : c)
+  const a1 = shift(rgbOf('--nd-accent')), bgc = rgbOf('--nd-bg')
+  let a2 = shift(rgbOf('--nd-accent-2'))
   if (toHsl(a2)[1] < 0.18) a2 = hueShift(a1, -48)                  // a grey second accent would only dull the mesh
   const a3 = hueShift(a1, 52), a4 = mix(a1, a2, 0.5)
   dark = luma(bgc) < 0.5
@@ -52,7 +53,7 @@ function draw() {
   g.globalCompositeOperation = dark ? 'lighter' : 'source-over'
   const gain = (dark ? 0.36 : 0.5) * props.intensity
   for (const b of blobs) {
-    const x = 0.5 + b.px * Math.sin(t * b.fx + b.ph), y = 0.5 + b.py * Math.cos(t * b.fy + b.ph * 1.3)
+    const x = props.cx + b.px * Math.sin(t * b.fx + b.ph), y = props.cy + b.py * Math.cos(t * b.fy + b.ph * 1.3)
     const rx = b.r * (1 + 0.08 * Math.sin(t * 0.33 + b.ph)), ry = rx * (LW / LH)
     g.globalAlpha = Math.min(1, gain * b.a)
     g.drawImage(b.img, x - rx, y - ry, rx * 2, ry * 2)

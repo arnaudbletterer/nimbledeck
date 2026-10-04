@@ -48,7 +48,7 @@ check('a held kinetic text stays hidden before the click', await page.evaluate((
 await key(page, 'ArrowRight')
 await page.waitForTimeout(300)
 check('the held kinetic text plays after the click', await page.evaluate(() => [...document.querySelectorAll('[data-kind=kinetic]')].some((k) => k.classList.contains('nd-k-play'))))
-await key(page, 'ArrowRight'); await page.waitForTimeout(300)   // now on the terminal slide
+await key(page, 'ArrowRight'); await page.waitForTimeout(900)   // now on the terminal slide (a left slide stays active for 650 ms while it fades out)
 check('leaving the slide resets the typewriter', await page.evaluate(() => [...document.querySelectorAll('[data-kind=typewriter]')].every((e) => !e.classList.contains('nd-done') && e.querySelector('.nd-tw-live').textContent === '')))
 
 // Terminal
