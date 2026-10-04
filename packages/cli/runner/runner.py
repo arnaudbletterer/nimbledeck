@@ -41,6 +41,7 @@ MAX_TIMEOUT = 60
 MAX_FILE_BYTES = 32_000_000     # RLIMIT_FSIZE: largest file the code may write
 MAX_OUTPUT_BYTES = 10_000_000   # stdout + stderr together, then the run is stopped
 MEMORY_POLL = 0.2
+MPL = {"dir": None, "warm": None}   # shared matplotlib cache folder, and the task that fills it at startup
 
 
 def _set_limits(timeout, memory_mb, which):
@@ -110,17 +111,33 @@ class Capped:
         return self.tail.decode("utf-8", "replace")[-MAX_TEXT:]
 
 
+async def warm_matplotlib(env):
+    """Build matplotlib's font cache once. A fresh cache folder per run made every run pay it (about 19 s on a Mac with many
+    fonts); a shared folder pays once, here, before the first run. Failure is harmless: the run then builds it itself."""
+    try:
+        p = await asyncio.create_subprocess_exec(sys.executable, "-I", "-c", "import matplotlib.pyplot", env=env,
+                                                 stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+        await p.wait()
+    except OSError:
+        pass
+
+
 async def run_code(msg, memory_mb, rlimits=frozenset()):
     timeout = min(float(msg.get("timeout") or 10), MAX_TIMEOUT)
     work = tempfile.mkdtemp(prefix="nd-run-")
     t0 = time.perf_counter()
     proc, tasks = None, []
     try:
+        if MPL["warm"]:
+            await asyncio.shield(MPL["warm"])   # the first run waits for the font cache; the timeout starts after
+            t0 = time.perf_counter()
         with open(os.path.join(work, "code.py"), "w", encoding="utf-8") as f:
             f.write(str(msg.get("code", "")))
         with open(os.path.join(work, "params.json"), "w") as f:
             json.dump({"dpi": min(float(msg.get("dpi") or 100), 300), "theme": msg.get("theme") or {}}, f)
         env = {k: v for k, v in os.environ.items() if k not in ("NIMBLEDECK_TOKEN",)}
+        if MPL["dir"]:
+            env["MPLCONFIGDIR"] = MPL["dir"]
         kwargs = {"start_new_session": True, "preexec_fn": lambda: _set_limits(timeout, memory_mb, rlimits)} if os.name == "posix" else {}
         proc = await asyncio.create_subprocess_exec(sys.executable, "-I", os.path.join(HERE, "wrapper.py"), work, cwd=work, env=env,
                                                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, **kwargs)
@@ -221,6 +238,7 @@ async def main():
     ap.add_argument("--port", type=int, required=True)
     ap.add_argument("--origin", action="append", default=[])
     ap.add_argument("--memory-mb", type=int, default=4096)
+    ap.add_argument("--cache-dir", help="folder that keeps matplotlib's font cache between sessions (default: a temporary one)")
     args = ap.parse_args()
     token = os.environ.get("NIMBLEDECK_TOKEN") or secrets.token_hex(16)
 
@@ -234,6 +252,9 @@ async def main():
     if not args.origin:
         sys.exit("runner: at least one --origin is required (the deck's own browser origin)")
     rlimits = probe_limits(args.memory_mb)
+    MPL["dir"] = os.path.abspath(args.cache_dir) if args.cache_dir else tempfile.mkdtemp(prefix="nd-mpl-")
+    os.makedirs(MPL["dir"], exist_ok=True)
+    MPL["warm"] = asyncio.create_task(warm_matplotlib({**{k: v for k, v in os.environ.items() if k != "NIMBLEDECK_TOKEN"}, "MPLCONFIGDIR": MPL["dir"]}))
     print(f"runner: memory limit {args.memory_mb} MB via " + ("RLIMIT_AS and RSS polling" if "as" in rlimits else "RSS polling"), file=sys.stderr, flush=True)
     async with serve(make_handler(token, args.memory_mb, rlimits), "127.0.0.1", args.port, origins=args.origin, process_request=process_request,
                      max_size=2_000_000):
