@@ -10,8 +10,10 @@ hide:
 Nimbledeck writes slides that run things: plain Markdown for the story, plus live animation, 3D, Python, video and
 websites, presented from one browser tab.
 
-The [home page](../){ .md-button .md-button--primary } is a Nimbledeck deck, written in one Markdown file. Watch it first, or
-[start writing your own](GETTING-STARTED.md){ .md-button }.
+The home page is a Nimbledeck deck, written in one Markdown file. Watch it first, or start writing your own.
+
+[Watch the deck](../){ .md-button .md-button--primary }
+[Get started](GETTING-STARTED.md){ .md-button }
 
 ## Find your way
 

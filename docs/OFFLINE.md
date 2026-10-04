@@ -48,3 +48,7 @@ requirements or the Python version.
 request left hanging, once with the browser offline and every request aborted. It checks that the first slide shows in
 under 3 seconds, that the keyboard walks the whole deck, that the website slide shows its offline panel and recovers, and
 that the only external address requested is the deck's own `<Site>` URL.
+
+The hosted site follows the same rule. `website/check-links.mjs` fails the site build on any script, stylesheet, image or
+frame that is not local, and `website/site-e2e.mjs` opens the built site with every external request left hanging and
+checks that none is attempted.
