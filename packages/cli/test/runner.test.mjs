@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 import WebSocket from 'ws'
 
 const hasUv = spawnSync('uv', ['--version']).status === 0
+const posix = process.platform !== 'win32'
 const here = dirname(fileURLToPath(import.meta.url))
 const TOKEN = 'test-token-123'
 const ORIGIN = 'http://localhost:3030'
@@ -77,7 +78,22 @@ test('an infinite loop is killed at the timeout and the runner keeps working', {
   const again = result(await run(ws, { id: 6, code: 'print("still alive")' })); assert.match(again.stdout, /still alive/); ws.close()
 })
 
-test('a newer run replaces the one in progress', { skip: !hasUv }, async () => {
+test('each run is a fresh process: no shared state, no stdin, its own session', { skip: !hasUv || !posix }, async () => {
+  const ws = await open(TOKEN)
+  const code = 'import os, sys\nprint(os.getpid(), os.getsid(0) == os.getpid(), repr(sys.stdin.read()), "leak" in globals())\nleak = 1\nimport builtins; builtins.leak2 = 1'
+  const a = result(await run(ws, { id: 20, code })); const b = result(await run(ws, { id: 21, code }))
+  const [pa, sa, ia, la] = a.stdout.trim().split(' '); const [pb, sb, ib, lb] = b.stdout.trim().split(' ')
+  assert.notEqual(pa, pb); assert.equal(sa, 'True'); assert.equal(sb, 'True'); assert.equal(ia, "''"); assert.equal(ib, "''"); assert.equal(la, 'False'); assert.equal(lb, 'False')
+  const c = result(await run(ws, { id: 22, code: 'print(hasattr(__import__("builtins"), "leak2"))' })); assert.match(c.stdout, /False/); ws.close()
+})
+
+test('the CPU limit still follows the run timeout', { skip: !hasUv || !posix }, async () => {
+  const ws = await open(TOKEN)
+  const r = result(await run(ws, { id: 23, code: 'import resource\nprint(resource.getrlimit(resource.RLIMIT_CPU))', timeout: 5 }))
+  assert.match(r.stdout, /\(7, 7\)/); ws.close()
+})
+
+test('a newer run replaces the one in progress',{ skip: !hasUv }, async () => {
   const ws = await open(TOKEN); const seen = []
   ws.onmessage = (e) => seen.push(JSON.parse(e.data))
   ws.send(JSON.stringify({ type: 'run', id: 10, code: 'import time; time.sleep(20)', timeout: 30 }))
@@ -88,7 +104,6 @@ test('a newer run replaces the one in progress', { skip: !hasUv }, async () => {
   assert.ok(!seen.some((m) => m.type === 'result' && m.id === 10), 'the replaced run must not report'); ws.close()
 })
 
-const posix = process.platform !== 'win32'
 
 test('code above the memory limit is stopped and reported', { skip: !hasUv || !posix }, async () => {
   const ws = await open(TOKEN); const t0 = Date.now()
