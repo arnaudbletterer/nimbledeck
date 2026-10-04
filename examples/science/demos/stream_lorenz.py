@@ -1,13 +1,14 @@
 """Live Python animation: the Lorenz system, integrated for an ensemble of trajectories that start almost on top of each other.
 
 Frame format (binary, float32): [step_ms, n, x0, y0, x1, y1, ...], x and y in [-2, 2] (the PyStream canvas maps that to
-its width and height; this demo expects a 1280 x 720 canvas). The points are ordered by trajectory, `SUB` consecutive points per trajectory (the sub-steps of
-one frame, so a fast trajectory still draws a continuous line). The page colours the points by position in the
-list, so a trajectory keeps its colour for its whole life.
+its width and height; this demo expects a 1280 x 720 canvas). The points are ordered by trajectory, with `SUB`
+consecutive points per trajectory (the sub-steps of one frame, so a fast trajectory still draws a continuous line).
+The page colours the points by their position in the list, so a trajectory keeps its colour for its whole life.
 
-The client sends JSON {"n", "dt", "g"}, which this demo reads as: n = trajectories, dt = Lorenz time per frame,
-g = the number of decimal digits the first and the last trajectory share at the start (difference = 10 ** -g). Each connection owns its
-simulation and the numpy step runs in a worker thread. The ensemble restarts when it has spread over the whole attractor.
+The client sends JSON {"n", "dt", "g"}, which this demo reads as: n = trajectories, dt = Lorenz time per frame, and
+g = the number of decimal digits the first and the last trajectory share at the start (difference = 10 ** -g).
+Each connection owns its simulation, and the numpy step runs in a worker thread. The ensemble restarts when it has
+spread over the whole attractor.
 """
 import asyncio
 import json
