@@ -18,10 +18,12 @@ This is the **web edition** of the example: a static build served from the web, 
 keeps everything that runs in a browser: layouts, builds, the three looks, `Orbit`, `Scene3D`, `Chart`, `Clip`,
 `Compare`, `Quiz`, `Flip`, `Countdown`, `CountUp` and `Site`. Search covers slide titles and notes.
 
-The six slides that need `nimbledeck run` (`PyStream`, `Demo`, `LiveCode`) are left out of this copy, so nothing here
-shows an offline panel. See them, and how to run them yourself, on [Run it locally](run-locally.md).
+The slides that need `nimbledeck run` (`PyStream`, `Demo`, `LiveCode`) cannot run here. Those with a recording stay and
+play it, marked "Recording of a live run"; any other is left out, so nothing here shows an offline panel. See how the
+recordings are made in [Recording live components](RECORDING.md), and run the slides yourself with
+[Run it locally](run-locally.md).
 
 ## Add your own deck here
 
 Any Slidev build can be published under `demos/`. The site build in `website/build.mjs` builds the example deck, skipping any
-slide that uses `PyStream`, `Demo` or `LiveCode`. Add a line there to build another deck next to it.
+slide that uses `PyStream`, `Demo` or `LiveCode` without a recording. Add a line there to build another deck next to it.

@@ -5,7 +5,7 @@
 ```
 packages/addon   slidev-addon-nimbledeck   components + design tokens + composables
 packages/theme   slidev-theme-nimbledeck   thirteen layouts, five variants, pulls in the addon by default
-packages/cli     nimbledeck                run, check, verify
+packages/cli     nimbledeck                run, record, check, verify
 examples/        decks that exercise everything (also the integration test)
 ```
 
@@ -41,6 +41,7 @@ and `publicDir` path must stay inside the project folder and contain no shell ch
 | `python.version`, `python.requirements` | `3.12`, `demos/requirements.txt` | Python for `uv run`, and the packages file (used when it exists) |
 | `demos`, `streams` | none | `{ "name": { "file": "...", "port": n } }` for `<Demo>` and `<PyStream>` |
 | `runner` | none | `{ "port": n }` enables live code |
+| `recordings` | none | scripted steps for `nimbledeck record`, keyed `live-<id>`, `stream-<name>`, `demo-<name>` (see [Recording](RECORDING.md)) |
 | `port`, `publicDir` | `3030`, `public` | the deck's port, and where its assets live |
 | `limits.maxTitle`, `limits.maxSubtitle` | 40, 55 | longest `# title` (error) and `#### subtitle` (warning) before the theme cuts it off |
 | `limits.maxBullets`, `limits.maxChars` | 7, 900 | bullets per slide, and characters of prose per slide (warnings) |
@@ -101,9 +102,12 @@ Option 2 is the proper fix and needs a change in the addon first.
 
 ## Failure model
 
-- Demo process down: the `Demo` component shows an offline panel (and a poster if `public/posters/<name>.png`
-  exists). It probes every 3 s and swaps the iframe back in when the process returns.
-- Stream process down: `PyStream` shows an offline notice and reconnects every 2 s.
+- Demo process down: the `Demo` component shows its recording when `public/recordings/demo-<name>.webm` or `.mp4` exists
+  (see [Recording](RECORDING.md)), else an offline panel (and a poster if `public/posters/<name>.png` exists). It probes
+  every 3 s and swaps the iframe back in when the process returns.
+- Stream process down: `PyStream` shows its recording, else an offline notice, and reconnects every 2 s.
+- Runner down: `LiveCode` shows its recording, else a notice, and reconnects every 2 s. A recording appears only after the
+  process has been missing for 0.7 s, and goes as soon as it is back.
 - A subprocess that crashes inside a demo is caught by the demo's own code. Only that demo shows an error.
 - Port already in use: `nimbledeck run` refuses to start and names the port.
 - Leaving a demo slide: a long computation already started in a subprocess keeps running to the end (measured with
@@ -135,6 +139,14 @@ The base theme adds `--nd-cover-bg --nd-cover-fg --nd-title-transform --nd-title
 number fill; a solid accent except in `studio`). The studio looks also set `--nd-font-mono` and `--nd-node-border` (the
 border of a Mermaid node).
 The variant is chosen by the headmatter key `ndVariant`, applied as `data-nd-variant` on `<html>`.
+
+## Recordings
+
+`nimbledeck record` (`packages/cli/src/record.mjs`) starts the deck like `run`, or attaches to one with `--url`, and films
+each live component in Chrome. The components expose `data-rec-id` (`stream-<name>`, `demo-<name>`, `live-<id>`) and
+`data-state`; the recorder waits for the live state, crops the box and encodes it. Playback is in the components, through
+`Recorded.vue` and `composables/useRecording.ts`. The web build helper `disableUnrecorded` in `packages/cli/src/recordings.mjs`
+keeps the slides whose components all have a recording. Details and measurements are in [Recording](RECORDING.md).
 
 ## The CLI checker
 

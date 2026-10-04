@@ -39,6 +39,14 @@ stream share one slide.
 
 </div>
 
+## Or watch a recording
+
+A live slide can also play a film of itself. `nimbledeck record my-deck.md` runs the deck and its Python processes once,
+films every live component, and saves the clips in `public/recordings`. Wherever the process is not running (a static
+website, a laptop without Python) the slide plays the clip, marked "Recording of a live run", and goes live by itself when
+the process is there. Typing, sliders and buttons can be scripted so the clip shows the point. See
+[Recording live components](RECORDING.md).
+
 ## Try them in three commands
 
 You need Node 20 or newer and [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12 by itself).

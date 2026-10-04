@@ -37,7 +37,8 @@ requirements or the Python version.
 2. If something is not cached, it checks for a connection for at most one second. If the connection answers, uv fetches
    what is missing, with a 10 second timeout (set `UV_HTTP_TIMEOUT` to change it).
 3. If there is no connection and something is missing, it prints one message naming what is missing, does not start the
-   Python processes, and starts the deck anyway. The demo, stream and live-code components show their offline panels.
+   Python processes, and starts the deck anyway. The demo, stream and live-code components play their [recordings](RECORDING.md) when they have one, and show their
+   offline panels otherwise.
 
 `UV_OFFLINE=1` forces the offline path. The Slidev server itself starts from the copy installed in the deck's
 `node_modules`, with no lookup.
