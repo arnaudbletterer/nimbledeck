@@ -70,6 +70,7 @@ Seven lines on the left. Click: the slide on the right is what they produce.
 
 ---
 layout: stage
+tour: 14
 ---
 
 <Stage full>
@@ -192,6 +193,7 @@ Drag it. A three.js scene, loaded only on the slide that uses it.
 
 ---
 layout: numbers
+tour: 9
 ---
 
 # Measured, not claimed
@@ -234,6 +236,7 @@ Milliseconds, before and after the runner work in docs/PERFORMANCE.md. One machi
 
 ---
 layout: default
+tour: 7
 ---
 
 # Which file holds the deck?
