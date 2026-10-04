@@ -264,3 +264,15 @@
 /* A soft vignette keeps the edges calm so text laid over the mesh stays readable. */
 .nd-aurora::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 40%, color-mix(in srgb, var(--nd-bg) 70%, transparent) 100%); }
 @media (prefers-reduced-motion: reduce) { .nd-aurora canvas { transition: none; } }
+
+/* ==== Motion toolkit: Stat ==== */
+.nd-stat { display: inline-block; text-align: left; font-family: var(--nd-font-display); }
+.nd-stat-num { display: flex; align-items: baseline; font-size: 150px; font-weight: 700; line-height: 1; letter-spacing: -0.04em; padding-right: .06em; font-variant-numeric: tabular-nums; color: var(--nd-ink);
+  background: linear-gradient(100deg, var(--nd-ink) 20%, var(--nd-accent) 95%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.nd-stat-val { display: inline-grid; }
+.nd-stat-val > * { grid-area: 1 / 1; justify-self: end; }
+.nd-stat-ghost { visibility: hidden; }
+.nd-stat-fix { font-size: .5em; font-weight: 600; letter-spacing: -0.02em; margin: 0 .04em; white-space: pre; }
+.nd-stat-label { margin-top: .5em; font: 500 26px/1.3 var(--nd-font-body); letter-spacing: 0; color: var(--nd-muted); opacity: 0; transform: translateY(14px); }
+.nd-stat.nd-on .nd-stat-label { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.16, 1, .3, 1) var(--nd-stat-wait), transform .8s cubic-bezier(.16, 1, .3, 1) var(--nd-stat-wait); }
+@media (prefers-reduced-motion: reduce) { .nd-stat-label { opacity: 1; transform: none; transition: none !important; } }
