@@ -68,6 +68,11 @@ strict about who can talk to it:
 - memory: `RLIMIT_AS` is set where the OS accepts it (Linux; macOS refuses it, and the runner logs that at startup), and on
   every POSIX system the runner also polls the resident memory of the run's process group every 200 ms and kills it above
   `--memory-mb` (default 4096), reporting "Stopped: memory limit". Windows has no memory limit;
+- to start fast, the runner keeps one wrapper process waiting with numpy and matplotlib already imported. A run takes it
+  and a new one is started at once, so no process ever serves two runs: each is still its own process and session, with
+  the same limits (the CPU limit is set by the process itself when the job arrives), the same timeout and the same kill.
+  Its stdin is `/dev/null` for the user's code. Matplotlib's font cache lives in one shared folder
+  (`.nimbledeck/cache/matplotlib`), not in each run's folder;
 - output is read incrementally and only its last 20,000 characters are kept; a run that prints more than 10 MB is stopped.
   A figure file larger than 8 MB is dropped without being read.
 

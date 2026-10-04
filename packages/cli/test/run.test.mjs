@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { loadConfig, validateConfig } from '../src/config.mjs'
-import { startDeck, winCommand } from '../src/run.mjs'
+import { slidevBin, startDeck, winCommand } from '../src/run.mjs'
 
 const project = (config) => {
   const root = mkdtempSync(join(tmpdir(), 'nd-run-'))
@@ -101,4 +101,9 @@ test('a missing program is explained and everything stops', async () => {
     assert.match(errors[0], /cannot start slidev: 'npx' was not found, install Node.js/)
     assert.equal(code, 1)
   } finally { console.error = orig }
+})
+
+test('Slidev is found in the deck project and started with node, not npx; a project without it falls back', () => {
+  assert.match(slidevBin(new URL('../../../examples/how-it-works', import.meta.url).pathname), /@slidev[\\/]cli[\\/]bin[\\/]slidev\.mjs$/)
+  assert.equal(slidevBin(mkdtempSync(join(tmpdir(), 'nd-noslidev-'))), null)
 })

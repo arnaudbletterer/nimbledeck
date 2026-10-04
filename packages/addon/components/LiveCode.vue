@@ -63,7 +63,7 @@ function run() {
   const colors = [1, 2, 3, 4].map((i) => cssVar(`--nd-chart-${i}`, '#888'))
   ws.send(JSON.stringify({ type: 'run', id: runId, code: text(), dpi, timeout: props.timeout, theme: { ink: cssVar('--nd-ink'), line: cssVar('--nd-line'), colors } }))
 }
-function schedule() { stale.value = true; clearTimeout(debounce); if (props.auto) debounce = window.setTimeout(run, 600) }
+function schedule() { stale.value = true; clearTimeout(debounce); if (props.auto) debounce = window.setTimeout(run, 300) }
 function reset() { view?.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: initial.value } }) }
 
 function mount() {

@@ -6,6 +6,7 @@ import { loadConfig } from './config.mjs'
 import { splitSlides } from './slides.mjs'
 
 const CHROME = findChrome()
+const PAGES = Number(process.env.NIMBLEDECK_VERIFY_PAGES) || 4   // slides checked at the same time
 
 // Runs inside the page: measures the current slide against the 1280 x 720 frame.
 // Content clipped by an overflow:hidden ancestor is fine; content that reaches outside the slide, enters the footer zone,
@@ -65,22 +66,36 @@ export async function verifyDeck(deckPath, root, url) {
   try { ({ chromium } = createRequire(join(root, 'noop.js'))('playwright-chromium')) } catch { console.error('nimbledeck verify needs playwright-chromium installed next to the deck'); return 2 }
   const slides = splitSlides(readFileSync(deckPath, 'utf8'))
   const browser = await chromium.launch(CHROME ? { executablePath: CHROME } : {})
-  const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 2 })
-  let total = 0
-  for (let n = 1; n <= slides.length; n++) {
-    process.stderr.write(`slide ${n}/${slides.length}\r`)
+  // Slides are independent and each one mostly waits (for animations, canvases, demos), so a few pages work in parallel.
+  // Results are printed in slide order, whichever page finishes first.
+  const lines = []   // lines[n - 1] = what slide n reports
+  let next = 1, done = 0
+  const worker = async () => {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 2 })
+    for (let n = next++; n <= slides.length; n = next++) {
+      lines[n - 1] = await verifySlide(page, n)
+      process.stderr.write(`slide ${++done}/${slides.length}\r`)
+    }
+  }
+  const verifySlide = async (page, n) => {
+    const out = []
     try {
       // 'domcontentloaded': embedded sites and videos must not be able to stall the check.
       await page.goto(`${base}/${n}?clicks=99`, { waitUntil: 'domcontentloaded', timeout: 20000 })
       await page.waitForFunction(() => [...document.querySelectorAll('.slidev-layout')].some((e) => e.getBoundingClientRect().width > 0), null, { timeout: 15000 })
-    } catch (e) { console.log(`ERROR slide ${n}: did not load (${String(e.message).split('\n')[0]})`); total++; continue }
+    } catch (e) { return [`ERROR slide ${n}: did not load (${String(e.message).split('\n')[0]})`] }
     await page.waitForTimeout(/<(Demo|PyStream|Scene3D|Site)\b/.test(slides[n - 1].body) ? 4500 : 1200)
     const r = await page.evaluate(measure, { chrome: cfg.verify.chrome, bleed: cfg.verify.bleed, lead: cfg.leadLayouts })
-    if (r.error) { console.log(`ERROR slide ${n}: ${r.error}`); total++; continue }
-    if (r.frame[0] !== 1280 || r.frame[1] !== 720) { console.log(`ERROR slide ${n}: frame is ${r.frame.join('x')}, expected 1280x720, so nothing can be trusted`); total++; continue }
+    if (r.error) return [`ERROR slide ${n}: ${r.error}`]
+    if (r.frame[0] !== 1280 || r.frame[1] !== 720) return [`ERROR slide ${n}: frame is ${r.frame.join('x')}, expected 1280x720, so nothing can be trusted`]
     const seen = new Set()
-    for (const i of r.issues) { const k = `${i.kind}|${i.el}`; if (seen.has(k)) continue; seen.add(k); console.log(`ERROR slide ${n} (line ${slides[n - 1].line}): ${i.kind}: ${i.el} (${i.detail})`); total++ }
+    for (const i of r.issues) { const k = `${i.kind}|${i.el}`; if (seen.has(k)) continue; seen.add(k); out.push(`ERROR slide ${n} (line ${slides[n - 1].line}): ${i.kind}: ${i.el} (${i.detail})`) }
+    return out
   }
+  await Promise.all(Array.from({ length: Math.min(PAGES, slides.length) }, worker))
+  const all = lines.flat()
+  all.forEach((l) => console.log(l))
+  const total = all.length
   await browser.close()
   console.log(`${slides.length} slides verified, ${total} placement problems`)
   return total ? 1 : 0
