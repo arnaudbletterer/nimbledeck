@@ -1,0 +1,25 @@
+{
+  "python": {
+    "version": "3.12",
+    "requirements": "demos/requirements.txt"
+  },
+  "demos": {
+    "turing": {
+      "file": "demos/turing.py",
+      "port": 2830
+    }
+  },
+  "streams": {
+    "lorenz": {
+      "file": "demos/stream_lorenz.py",
+      "port": 18870
+    }
+  },
+  "limits": {
+    "maxTitle": 40,
+    "maxBullets": 7
+  },
+  "runner": {
+    "port": 18910
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "nimbledeck-example-science",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nimbledeck run science.md",
+    "check": "nimbledeck check science.md",
+    "verify": "nimbledeck verify science.md",
+    "build": "slidev build science.md",
+    "build:web": "node build-web.mjs",
+    "export": "slidev export science.md --with-clicks"
+  },
+  "dependencies": {
+    "@slidev/cli": "53.0.0",
+    "nimbledeck": "0.1.0",
+    "slidev-theme-nimbledeck": "0.1.0",
+    "playwright-chromium": "1.63.0"
+  }
+}
