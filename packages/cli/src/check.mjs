@@ -7,6 +7,10 @@ import { knownLayouts } from './layouts.mjs'
 import { parseHeadmatter, splitSlides } from './slides.mjs'
 
 // Slide canvas is 1280 x 720. Content area of a normal slide: 1140 wide, about 500 tall.
+// Layouts whose slot is the whole slide, so a <Stage> may be up to 1280 x 720.
+const FRAME = new Set(['full', 'hero', 'split', 'stage'])
+// Display layouts wrap their title instead of cutting it off, so a title may be longer (but a sentence of 80 characters is the most that fits).
+const WRAPS = new Set(['hero', 'statement', 'split'])
 const CONTENT = { w: 1140, h: 500 }, SLIDE = { w: 1280, h: 720 }
 const num = (attrs, name) => { const m = attrs.match(new RegExp(`(?:^|\\s):?${name}="(-?\\d+(?:\\.\\d+)?)"`)); return m ? Number(m[1]) : undefined }
 
@@ -15,8 +19,8 @@ function checkStages(body, layout, where, errors) {
   for (const st of body.matchAll(/<Stage\b([^>]*)>([\s\S]*?)<\/Stage>/g)) {
     const full = /(^|\s):?full\b/.test(st[1])
     const w = full ? SLIDE.w : num(st[1], 'w') ?? 1140, h = full ? SLIDE.h : num(st[1], 'h') ?? 460
-    const max = layout === 'full' ? SLIDE : CONTENT
-    if (w > max.w || h > max.h) errors.push(`${where}: <Stage> ${w}x${h} does not fit the ${layout === 'full' ? 'slide' : 'content area'} (max ${max.w}x${max.h})`)
+    const max = FRAME.has(layout) ? SLIDE : CONTENT
+    if (w > max.w || h > max.h) errors.push(`${where}: <Stage> ${w}x${h} does not fit the ${FRAME.has(layout) ? 'slide' : 'content area'} (max ${max.w}x${max.h})`)
     for (const at of st[2].matchAll(/<At\b([^>]*)>/g)) {
       const x = num(at[1], 'x') ?? 0, y = num(at[1], 'y') ?? 0, aw = num(at[1], 'w'), ah = num(at[1], 'h')
       if (x < 0 || y < 0 || x + (aw ?? 0) > w || y + (ah ?? 0) > h) errors.push(`${where}: <At> at (${x},${y}) size ${aw ?? '?'}x${ah ?? '?'} falls outside its ${w}x${h} <Stage>`)
@@ -43,7 +47,8 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     if (!layouts.has(layout)) errors.push(`${where}: unknown layout '${layout}'`)
     const h1 = body.match(/^# (.+)$/m)
     if (!LEAD.has(layout) && !h1) errors.push(`${where}: missing '# title'`)
-    if (h1 && h1[1].length > cfg.limits.maxTitle) errors.push(`${where}: title ${h1[1].length} chars > ${cfg.limits.maxTitle}, would be cut off`)
+    const maxTitle = WRAPS.has(layout) ? 80 : cfg.limits.maxTitle
+    if (h1 && h1[1].length > maxTitle) errors.push(`${where}: title ${h1[1].length} chars > ${maxTitle}, would be cut off`)
     const sub = body.match(/^#### (.+)$/m)
     if (!LEAD.has(layout) && sub && sub[1].length > cfg.limits.maxSubtitle) warnings.push(`${where}: subtitle ${sub[1].length} chars > ${cfg.limits.maxSubtitle}, would be cut off`)
     const bullets = (body.match(/^\s*[-*] /gm) || []).length
@@ -58,7 +63,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     // Images must hold enough pixels for the box they fill, or they look soft on high-resolution screens.
     for (const m of body.matchAll(/(?:<At\b([^>]*)>\s*)?<Photo\b([^>]*?)\bsrc="(\/[^"]+)"/g)) {
       const file = join(root, cfg.publicDir, m[3].replace(/^\//, ''))
-      const box = (m[1] && num(m[1], 'w')) || (layout === 'full' && !m[1] ? 1280 : 1140)
+      const box = (m[1] && num(m[1], 'w')) || (FRAME.has(layout) && !m[1] ? 1280 : 1140)
       const sz = existsSync(file) ? imageSize(file) : null
       if (sz && sz.w < box * 1.5) warnings.push(`${where}: ${m[3]} is ${sz.w}px wide for a ${box}px box, it will look soft on high-resolution screens (use at least ${Math.round(box * 1.5)}px)`)
     }

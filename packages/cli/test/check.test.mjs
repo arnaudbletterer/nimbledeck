@@ -127,3 +127,13 @@ test('a malformed leadLayouts or verify setting is a readable error', () => {
   assert.throws(() => run('# A\n', { config: { leadLayouts: 'cover' } }), /leadLayouts: must be a non-empty list/)
   assert.throws(() => run('# A\n', { config: { verify: { chrome: [] } } }), /verify.chrome/)
 })
+
+test('display layouts take a full-slide <Stage> and a long wrapped title', () => {
+  const vue = '<template><slot/></template>'
+  const files = { 'layouts/hero.vue': vue, 'layouts/statement.vue': vue }
+  const long = 'A sentence long enough to be cut off in a title bar but fine on a statement'
+  const deck = `---\ntheme: none\nlayout: hero\n---\n\n<Stage full>\n<At :w="1280" :h="720">\nx\n</At>\n</Stage>\n\n# ${long}\n\n---\nlayout: statement\n---\n\n# ${long}\n\n---\nlayout: mine\n---\n\n# ${long}\n`
+  const text = run(deck, { files }).errors.join('\n')
+  assert.doesNotMatch(text, /slide [12]\)/)
+  assert.match(text, /slide 3\).*would be cut off/)
+})
