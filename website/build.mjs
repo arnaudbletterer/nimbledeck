@@ -39,7 +39,13 @@ run('uvx', ['zensical@0.0.67', 'build', '--clean'])
 const dir = resolve(root, 'examples/how-it-works')
 const tmp = resolve(dir, '.docs-build.md')
 const src = readFileSync(resolve(dir, 'how-it-works.md'), 'utf8')
-writeFileSync(tmp, src.replace(/^---\n/, '---\nrouterMode: hash\n'))
+// A static host runs no Python: slides that need `nimbledeck run` are left out of the web edition (they are shown on
+// the "Run it locally" page instead). Slidev skips a slide whose frontmatter says `disabled: true`.
+const NEEDS_RUN = /<(PyStream|Demo|LiveCode)\b/
+let skipped = 0
+const web = src.split(/\n---\n(?=layout:)/).map((slide, i) => (i > 0 && NEEDS_RUN.test(slide) ? (skipped++, `disabled: true\n${slide}`) : slide)).join('\n---\n')
+console.log(`web edition: ${skipped} slides that need nimbledeck run are left out`)
+writeFileSync(tmp, web.replace(/^---\n/, '---\nrouterMode: hash\n'))
 try {
   run('npx', ['slidev', 'build', '.docs-build.md', '--base', `${siteBase}demos/how-it-works/`,
     '--out', resolve(root, 'site/demos/how-it-works')], dir)

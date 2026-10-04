@@ -7,37 +7,21 @@
 [Open it full screen](demos/how-it-works/){ .md-button .md-button--primary target="_blank" }
 
 *How a Nimbledeck deck works* is built with Nimbledeck itself. It walks through the writing loop, the layouts, builds,
-a canvas scene, a WebGL scene, Python, video, a quiz and live code. Its source is
+a canvas scene, a WebGL scene, video, a quiz and a website in a slide. Its source is
 `examples/how-it-works/how-it-works.md` in the repository.
 
 Keys: arrows to move, `?` lists every shortcut, `o` opens the overview, `/` searches slide titles.
 
-## What works on this page
+## What this copy contains
 
-This copy is a **static build** served from the web. There is no `nimbledeck run` behind it, so no Python process is
-running.
+This is the **web edition** of the example: a static build served from the web, with no Python process behind it. It
+keeps everything that runs in a browser: layouts, builds, the three looks, `Orbit`, `Scene3D`, `Chart`, `Clip`,
+`Compare`, `Quiz`, `Flip`, `Countdown`, `CountUp` and `Site`. Search covers slide titles and notes.
 
-| Works here | Needs a local process, so it shows its offline panel |
-|---|---|
-| Layouts, builds, themes | `<PyStream>` (streamed simulation) |
-| `Orbit`, `Scene3D` | `<Demo>` (marimo apps) |
-| `Clip`, `Photo`, `Compare`, `Chart` | `<LiveCode>` (editable Python) |
-| `Quiz`, `Flip`, `Countdown`, `CountUp` | |
-| Search by slide title and notes | Search inside slide text |
-
-The offline panels are the designed failure model: a demo that is down must never stop the talk. To see everything
-working, run the example on your machine:
-
-```sh
-git clone <the Nimbledeck repository URL> nimbledeck
-cd nimbledeck
-npm install
-npm run example        # http://localhost:3030, with every demo running
-```
-
-Needs Node 20 or newer and [uv](https://docs.astral.sh/uv/). See [Get started](GETTING-STARTED.md).
+The six slides that need `nimbledeck run` (`PyStream`, `Demo`, `LiveCode`) are left out of this copy, so nothing here
+shows an offline panel. See them, and how to run them yourself, on [Run it locally](run-locally.md).
 
 ## Add your own deck here
 
-Any Slidev build can be published under `demos/`. The site build in `website/build.mjs` builds the example deck; add a
-line there to build another one next to it.
+Any Slidev build can be published under `demos/`. The site build in `website/build.mjs` builds the example deck, skipping any
+slide that uses `PyStream`, `Demo` or `LiveCode`. Add a line there to build another deck next to it.

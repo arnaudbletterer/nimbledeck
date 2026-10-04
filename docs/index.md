@@ -15,7 +15,7 @@ hide:
 [Get started](GETTING-STARTED.md){ .md-button }
 
 <div class="nd-frame"><iframe src="demos/how-it-works/" title="The Nimbledeck example deck, running" loading="lazy" allow="fullscreen"></iframe></div>
-<p class="nd-caption">This is a real Nimbledeck deck. Click it, then use the arrow keys. <a href="demos/">What works on this page</a>.</p>
+<p class="nd-caption">This is a real Nimbledeck deck. Click it, then use the arrow keys. <a href="demos/">About this demo</a>, and <a href="run-locally/">what only runs locally</a>.</p>
 
 </div>
 
