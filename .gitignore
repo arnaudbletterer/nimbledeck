@@ -16,3 +16,4 @@ site/
 site-src/
 .docs-build.md
 .web-build.md
+dist-hosted/
