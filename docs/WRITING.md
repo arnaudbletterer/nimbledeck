@@ -90,6 +90,18 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 | `<Headline>text</Headline>` | Large display text (`size` xl, l, m; `tone` light, dark). |
 | `<Site url="https://..." />` | A website in a frame. Many sites forbid framing (GitHub does): use a screenshot or open it separately. |
 | `<Fly>text</Fly>` | Entrance motion. |
+| `<Kinetic text="Slides that move." />` | Kinetic headline in the display font, tight and balanced, filling its box. `mode` words, letters or lines (lines split on `\|`); `from` up, down, left, right, blur, scale or mask (a reveal from a clipping line); `:stagger` in ms; `size` xl (120 px), l, m, s; `tone` auto, light, dark; `accent="move,fast"` colours those words with `--nd-accent`. Plays when its slide appears and again on every re-entry. `hold` keeps it hidden until a `v-click` on it (`<Kinetic v-click hold ... />`) or until a bound `:trigger` number is above 0; any later change of `:trigger` replays it. |
+| `<Typewriter lang="md">` with a fenced block or plain text | Types its content with a blinking caret and simple highlighting (`md`, `sh`, `py`, `json`, `html`). `:speed` ms per character, `:delay` ms before it starts, `caret`, `:keep="false"` fades the text out after a moment. With `lang="sh"` a line starting with `$ ` is typed and any other line appears as output. When it is done the root gets the class `nd-done`. Leaving the slide resets it. Size it with `style="font-size: 28px"`. |
+| `<Terminal title="nimbledeck" :lines="[...]" />` | A window (three dots, a title) that types a shell session: `$ ` lines are typed, other lines appear as output. Same `nd-done` class and reset as Typewriter. |
+| `<Aurora :intensity="1" :speed="1" />` | An animated gradient mesh of the accent colours that fills its box. Put it in `<Stage full>` inside an `<At :w="1280" :h="720">`. Renders at half resolution, pauses off screen, suits dark and light variants. |
+| `<Stat value="60" suffix=" fps" label="smooth on a laptop" />` | A big number that counts up (`:decimals`, `prefix`, `:duration`), then its label fades up. The number never changes width while it counts. |
+| `<Marquee :speed="40" gap="2em">` with content | Content that scrolls sideways for ever (`speed` in slide pixels per second). Repeats its content to fill the slide; paused off screen. |
+| `<Spotlight>` with content | A soft pool of accent light that follows the pointer over the content, and drifts slowly by itself when the pointer is away. |
+| `<Tilt>` with content | Content that tilts in 3D toward the pointer (8 degrees at most) with a soft moving sheen. Off for reduced motion. Round the sheen with `--nd-tilt-radius` (16 px by default). |
+
+The motion components give a size to anything that fills its box, so place them with `<At :w :h>`. All of them honour the
+system "reduce motion" setting by showing their final state. To chain the typing with a build, hide the next element until a
+click: `<At v-click>`.
 
 ## Adding a live Python demo
 

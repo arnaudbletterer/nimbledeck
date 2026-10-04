@@ -44,6 +44,59 @@ A card that flips on click, with `#front` and `#back` content.
 
 </div>
 
+## Motion design
+
+Typography, backgrounds and terminals that move. Each plays when its slide appears, sleeps when it is left, and shows its
+final state at once when the system asks for reduced motion. A throwaway slide per component lives in
+`examples/motion-lab/lab.md`.
+
+<div class="nd-cards" markdown>
+
+<div markdown>
+### `<Kinetic text="Slides that move." />`
+A headline that arrives word by word, letter by letter or line by line, from above, below, the sides, a blur, a scale or a
+clipping line. `accent` colours chosen words. Replays on re-entry; `hold` waits for a click.
+</div>
+
+<div markdown>
+### `<Typewriter lang="md">`
+Types a fenced block or plain text with a blinking caret and simple highlighting. The root gets `nd-done` when it is
+finished, so a build can follow.
+</div>
+
+<div markdown>
+### `<Terminal :lines="[...]" />`
+A window with three dots and a title that types a shell session: `$ ` lines are typed, the rest appears as output.
+</div>
+
+<div markdown>
+### `<Aurora />`
+A slowly drifting gradient mesh built from the accent colours, for dark and light variants. Cheap: half resolution, off
+screen it sleeps.
+</div>
+
+<div markdown>
+### `<Stat value="60" suffix=" fps" label="..." />`
+A big number that counts up, then its label fades in. It never changes width while counting.
+</div>
+
+<div markdown>
+### `<Marquee>`
+Content that scrolls sideways for ever, repeated to fill the slide.
+</div>
+
+<div markdown>
+### `<Spotlight>`
+A soft light that follows the pointer over its content, and drifts by itself when the pointer rests.
+</div>
+
+<div markdown>
+### `<Tilt>`
+Content that leans toward the pointer in 3D with a moving sheen.
+</div>
+
+</div>
+
 ## Media and data
 
 <div class="nd-cards" markdown>
