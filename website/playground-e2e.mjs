@@ -172,6 +172,13 @@ const before = await page.evaluate(() => document.getElementById('count').textCo
 await page.keyboard.press('ArrowLeft')
 check('arrows in the gallery do not change the slide', before === await page.evaluate(() => document.getElementById('count').textContent))
 
+// ---- Tabs: one tab stop, arrows move ----
+await page.locator('#gtabs [aria-selected=true]').focus()
+await page.keyboard.press('ArrowRight')
+check('arrow keys move between the gallery tabs', await page.evaluate(() => document.activeElement.closest('#gtabs') && document.activeElement.getAttribute('aria-selected') === 'true'))
+check('only the selected tab is a tab stop', await page.$$eval('#gtabs button', (b) => b.filter((x) => x.tabIndex === 0).length) === 1)
+await kindTo('motion')
+
 // ---- Hover: only the card under the pointer plays ----
 const hovered = motions[Math.min(3, motions.length - 1)]
 await cardOf(hovered).hover()

@@ -455,10 +455,22 @@ function setKind(k) {
   gkind = k; gq = ''; gkey = ''
   $('gq').value = ''; $('gq').placeholder = `Search ${NOUN[k]}`; $('gq').setAttribute('aria-label', `Search ${NOUN[k]}`)
   for (const b of $('gtabs').children) b.setAttribute('aria-selected', b.dataset.k === k)
+  G.setAttribute('aria-labelledby', `gt-${k}`)
   $('tour').textContent = 'Tour'; hint()
   buildGallery()
 }
 $('gtabs').onclick = (e) => { const k = e.target.closest('button')?.dataset.k; if (k) setKind(k) }
+// Tabs: only the selected one is a tab stop, the arrow keys move between them (the pattern of a WAI-ARIA tablist).
+function tablist(host) {
+  host.addEventListener('keydown', (e) => {
+    const tabs = [...host.children], i = tabs.indexOf(document.activeElement), d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]
+    if (i < 0 || !d) return
+    e.preventDefault(); const next = tabs[(i + d + tabs.length) % tabs.length]; next.focus(); next.click()
+  })
+  new MutationObserver(() => [...host.children].forEach((b) => { b.tabIndex = b.getAttribute('aria-selected') === 'true' ? 0 : -1 })).observe(host, { attributes: true, subtree: true, attributeFilter: ['aria-selected'] })
+}
+tablist($('gtabs')); tablist($('tabs'))
+for (const host of [$('gtabs'), $('tabs')]) [...host.children].forEach((b) => { b.tabIndex = b.getAttribute('aria-selected') === 'true' ? 0 : -1 })
 $('gq').oninput = (e) => { gq = e.target.value; filter() }
 $('all').onchange = (e) => { S.all[gkind] = e.target.checked; save(); hint() }
 

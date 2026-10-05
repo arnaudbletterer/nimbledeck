@@ -68,9 +68,9 @@
       </section>
 
       <div class="seg tabs" id="gtabs" role="tablist" aria-label="What to change">
-        <button role="tab" data-k="look">Look</button>
-        <button role="tab" data-k="motion">Motion</button>
-        <button role="tab" data-k="bg">Background</button>
+        <button role="tab" id="gt-look" data-k="look">Look</button>
+        <button role="tab" id="gt-motion" data-k="motion">Motion</button>
+        <button role="tab" id="gt-bg" data-k="bg">Background</button>
       </div>
       <div class="gbar">
         <input type="search" id="gq" autocomplete="off" spellcheck="false">
@@ -78,7 +78,7 @@
         <button class="soft" id="tour">Tour</button>
       </div>
       <p class="muted small" id="allhint"></p>
-      <div id="gallery" role="group" aria-labelledby="gtabs"></div>
+      <div id="gallery" role="tabpanel"></div>
       <p class="muted small" id="gcount" aria-live="polite"></p>
       <p class="muted small" id="ginfo"></p>
 
