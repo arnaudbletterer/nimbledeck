@@ -85,6 +85,7 @@ const motionOf = () => page.evaluate(() => {
   check('the recipe is shown first', /ndVariant: \S+/.test(await recipe()) && /motion: \S+/.test(await recipe()), (await recipe()).replace(/\n/g, ' / '))
   const hasBg = (await page.evaluate(async () => (await (await fetch('data.json')).json()).presets?.backgrounds?.length ?? 0)) > 0
   check('opens on an animated background when the theme has some', !hasBg || /background:/.test(fm))
+  await page.waitForTimeout(1800)
   await shot(page, '1-first-impression')
 }
 
