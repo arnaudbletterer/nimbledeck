@@ -1,0 +1,38 @@
+{
+  "motions": [
+    { "id": "fade-up", "label": "Fade up", "description": "Everything rises 56 px and fades in, one block after the other.", "use": "any slide; the safe default" },
+    { "id": "cascade", "label": "Cascade", "description": "The title slides in from the left out of a blur, then each block falls into place behind it.", "use": "lists and bullet slides" },
+    { "id": "slide-left", "label": "Slide left", "description": "Content travels 200 px from the right edge towards the left.", "use": "next step, timeline, comparison" },
+    { "id": "slide-right", "label": "Slide right", "description": "Content travels 200 px from the left edge towards the right.", "use": "previous step, flashback, answer" },
+    { "id": "drop", "label": "Drop", "description": "Falls from above and lands with an overshoot, slightly crooked on the way down.", "use": "statement, divider, punchline" },
+    { "id": "zoom", "label": "Zoom", "description": "Grows from a speck out of a blur.", "use": "hero, cover, a single image" },
+    { "id": "zoom-out", "label": "Zoom out", "description": "Starts huge and close to the camera, then settles back to size.", "use": "cover, closing" },
+    { "id": "blur-in", "label": "Blur in", "description": "No movement: a heavy blur resolves into the text.", "use": "quote, calm statement" },
+    { "id": "focus", "label": "Focus", "description": "A camera pulling focus: content and background start blurred and enlarged, then sharpen in turn.", "use": "reveal, hero, background shown" },
+    { "id": "wipe", "label": "Wipe", "description": "Each block is uncovered from left to right.", "use": "table, code, image, chart" },
+    { "id": "curtain", "label": "Curtain", "description": "The title is let down like a curtain; blocks open from their middle outwards.", "use": "cover, statement, section" },
+    { "id": "flip", "label": "Flip", "description": "Each block turns up on a hinge at its top edge, in 3D.", "use": "cards, numbers, agenda items" },
+    { "id": "pop", "label": "Pop", "description": "Springs up from nothing and overshoots a little.", "use": "bullets, chips, short lists" },
+    { "id": "rise", "label": "Rise", "description": "Text climbs out of a hidden line below it; blocks follow, slower.", "use": "title-led slides, hero" },
+    { "id": "typewriter", "label": "Typewriter", "description": "The title is typed one character at a time; blocks flicker on after it.", "use": "code, terminal, technical statement" },
+    { "id": "glitch", "label": "Glitch", "description": "A short RGB split and jitter on entry, then still.", "use": "tech cover, section break" },
+    { "id": "spotlight", "label": "Spotlight", "description": "The slide is dark, a soft circle of light opens from the middle and the content settles into it.", "use": "cover, closing, reveal" },
+    { "id": "swing", "label": "Swing", "description": "Hangs from its top-left corner and swings into place like a sign.", "use": "callout, label, warning" },
+    { "id": "rubber", "label": "Rubber", "description": "Stretches and squashes like rubber before it settles.", "use": "fun deck, short list, big word" },
+    { "id": "parallax", "label": "Parallax", "description": "Title, body and background travel different distances at different speeds.", "use": "hero or statement over a background" },
+    { "id": "count", "label": "Count", "description": "Cards rise in turn and each big figure rolls up from behind a line.", "use": "numbers layout, key figures" }
+  ],
+  "backgrounds": [
+    { "id": "aurora", "label": "Aurora", "description": "Soft blobs of the accent colours drifting on slow orbits (the Aurora component)." },
+    { "id": "shader", "label": "Shader", "description": "Slow folds of coloured light with contour lines, drawn on the GPU (the Shader component)." },
+    { "id": "grid", "label": "Grid", "description": "A fine grid drifting diagonally and fading towards the edges, over a faint glow." },
+    { "id": "mesh", "label": "Mesh", "description": "Three big soft blobs of colour on slow, different orbits." },
+    { "id": "noise", "label": "Noise", "description": "Film grain flickering at about 8 fps over a faint glow." },
+    { "id": "dots", "label": "Dots", "description": "A lattice of dots drifting, with a second lattice turning slowly over it." },
+    { "id": "waves", "label": "Waves", "description": "Three layers of sine curves sliding sideways at different speeds." },
+    { "id": "spotlight", "label": "Spotlight", "description": "One large pool of light wandering across the slide and a smaller one answering it." },
+    { "id": "stars", "label": "Stars", "description": "Three fields of dots that twinkle and drift at different speeds." },
+    { "id": "gradient", "label": "Gradient", "description": "A wide wash of the two accents turning slowly around the middle." }
+  ],
+  "scrims": ["none", "soft", "strong"]
+}

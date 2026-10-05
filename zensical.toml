@@ -15,6 +15,7 @@ nav = [
     { "Writing a deck" = "WRITING.md" },
     { "Scripted tours and sounds" = "TOUR.md" },
     { "Layouts and playground" = "layouts.md" },
+    { "Motion and backgrounds" = "MOTION.md" },
     { "Components gallery" = "components.md" },
     { "Themes and brands" = "THEMING.md" },
     { "Architecture" = "ARCHITECTURE.md" },

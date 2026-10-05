@@ -137,3 +137,23 @@ test('display layouts take a full-slide <Stage> and a long wrapped title', () =>
   assert.doesNotMatch(text, /slide [12]\)/)
   assert.match(text, /slide 3\).*would be cut off/)
 })
+
+test('motion, background and scrim ids are checked, with the valid ids and a suggestion', () => {
+  const r = run('---\ntheme: none\nndMotion: cascde\nndBackground: aurora\n---\n\n# A\n\n---\nmotion: pop\nbackground: wavs\nscrim: heavy\n---\n\n# B\n\n---\nmotion: none\n---\n\n# C\n')
+  const text = r.errors.join('\n')
+  assert.match(text, /headmatter\): ndMotion: unknown 'cascde'. Did you mean 'cascade'\? Valid: .*fade-up.*none/)
+  assert.match(text, /\(slide 2\): background: unknown 'wavs'. Did you mean 'waves'\?/)
+  assert.match(text, /\(slide 2\): scrim: unknown 'heavy'.? Valid: none, soft, strong/)
+  assert.doesNotMatch(text, /unknown 'pop'|unknown 'aurora'|unknown 'none'/)
+  assert.equal(r.errors.length, 3)
+})
+
+test('an unknown ndVariant is an error for the base theme only', () => {
+  const t = (theme) => run(`---\ntheme: ${theme}\nndVariant: studo\n---\n\n# A\n`).errors.join('\n')
+  assert.match(t('nimbledeck'), /ndVariant: unknown 'studo'. Did you mean 'studio'\?/)
+  assert.doesNotMatch(t('none'), /ndVariant/)
+})
+
+test('quotes and trailing comments around a preset id are ignored', () => {
+  assert.deepEqual(run('---\ntheme: none\nndMotion: "pop"   # entry\n---\n\n# A\n').errors, [])
+})

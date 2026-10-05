@@ -6,6 +6,7 @@ import { loadConfig, validateConfig } from './config.mjs'
 import { knownLayouts, knownLooks } from './layouts.mjs'
 import { parseHeadmatter, splitSlides } from './slides.mjs'
 import { checkDeckSound, checkTourKeys } from './tourcheck.mjs'
+import { bare, checkChoice, loadPresets } from './presets.mjs'
 
 // Slide canvas is 1280 x 720. Content area of a normal slide: 1140 wide, about 500 tall.
 // Layouts with a slot that is the whole slide (the slot of full and stage, the ::bg:: slot of hero, split, statement and
@@ -52,6 +53,20 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
   checkDeckSound(head, { root, publicDir: cfg.publicDir, errors })
   checkVariant(head, root, name, errors)
 
+  // Presets (docs/MOTION.md): the deck's defaults, then each slide's own choice.
+  const presets = loadPresets(root, bare(head.theme))
+  const scrims = presets?.scrims ?? ['none', 'soft', 'strong']
+  const presetErrors = (src, where, keys) => {
+    if (!presets) return
+    const ids = { motion: presets.motions.map((m) => m.id), background: presets.backgrounds.map((b) => b.id) }
+    for (const [key, kind] of keys) {
+      if (src[key] === undefined) continue
+      const msg = kind === 'scrim' ? checkChoice(key, src[key], scrims, { allowNone: false }) : checkChoice(key, src[key], ids[kind])
+      msg.forEach((m) => errors.push(`${where}: ${m}`))
+    }
+  }
+  presetErrors(head, `${name}:1 (headmatter)`, [['ndMotion', 'motion'], ['ndBackground', 'background'], ['ndScrim', 'scrim']])
+
   slides.forEach((s, idx) => {
     const n = idx + 1, body = s.body, where = `${name}:${s.line} (slide ${n})`
     const layout = s.fm.layout || (n === 1 ? head.layout : undefined) || 'default'
@@ -64,6 +79,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     if (!LEAD.has(layout) && sub && sub[1].length > cfg.limits.maxSubtitle) warnings.push(`${where}: subtitle ${sub[1].length} chars > ${cfg.limits.maxSubtitle}, would be cut off`)
     const bullets = (body.match(/^\s*[-*] /gm) || []).length
     if (bullets > cfg.limits.maxBullets) warnings.push(`${where}: ${bullets} bullets > ${cfg.limits.maxBullets}, split the slide`)
+    presetErrors(s.fm, where, [['motion', 'motion'], ['background', 'background'], ['scrim', 'scrim']])
     checkStages(body, layout, where, errors)
     checkTourKeys(s, { where, root, publicDir: cfg.publicDir, errors, warnings })
     if (/<LiveCode\b/.test(body) && !cfg.runner) errors.push(`${where}: <LiveCode> needs a "runner" entry in nimbledeck.config.json`)

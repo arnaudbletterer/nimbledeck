@@ -10,6 +10,11 @@ changing a component.
 3. Run `nimbledeck check <deck.md>`; fix every ERROR; split slides that trigger a warning.
 4. Preview with `nimbledeck run <deck.md>` when a live component or demo is involved.
 
+## Animating a slide
+
+To animate a slide pick a preset (`motion: <id>`, `ndMotion: <id>`, `background: <id>`, see `docs/MOTION.md`); never write CSS or
+compose components for common effects.
+
 ## Changing the system
 
 - A new live component goes in `packages/addon/components/`. It must gate on `useActive()`, use `--nd-*` tokens, and

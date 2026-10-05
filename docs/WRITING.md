@@ -68,6 +68,11 @@ Showcase layouts, for keynote-style decks (they look best with `ndVariant: studi
 Diagrams: a fenced `mermaid` block. Builds: wrap a list in `<v-clicks>`. Speaker notes: an HTML comment at the end of
 a slide.
 
+## Motion and backgrounds
+
+One line animates a slide: `motion: pop` in its frontmatter, `ndMotion: cascade` in the headmatter for the whole deck, and
+`background: aurora` for a live background. `nimbledeck check` validates the ids. See [MOTION.md](MOTION.md).
+
 ## Placing things: Stage and At
 
 Live components fill the box they are put in and have no frame or background by default, so they behave like any other
