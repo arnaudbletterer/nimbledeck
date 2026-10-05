@@ -6,6 +6,11 @@ titleTemplate: "%s"
 layout: hero
 class: nd-grid
 transition: nd-zoom
+ndSound: pad
+ndSlideSound: whoosh
+tour: 5
+sounds:
+  - { at: 0.3, src: swell, volume: 0.6 }
 ---
 
 ::bg::
@@ -27,6 +32,9 @@ Hook. Everything you are about to see is one Markdown file. Nothing was exported
 ---
 layout: statement
 class: nd-grid
+tour: 5
+sounds:
+  - { at: 1.2, src: soft-boom, volume: 0.5 }
 ---
 
 ::bg::
@@ -47,12 +55,17 @@ No slide editor, no binary format. A file you can diff, review and hand to an ag
 
 ---
 layout: stage
-tour: 14
+tour: 9
+sounds:
+  - { at: 0.9, src: typing, volume: 0.7 }
+  - { at: 2.2, src: typing, volume: 0.7 }
+  - { at: 3.5, src: typing, volume: 0.7 }
+  - { at: 4.8, src: typing, volume: 0.6 }
 ---
 
 <Stage full>
 <At :w="1280" :h="720" :z="1">
-<Livedeck :speed="26" :delay="900" :size="23">
+<Livedeck :speed="20" :delay="900" :size="23">
 
 ````md
 ---
@@ -85,6 +98,14 @@ Fourteen lines of Markdown, three slides. The preview on the right is a sketch o
 
 ---
 layout: stage
+tour: 6
+sounds:
+  - { at: 0.4, src: tick, volume: 0.4 }
+  - { at: 0.5, src: tick, volume: 0.4 }
+  - { at: 0.6, src: tick, volume: 0.4 }
+  - { at: 0.7, src: tick, volume: 0.4 }
+  - { at: 0.8, src: tick, volume: 0.4 }
+  - { at: 0.9, src: tick, volume: 0.4 }
 ---
 
 <Stage full>
@@ -145,6 +166,19 @@ One word in the frontmatter picks the layout. The checker rejects inline HTML an
 ---
 layout: default
 class: nd-wide
+tour: 7
+tourScript:
+  - { at: 1.0, click: ".nd-look:nth-child(1)", caption: "Click a look" }
+  - { at: 1.9, click: ".nd-look:nth-child(2)" }
+  - { at: 2.8, click: ".nd-look:nth-child(3)" }
+  - { at: 3.7, click: ".nd-look:nth-child(4)" }
+  - { at: 4.6, click: ".nd-look:nth-child(5)" }
+sounds:
+  - { at: 1.0, src: click, volume: 0.6 }
+  - { at: 1.9, src: click, volume: 0.6 }
+  - { at: 2.8, src: click, volume: 0.6 }
+  - { at: 3.7, src: click, volume: 0.6 }
+  - { at: 4.6, src: click, volume: 0.6 }
 ---
 
 # Same words. Five looks.
@@ -169,6 +203,7 @@ Press 1 to 5, or click a chip. The slide steps through the looks by itself and e
 
 ---
 layout: statement
+tour: 5
 ---
 
 ::bg::
@@ -196,6 +231,8 @@ Text that moves is a tag, not a keyframe editor. Words, letters or lines; from a
 
 ---
 layout: full
+tour: 5
+sound: swell
 ---
 
 <Stage full>
@@ -214,6 +251,10 @@ This runs in the browser at the screen's own resolution. No video, no plugin.
 
 ---
 layout: split
+tour: 7
+tourScript:
+  - { at: 1.2, drag: ".nd-gl canvas", from: 0.3, to: 0.7, over: 2, caption: "Drag the scene" }
+  - { at: 3.6, drag: ".nd-gl canvas", from: 0.7, to: 0.35, over: 1.6 }
 ---
 
 ::default::
@@ -235,7 +276,12 @@ Drag it. A three.js scene, loaded only on the slide that uses it.
 
 ---
 layout: numbers
-tour: 9
+tour: 6
+sounds:
+  - { at: 1.7, src: pop, volume: 0.5 }
+  - { at: 1.85, src: pop, volume: 0.5 }
+  - { at: 2.0, src: pop, volume: 0.5 }
+  - { at: 2.15, src: pop, volume: 0.5 }
 ---
 
 # Measured on one Mac
@@ -262,6 +308,7 @@ Thirteen layout files in the theme. 0.13 s, 22 ms and 60 fps come from docs/PERF
 
 ---
 layout: default
+tour: 5
 ---
 
 # What a live code run costs, in ms
@@ -279,6 +326,11 @@ Measured on one Mac (docs/PERFORMANCE.md): 22 ms for a run that prints, 132 ms f
 ---
 layout: default
 tour: 7
+tourScript:
+  - { at: 1.2, hover: B, caption: "Which file holds the deck?" }
+  - { at: 2.6, click: C, caption: "One .md file" }
+sounds:
+  - { at: 2.75, src: success, volume: 0.8 }
 ---
 
 # Which file holds the deck?
@@ -305,6 +357,13 @@ Click an answer, or press 1 to 4. Interaction is for the presenter and resets wh
 
 ---
 layout: stage
+tour: 8
+tourScript:
+  - { at: 2.4, drag: ".nd-compare", from: 0.56, to: 0.12, over: 1.2, caption: "Drag to compare" }
+  - { at: 3.9, drag: ".nd-compare", from: 0.12, to: 0.88, over: 1.5 }
+sounds:
+  - { at: 2.4, src: whoosh, volume: 0.35 }
+  - { at: 3.9, src: whoosh, volume: 0.35 }
 ---
 
 <Stage :w="1200" :h="604">
@@ -321,6 +380,7 @@ Left: the Markdown. Right: a sketch of the slide in the studio colours, drawn by
 
 ---
 layout: full
+tour: 5
 ---
 
 <Stage full>
@@ -339,14 +399,50 @@ A four second loop made by a short numpy script in the repo, 300 KB.
 -->
 
 ---
+layout: stage
+tour: 9
+sounds:
+  - { at: 1.0, src: click }
+  - { at: 1.6, src: tick }
+  - { at: 2.2, src: pop }
+  - { at: 2.9, src: chime }
+  - { at: 3.7, src: success }
+  - { at: 4.8, src: whoosh }
+---
+
+<Stage full>
+<At :w="1280" :h="720"><Aurora :intensity="0.45" :hue="-60" :cx="0.5" :cy="0.9" /></At>
+<At :x="140" :y="64" :w="1000" :z="1">
+<Kinetic text="It has a voice." mode="words" from="mask" :stagger="170" size="l" accent="voice." />
+</At>
+<At :x="140" :y="200" :w="1000" :h="230" :z="1" enter="fade" :delay="500"><Equalizer :bars="32" /></At>
+<At :x="140" :y="460" :w="1000" :z="1" enter="fade" :delay="900">
+<Kinetic text="Eleven sounds, made in the browser. No files." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
+</At>
+</Stage>
+
+::caption::
+
+Sound is optional. The speaker in the bar switches it off.
+
+<!--
+Click, tick, pop, chime, success, whoosh: each is synthesised with the Web Audio API, zero bytes, nothing fetched. Sound is off until the viewer asks, and the equalizer is drawn from the real output.
+-->
+
+---
 layout: default
+tour: 9
+tourScript:
+  - { at: 2.0, type: "\nplt.title('typed by the tour')", into: ".cm-content", speed: 60, caption: "Edit the code" }
+sounds:
+  - { at: 2.2, src: typing, volume: 0.7 }
 ---
 
 # Edit the code. The plot reruns.
 
 <Stage :h="500">
 <At :w="1140" :h="500">
-<LiveCode>
+<LiveCode id="14">
 
 ```python
 import numpy as np
@@ -368,6 +464,9 @@ Needs nimbledeck run. Change a number, the figure follows. Python runs on this m
 
 ---
 layout: full
+tour: 8
+tourScript:
+  - { at: 2.0, drag: ".nd-ctl label:nth-child(1) input", from: 0.15, to: 0.7, over: 1.6, caption: "More particles" }
 ---
 
 <Stage full>
@@ -384,6 +483,10 @@ Needs nimbledeck run. A numpy process computes every frame and streams it over a
 
 ---
 layout: stage
+tour: 7
+sounds:
+  - { at: 1.3, src: typing, volume: 0.7 }
+  - { at: 3.2, src: success, volume: 0.6 }
 ---
 
 <Stage full>
@@ -407,6 +510,7 @@ check lints the Markdown. verify opens the running deck in Chrome and reports cl
 ---
 layout: statement
 class: nd-grid
+tour: 5
 ---
 
 ::bg::
@@ -429,6 +533,11 @@ Nimbledeck makes no network request of its own. Only a website embedded in a sli
 
 ---
 layout: stage
+tour: 9
+sounds:
+  - { at: 1.1, src: typing, volume: 0.7 }
+  - { at: 2.6, src: typing, volume: 0.7 }
+  - { at: 4.1, src: typing, volume: 0.7 }
 ---
 
 <Stage full>
@@ -464,6 +573,11 @@ That is docs/GETTING-STARTED.md in three lines. Click for the last beat: edit th
 ---
 layout: closing
 class: nd-grid
+tour: 6
+sounds:
+  - { at: 0.0, src: riser, volume: 0.8 }
+  - { at: 2.2, src: soft-boom, volume: 0.8 }
+  - { at: 2.3, src: chime, volume: 0.6 }
 ---
 
 ::bg::
