@@ -22,5 +22,6 @@ export function recordingCandidates(base: string, canPlay: (mime: string) => str
   return RECORDING_TYPES.filter((t) => canPlay(t.mime)).map((t) => `${base}.${t.ext}`)
 }
 
-// A dev server answers a missing file with the deck's index.html and status 200, so a hit counts only when it is a video.
-export const isVideoResponse = (status: number, contentType: string | null): boolean => status >= 200 && status < 300 && /^video\//i.test(contentType ?? '')
+// A dev server answers a missing file with the deck's index.html and status 200, so a hit counts only when it is not a web page:
+// a video type, or the generic type that a static host without a .webm mapping sends.
+export const isVideoResponse = (status: number, contentType: string | null): boolean => status >= 200 && status < 300 && /^(video\/|application\/octet-stream)/i.test(contentType ?? '')

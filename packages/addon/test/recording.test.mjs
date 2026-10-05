@@ -24,6 +24,7 @@ test('only the types the browser can play are tried, WebM first', () => {
 
 test('a dev server that answers a missing file with the page is not a recording', () => {
   assert.equal(isVideoResponse(200, 'video/webm'), true)
+  assert.equal(isVideoResponse(200, 'application/octet-stream'), true)   // a static host without a .webm mapping
   assert.equal(isVideoResponse(200, 'text/html; charset=utf-8'), false)
   assert.equal(isVideoResponse(404, 'video/webm'), false)
   assert.equal(isVideoResponse(200, null), false)

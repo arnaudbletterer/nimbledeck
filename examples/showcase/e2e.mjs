@@ -152,6 +152,8 @@ async function webTests(browser) {
         }
         const off = await inSlide(page, (root) => [...root.querySelectorAll('[data-state=offline], .nd-off, .nd-site-off, .nd-live-msg')].filter((e) => !e.closest('[data-kind=recording]') && !e.querySelector('[data-kind=recording]')).length)   // a recording that stands in for a process is not an offline panel
         if (off) bad.offline.push(`slide ${n}: ${off} offline panel(s)`)
+        const said = await inSlide(page, (root) => /Start everything with|is not running|nimbledeck run/i.test(root.innerText))   // the text of any offline notice, panel or not
+        if (said) bad.offline.push(`slide ${n}: says to run nimbledeck`)
         // Slides that are mounted but not on screen must be quiet.
         const awake = await page.evaluate(() => [...document.querySelectorAll('.slidev-layout')].filter((e) => e.getBoundingClientRect().width === 0).flatMap((e) => [...e.querySelectorAll('.nd-on, .nd-mq-run, .nd-k-play')]).length)
         if (awake) bad.stray.push(`slide ${n}: ${awake} animated element(s) running on a hidden slide`)

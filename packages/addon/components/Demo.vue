@@ -45,7 +45,7 @@ onUnmounted(stop)
     <Recorded v-else-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
     <div v-else class="nd-down">
       <img v-if="posterOk" :src="poster" @error="posterOk = false">
-      <p v-if="active">Live demo offline. Start everything with <code>nimbledeck run</code></p>
+      <p v-if="active && !rec.pending">Live demo offline. Start everything with <code>nimbledeck run</code></p>
     </div>
     <span class="nd-dot" :class="{ on: live }" :title="live ? 'live' : 'offline'" />
   </div>

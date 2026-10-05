@@ -130,7 +130,7 @@ onUnmounted(() => { stop(); view?.destroy() })
       </div>
     </div>
     <div ref="result" class="nd-live-out" :class="{ 'nd-stale': stale }" :inert="rec.shown || undefined">
-      <div v-if="state === 'offline' && !rec.shown" class="nd-live-msg">The Python runner is not running. Start everything with <code>nimbledeck run</code>.</div>
+      <div v-if="state === 'offline' && !rec.shown && !rec.pending" class="nd-live-msg">The Python runner is not running. Start everything with <code>nimbledeck run</code>.</div>
       <img v-for="(src, i) in images" :key="i" class="nd-live-img" :src="`data:image/png;base64,${src}`" alt="">
       <pre v-if="stdout" class="nd-live-stdout">{{ stdout }}</pre>
       <pre v-if="stderr" class="nd-live-stderr">{{ stderr }}</pre>

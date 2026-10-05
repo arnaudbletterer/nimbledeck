@@ -22,14 +22,15 @@ export function useRecording(id: () => string, prop: () => string | undefined, o
   const base = computed(() => recordingBase(prop(), id(), import.meta.env.BASE_URL))
   const src = ref<string | null>(null)
   const waited = ref(false)
+  const looked = ref(false)   // the lookup for a recording has finished (found or not)
   const reduced = ref(false)
   let timer = 0
   watch(active, async (a) => {
-    if (!a) { src.value = null; return }
+    if (!a) { src.value = null; looked.value = false; return }
     reduced.value = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     const b = base.value
     const url = await lookup(b)
-    if (active.value && b === base.value) src.value = url
+    if (active.value && b === base.value) { src.value = url; looked.value = true }
   }, { immediate: true })
   watch([offline, active], ([off, a]) => {
     clearTimeout(timer); waited.value = false
@@ -37,5 +38,7 @@ export function useRecording(id: () => string, prop: () => string | undefined, o
   }, { immediate: true })
   onUnmounted(() => clearTimeout(timer))
   const shown = computed(() => active.value && offline.value && waited.value && !!src.value)
-  return { shown, src, poster: computed(() => `${base.value}.jpg`), reduced }
+  // True while a recording may still take the place of the offline notice: the notice must not flash before it.
+  const pending = computed(() => active.value && offline.value && (!looked.value || (!!src.value && !waited.value)))
+  return { shown, pending, src, poster: computed(() => `${base.value}.jpg`), reduced }
 }
