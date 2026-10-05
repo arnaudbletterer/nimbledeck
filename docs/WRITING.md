@@ -8,6 +8,21 @@
 4. `nimbledeck run <name>.md`, then open http://localhost:3030 (keys: arrows to move, `?` lists every shortcut, `/` searches slides, `o` overview; presenter view is the address `/presenter/1`).
 5. Export: `slidev export <name>.md --with-clicks` (one page per build step).
 
+## Choosing a look
+
+One line of the header: `ndVariant: <id>`. `nimbledeck check` rejects an unknown id and lists the known ones. Twenty looks ship with the
+theme (full catalogue in [THEMING.md](THEMING.md)); the short version:
+
+- Everyday content: `plain`, `slate-pro`, `ocean`, `paper`, `editorial`.
+- Keynote and stage talks: `studio`, `studio-light`, `neon`, `sunset`, `gold`, `swiss`.
+- Technical audiences: `night`, `terminal`, `blueprint`.
+- Character: `mono`, `candy`, `newsprint`, `forest`.
+- A big room, a weak projector or accessibility needs: `high-contrast` (7:1 text, larger footer).
+- A PDF to print or hand out: `print` (white page, no gradients, grayscale photos).
+
+Choose the look first and write the content second; the layouts are the same in every look, and a title of up to 40 characters fits
+in all of them.
+
 ## Syntax
 
 Slides are separated by `---`. A slide picks a layout in its own frontmatter:
@@ -40,7 +55,7 @@ layout: two-cols
 | `photo-right` | idea plus photo | `image:` frontmatter, `::title::`, `::default::` |
 | `full` | a full-frame element: website, animation, video, photo with text | no title bar or footer; the slot fills the 1280 x 720 slide |
 
-Showcase layouts, for keynote-style decks (they look best with `ndVariant: studio` or `studio-light`, and work in every look):
+Showcase layouts, for keynote-style decks (they look best with `ndVariant: studio` or `studio-light`, and work in all twenty looks):
 
 | Layout | Use for | Content |
 |---|---|---|
@@ -109,7 +124,7 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 | `<Stat value="60" suffix=" fps" label="smooth on a laptop" />` | A big number that counts up (`:decimals`, `prefix`, `:duration`, `:delay` to stagger several), then its label fades up and the number glows. The number never changes width while it counts. |
 | `<Shader :hue="0" :intensity="1" :lines="0.35" />` | A WebGL fragment shader that fills its box: slow folds of colour in the accent colours with fine contour lines. Use it like Aurora, in `<Stage full>` inside `<At :w="1280" :h="720">`, when a hero or a finale needs more depth. Half resolution, sleeps off screen, one still frame for reduced motion, a flat background where WebGL is missing. |
 | `<Livedeck>` with a fenced `md` block | Markdown typed on the left, the slides it describes appearing on the right as each is finished (`layout: hero`, `statement` or `closing`, `# Title` with `**bold**` in the accent colour, `#### kicker`). The preview is a sketch drawn from the colour tokens, not a screenshot. `:speed`, `:delay`, `:size` as for Typewriter. |
-| `<Looks />` | A look switcher. It steps through plain, paper, night, studio light and studio by itself when its slide appears (a soft cross-fade through View Transitions where the browser has them), keys 1 to 5 or a click on a chip pick one, and leaving the slide puts the deck's look back. `:looks`, `:interval`, `:delay`, `auto`. |
+| `<Looks />` | A look switcher. It steps through a curated tour (plain, paper, night, studio light, studio, editorial, swiss, neon) by itself when its slide appears (a soft cross-fade through View Transitions where the browser has them), keys 1 to 9 or a click on a chip pick one, and leaving the slide puts the deck's look back. `:looks="['terminal', 'gold']"` names the looks, `looks="all"` offers all twenty (it wraps onto several rows, so give it height), `:interval`, `:delay`, `auto`. |
 | `<Marquee :speed="40" gap="2em">` with content | Content that scrolls sideways for ever (`speed` in slide pixels per second). Repeats its content to fill the slide; paused off screen. |
 | `<Spotlight>` with content | A soft pool of accent light that follows the pointer over the content, and drifts slowly by itself when the pointer is away. |
 | `<Tilt>` with content | Content that tilts in 3D toward the pointer (8 degrees at most) with a soft moving sheen. Off for reduced motion. Round the sheen with `--nd-tilt-radius` (16 px by default). |

@@ -4,7 +4,7 @@
 
 ```
 packages/addon   slidev-addon-nimbledeck   components + design tokens + composables
-packages/theme   slidev-theme-nimbledeck   thirteen layouts, five variants, pulls in the addon by default
+packages/theme   slidev-theme-nimbledeck   thirteen layouts, twenty looks (looks.json), pulls in the addon by default
 packages/cli     nimbledeck                run, record, check, verify
 examples/        decks that exercise everything (also the integration test)
 ```
@@ -142,7 +142,11 @@ palette `--nd-chart-1` to `--nd-chart-4` (used by `Chart`), and the quiz feedbac
 The base theme adds `--nd-cover-bg --nd-cover-fg --nd-title-transform --nd-title-size`, and `--nd-gradient` (accent line and
 number fill; a solid accent except in `studio`). The studio looks also set `--nd-font-mono` and `--nd-node-border` (the
 border of a Mermaid node).
-The variant is chosen by the headmatter key `ndVariant`, applied as `data-nd-variant` on `<html>`.
+The variant is chosen by the headmatter key `ndVariant`, applied as `data-nd-variant` on `<html>`. The ids are listed in
+`packages/theme/looks.json`, which the checker, the `Looks` component (through `data-nd-looks` on `<html>`) and the playground read.
+Every look defines the whole token set plus `--nd-scheme` (`light` or `dark`); optional knobs (`--nd-h1-*`, `--nd-callout-*`,
+`--nd-th-*`, `--nd-code-*`, `--nd-card-*`, `--nd-page-image`, `--nd-cover-image`, ...) feed the shared rules, and the rules of a
+look are keyed on `[data-nd-variant="id"]`, all in `styles/index.css` (see [THEMING.md](THEMING.md)).
 
 ## Recordings
 

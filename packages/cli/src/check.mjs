@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { imageSize } from './imagesize.mjs'
 import { loadConfig, validateConfig } from './config.mjs'
-import { knownLayouts } from './layouts.mjs'
+import { knownLayouts, knownLooks } from './layouts.mjs'
 import { parseHeadmatter, splitSlides } from './slides.mjs'
 import { checkDeckSound, checkTourKeys } from './tourcheck.mjs'
 
@@ -30,6 +30,13 @@ function checkStages(body, layout, where, errors) {
   }
 }
 
+// `ndVariant` must be a look of the deck's theme (a theme without a looks.json is not checked).
+function checkVariant(head, root, name, errors) {
+  const id = String(head.ndVariant ?? '').replace(/^["']|["']$/g, '').trim()
+  const known = id ? knownLooks(root, head) : null
+  if (known && !known.has(id)) errors.push(`${name}:1: unknown look ndVariant '${id}' (known: ${[...known].join(', ')})`)
+}
+
 // Lint a deck. Returns { errors, warnings, slides }. Rules mirror docs/WRITING.md.
 export function checkDeck(deckPath, root = dirname(deckPath)) {
   const text = readFileSync(deckPath, 'utf8')
@@ -43,6 +50,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
   const errors = [], warnings = []
   const name = deckPath.split(/[\\/]/).pop()
   checkDeckSound(head, { root, publicDir: cfg.publicDir, errors })
+  checkVariant(head, root, name, errors)
 
   slides.forEach((s, idx) => {
     const n = idx + 1, body = s.body, where = `${name}:${s.line} (slide ${n})`

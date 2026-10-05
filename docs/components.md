@@ -94,8 +94,8 @@ Markdown typed on the left, the slides it describes appearing on the right as ea
 
 <div markdown>
 ### `<Looks />`
-The same slide in every look of the theme, live: it steps through them by itself, keys 1 to 5 pick one, and the deck's own
-look returns when you leave.
+The same slide in several looks of the theme, live: it steps through a curated tour by itself, keys 1 to 9 pick one, and the
+deck's own look returns when you leave. `looks` takes any ids (`:looks="['terminal', 'gold']"`), or `"all"` for every look.
 </div>
 
 <div markdown>
@@ -244,7 +244,10 @@ layout: full
 | `photo-right` | an idea plus a photo |
 | `full` | a full-frame element: website, animation, video |
 
-## Three looks
+## Twenty looks
 
-Set `ndVariant` in the deck header to `plain`, `paper`, `night`, `studio` or `studio-light`. Layouts do not change, only the tokens do.
+Set `ndVariant` in the deck header to any look of `packages/theme/looks.json`: `plain`, `paper`, `night`, `studio`,
+`studio-light`, `editorial`, `swiss`, `neon`, `terminal`, `blueprint`, `sunset`, `ocean`, `forest`, `mono`, `candy`, `gold`,
+`newsprint`, `slate-pro`, `high-contrast` or `print`. Layouts do not change; the tokens and a few rules per look do. The
+catalogue, with a line on each look and its contrast, is in [Looks and themes](THEMING.md).
 To build your own brand look, see [Themes and brands](THEMING.md).

@@ -82,8 +82,9 @@ npm run export   # writes slides.pdf next to slides.md, one page per build step
 In the browser: arrows move, `?` lists every shortcut, `/` searches slides, `o` is the overview, and the presenter view
 is `http://localhost:3030/presenter/1`.
 
-Edit `slides.md` and the page reloads. To change the look of the whole deck, set `ndVariant` in the header to `plain`,
-`paper`, `night`, `studio` or `studio-light`. The slide syntax is in [WRITING.md](WRITING.md).
+Edit `slides.md` and the page reloads. To change the look of the whole deck, set `ndVariant` in the header to one of the twenty
+looks (`plain`, `paper`, `night`, `studio`, `editorial`, `swiss`, `neon`, `terminal` and more, all listed in [THEMING.md](THEMING.md)).
+`nimbledeck check` rejects a name that does not exist. The slide syntax is in [WRITING.md](WRITING.md).
 
 ## Troubleshooting
 

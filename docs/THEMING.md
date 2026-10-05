@@ -3,13 +3,117 @@
 A brand lives in its own repository and depends on Nimbledeck. Nimbledeck never contains brand fonts, logos or
 company content.
 
-## Looks and showcase layouts in the base theme
+## Looks in the base theme
 
-`ndVariant` picks the look: `plain`, `paper`, `night`, and the keynote pair `studio` (near-black blue, warm off-white
-ink, cyan to violet accent) and `studio-light` (the same identity on a warm white page). Both use system font stacks
-only (SF Pro, Inter, system-ui, with a tight tracking and heavy weight for display type), so a deck works offline.
-`studio` is dark: the theme switches Slidev to its dark code theme for it, and Mermaid follows. Text contrast is at least
-7:1 for body and muted text on `studio`, and at least 4.5:1 everywhere on `studio-light`.
+`ndVariant` picks the look of a whole deck, and the `Looks` component shows the same slide in several of them. There are
+twenty looks, listed with their colours in [`packages/theme/looks.json`](../packages/theme/looks.json); the checker rejects an
+`ndVariant` that is not in that file. Every look is a complete set of `--nd-*` tokens plus a few rules of its own (title weight
+and rule, callout shape, table style, list marker, code block, cover), so a look is a character, not only a palette. Fonts are
+system stacks, never downloaded, so every look works offline. A look that needs a face a machine does not have falls back
+through its stack (Didot, then Bodoni, then Georgia, for example).
+
+| Look | Scheme | Personality | Best for |
+|---|---|---|---|
+| `plain` | light | White page, ink, one blue accent. The neutral default. | Documentation, anything where the content leads |
+| `paper` | light | Warm paper, Georgia, a rust accent. | Essays, reading material, the humanities |
+| `night` | dark | Slate blue-black with a sky-blue accent. | Dark rooms, engineering talks |
+| `studio` | dark | Keynote dark: near-black blue, cyan to violet, heavy tight type, progress hairline. | Launches, demos, conference keynotes |
+| `studio-light` | light | The studio identity on a warm white page. | The same talks in a bright room |
+| `editorial` | light | Serif display on warm paper, double rules, small-caps kickers, pull-quote callouts. | Long-form talks, research, anything magazine-like |
+| `swiss` | light | White, black and one red; huge grotesk, a heavy rule over each title, red covers, square bullets. | Design talks, pitches, one strong message |
+| `neon` | dark | Near-black with electric magenta and cyan, glowing titles, a perspective grid on covers. | Lightning talks, music, games, creative technology |
+| `terminal` | dark | Green phosphor on black, monospace everywhere, scan lines, a blinking caret after each title. | Developer talks, command-line tools, security |
+| `blueprint` | dark | Deep blue drafting paper with a measured grid, uppercase lettering, a framed cover. | Architecture, hardware, systems design |
+| `sunset` | dark | Deep plum with a coral to gold glow and a setting sun on covers. | Stories, community talks, events |
+| `ocean` | light | Airy seafoam page, deep-water covers with a wave line, blue and teal. | Health, travel, sustainability, product overviews |
+| `forest` | dark | Deep green with leaf and amber accents, leaf-shaped corners. | Nature, wellbeing, sustainability |
+| `mono` | light | Grayscale brutalism: black title bars, thick borders, hard offset shadows, grayscale media. | Manifestos, design critique, zines |
+| `candy` | light | Playful pastel, rounded type, bubbly corners, dotted rules. | Workshops, teaching, community events |
+| `gold` | dark | Black and gold, Didone capitals with wide tracking, a fine frame. | Galas, awards, premium brands |
+| `newsprint` | light | Grey newsprint, condensed black headlines, serif text, thick-thin rules, a dotted cover. | Retrospectives, journalism, front-page summaries |
+| `slate-pro` | light | Corporate and calm: slate neutrals, one blue, a short accent bar under titles. | Business reviews, steering committees, consulting |
+| `high-contrast` | dark | White on black with yellow, 7:1 or better for all text, larger footer and muted text, thick outlines and focus rings. | Large rooms, projectors, low-vision audiences, accessibility policies |
+| `print` | light | Ink-friendly for PDF handouts: white page, thin black rules, no gradients, grayscale media. | Printed slides and handouts |
+
+Dark looks also switch Slidev to its dark syntax theme, so highlighted code keeps its contrast. The theme derives this from the
+`dark` flag of `looks.json` (`setup/main.ts`); the `Looks` component reads the same fact from the `--nd-scheme` token of the look.
+
+### Contrast
+
+WCAG contrast ratios, computed from the colours in the stylesheet by `examples/theme-lab/looks-contrast.mjs`, and checked by
+`packages/addon/test/looks.test.mjs` (4.5:1 for every text pair, 7:1 for all of `high-contrast`, 3:1 for chart marks). Each
+cell is the lowest ratio of its group.
+
+| Look | Body | Muted | Accent | On surface | Cover | Answers | Charts |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `plain` | 15.8 | 5.2 | 5.2 | 4.7 | 17.7 | 4.7 | 4.8 |
+| `paper` | 14.6 | 5.8 | 6.8 | 5.0 | 14.6 | 4.7 | 4.8 |
+| `night` | 14.4 | 7.0 | 8.3 | 5.7 | 19.3 | 5.6 | 6.6 |
+| `studio` | 17.2 | 7.9 | 11.0 | 7.1 | 17.5 | 5.6 | 7.3 |
+| `studio-light` | 17.7 | 5.8 | 6.6 | 5.3 | 17.7 | 5.1 | 4.6 |
+| `editorial` | 15.4 | 5.3 | 6.6 | 4.7 | 15.4 | 5.9 | 4.3 |
+| `swiss` | 18.9 | 7.0 | 5.5 | 6.1 | 5.5 | 5.5 | 3.4 |
+| `neon` | 17.7 | 9.2 | 6.3 | 8.6 | 20.4 | 6.1 | 6.3 |
+| `terminal` | 16.5 | 10.2 | 18.1 | 9.4 | 17.0 | 7.1 | 10.9 |
+| `blueprint` | 13.0 | 8.0 | 9.7 | 6.8 | 15.0 | 6.3 | 6.8 |
+| `sunset` | 16.4 | 10.4 | 7.8 | 9.1 | 15.5 | 6.7 | 6.4 |
+| `ocean` | 14.0 | 5.6 | 5.5 | 5.1 | 12.9 | 5.1 | 4.3 |
+| `forest` | 15.3 | 8.6 | 9.5 | 7.0 | 16.5 | 6.6 | 6.4 |
+| `mono` | 16.8 | 7.9 | 16.8 | 9.3 | 16.8 | 14.0 | 3.6 |
+| `candy` | 13.2 | 6.2 | 5.1 | 5.7 | 10.9 | 4.6 | 3.6 |
+| `gold` | 16.5 | 8.7 | 9.4 | 8.2 | 17.0 | 8.0 | 4.3 |
+| `newsprint` | 14.3 | 6.8 | 5.4 | 6.0 | 14.3 | 6.0 | 3.5 |
+| `slate-pro` | 17.1 | 6.7 | 6.4 | 6.1 | 17.1 | 5.5 | 4.5 |
+| `high-contrast` | 21.0 | 15.9 | 16.6 | 14.0 | 21.0 | 9.4 | 8.3 |
+| `print` | 21.0 | 10.4 | 9.9 | 9.3 | 21.0 | 17.5 | 4.3 |
+
+Each cell is the lowest ratio of its group: Body is ink on the page, Muted is muted text on the page, On surface is ink and muted on the card colour, Answers covers the quiz tints, Charts is the weakest of the four chart colours on the page.
+
+Two states are meant to be dimmer. A faded answer in a finished quiz keeps 60 percent opacity in every look but `high-contrast`
+(85 percent there), because fading is how a quiz says "not this one"; a right or wrong answer is also marked by a glyph and a border,
+so colour is never the only signal.
+
+### Choosing and showing looks
+
+```yaml
+---
+theme: nimbledeck
+ndVariant: editorial
+---
+```
+
+`<Looks />` steps through a curated tour (plain, paper, night, studio light, studio, editorial, swiss, neon) when its slide
+appears. `<Looks :looks="['terminal', 'blueprint', 'gold']" />` tours the ones you name, and `<Looks looks="all" />` offers all
+twenty (give it a few rows of height). Keys 1 to 9 pick a look, and the deck's own look returns when you leave the slide.
+
+### Adding a look to the base theme
+
+1. Add a block `[data-nd-variant="id"] { ... }` at the end of `packages/theme/styles/index.css`, inside the look catalogue. It
+   must define every token that `packages/theme/looks-lib.mjs` lists as required (colours, chart colours, quiz tints, fonts, gradient,
+   title size and transform, `--nd-scheme`). Do not start an id with `studio`: the studio rules match by prefix.
+2. Set the optional knobs that shape the shared rules: `--nd-h1-weight`, `--nd-h1-tracking`, `--nd-h1-rule` (the line under a title),
+   `--nd-h1-padx`, `--nd-h4-*` (subtitle), `--nd-bullet` and `--nd-marker-color`, `--nd-callout-radius`, `--nd-callout-bg`,
+   `--nd-callout-box` and `--nd-callout-bar`, `--nd-th-bg`, `--nd-th-ink`, `--nd-th-rule`, `--nd-zebra`, `--nd-td-rule`,
+   `--nd-code-bg`, `--nd-code-border`, `--nd-code-radius`, `--nd-card-radius`, `--nd-card-border`, `--nd-page-image`,
+   `--nd-cover-image`, `--nd-closing-image`, `--nd-body-size`, `--nd-faded-opacity`. With none set, the result is the plain look.
+3. Add the rules that give the look its character, each prefixed with `[data-nd-variant="id"]` so they win over the shared rules.
+4. Add the entry (`id`, `label`, `description`, `dark`, `swatch` = page, ink, accent, accent 2) to `looks.json`.
+5. Run `npm test`. It fails if the two disagree, if a token is missing or if a text pair falls under its ratio.
+6. Look at it: start the sample deck (`NIMBLEDECK_PORT_OFFSET=700 nimbledeck run looks.md` in `examples/theme-lab`) and run
+   `node looks-shots.mjs http://localhost:3730 shots --looks id`. It writes a screenshot of each of the 18 slides under that look,
+   a contact sheet, and lists any text that is cut off or leaves the slide. Read the PNGs.
+
+### Known limits of the looks
+
+- `Aurora` and `Shader` draw in the accent colours, so their hue follows the look. A black accent has no hue, so `mono` and `print`
+  turn live backgrounds (`.nd-bg`) and the photo of `photo-right` to grayscale with a CSS filter.
+- Mermaid reads the tokens when a diagram first renders and Slidev then caches the drawing, so a diagram keeps the colours of the look
+  it was first drawn in until the page is reloaded. The `Looks` tour changes the look under such a diagram without redrawing it.
+- Titles are one line: a title too long for its look is cut with an ellipsis, as in every look. Looks with wide letters
+  (`gold`, `blueprint`, `newsprint`, `terminal`) fit about 38 to 40 characters, which is what the checker allows.
+- Photos keep their colours except in `mono` and `print`.
+
+## Showcase layouts
 
 Besides the eight base layouts the theme ships five for showcase decks: `hero`, `statement`, `split`, `stage` and
 `numbers` (slots and content in [WRITING.md](WRITING.md)). They are extras: a brand theme does not have to implement them,

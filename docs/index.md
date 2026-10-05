@@ -75,7 +75,7 @@ A failing demo shows an offline panel and reconnects on its own. It cannot stop 
 
 <div markdown>
 ### Themeable
-Three built-in looks, and brand themes that restyle every live component through `--nd-*` tokens. [Themes](THEMING.md).
+Twenty built-in looks, from `editorial` and `swiss` to `neon`, `terminal`, `blueprint` and an ink-friendly `print`, chosen with one line of the header. Brand themes restyle every live component through `--nd-*` tokens. [Looks and themes](THEMING.md).
 </div>
 
 </div>
@@ -87,7 +87,7 @@ Three built-in looks, and brand themes that restyle every live component through
     ````md
     ---
     theme: nimbledeck
-    ndVariant: night        # plain | paper | night | studio | studio-light
+    ndVariant: night        # one of the twenty looks: plain, paper, night, studio, editorial, swiss, neon, ... (THEMING.md)
     title: My talk
     layout: cover
     ---

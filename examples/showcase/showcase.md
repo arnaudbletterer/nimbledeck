@@ -184,7 +184,7 @@ sounds:
 # Same words. Five looks.
 
 <Stage :h="64">
-<At :w="1140" :h="64"><Looks /></At>
+<At :w="1140" :h="64"><Looks :looks="['plain', 'paper', 'night', 'studio-light', 'studio']" /></At>
 </Stage>
 
 | Look | What it looks like |
