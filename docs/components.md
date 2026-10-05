@@ -46,6 +46,9 @@ A card that flips on click, with `#front` and `#back` content.
 
 ## Motion design
 
+For a whole slide, use a [motion or background preset](MOTION.md) instead of composing the pieces below.
+
+
 Typography, backgrounds and terminals that move. Each plays when its slide appears, sleeps when it is left, and shows its
 final state at once when the system asks for reduced motion. A throwaway slide per component lives in
 `examples/motion-lab/lab.md`.

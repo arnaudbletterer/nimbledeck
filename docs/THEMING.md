@@ -52,6 +52,14 @@ brand-repo/
    `leadLayouts` (layouts that need no `# title`) and `verify.chrome` / `verify.bleed` (CSS selectors for slide furniture
    and full-bleed media), so the generic CLI never needs brand names. See the table in `docs/ARCHITECTURE.md`.
 
+## Presets for free
+
+Motion and background presets (see [MOTION.md](MOTION.md)) live in the addon: `slide-bottom.vue` sets `data-nd-motion`, `data-nd-bg`
+and `data-nd-scrim` on the slide's `.slidev-layout` root, and the CSS reaches titles, blocks, list items, rows and cards by role. A
+brand theme that lists the addon gets them with no code. A brand layout must have a `.slidev-layout` root (optionally
+`position: relative`), paint its own background on that root, and keep the title as an `h1`. The background layer takes the colours
+the root really paints, so a dark cover stays dark.
+
 ## Name your palette, and make emphasis controllable
 
 Convention used by the Quartier Latin theme (worth copying): define the brand palette once as named tokens with a
