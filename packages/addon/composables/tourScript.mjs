@@ -111,7 +111,7 @@ export function parseSounds({ sound, sounds, bed } = {}, { seconds } = {}) {
       cues.push({ at: c.at, src: c.src, volume: c.volume ?? 1 })
     })
   }
-  return { cues: errors.length ? [] : cues.sort((a, b) => a.at - b.at), errors, warnings }
+  return { cues: cues.sort((a, b) => a.at - b.at), errors, warnings }
 }
 
 // Run steps in order against an injected clock. Each step first moves (the glide ends exactly at `at`), then acts.

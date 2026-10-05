@@ -5,6 +5,7 @@ import { imageSize } from './imagesize.mjs'
 import { loadConfig, validateConfig } from './config.mjs'
 import { knownLayouts } from './layouts.mjs'
 import { parseHeadmatter, splitSlides } from './slides.mjs'
+import { checkDeckSound, checkTourKeys } from './tourcheck.mjs'
 
 // Slide canvas is 1280 x 720. Content area of a normal slide: 1140 wide, about 500 tall.
 // Layouts with a slot that is the whole slide (the slot of full and stage, the ::bg:: slot of hero, split, statement and
@@ -41,6 +42,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
   const slides = splitSlides(text)
   const errors = [], warnings = []
   const name = deckPath.split(/[\\/]/).pop()
+  checkDeckSound(head, { root, publicDir: cfg.publicDir, errors })
 
   slides.forEach((s, idx) => {
     const n = idx + 1, body = s.body, where = `${name}:${s.line} (slide ${n})`
@@ -55,6 +57,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     const bullets = (body.match(/^\s*[-*] /gm) || []).length
     if (bullets > cfg.limits.maxBullets) warnings.push(`${where}: ${bullets} bullets > ${cfg.limits.maxBullets}, split the slide`)
     checkStages(body, layout, where, errors)
+    checkTourKeys(s, { where, root, publicDir: cfg.publicDir, errors, warnings })
     if (/<LiveCode\b/.test(body) && !cfg.runner) errors.push(`${where}: <LiveCode> needs a "runner" entry in nimbledeck.config.json`)
     // An interactive quiz needs its answer to be one of its choices.
     for (const q of body.matchAll(/<Quiz\b([^>]*)>([\s\S]*?)<\/Quiz>/g)) {
