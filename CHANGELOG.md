@@ -5,6 +5,11 @@ has not had a tagged release yet, so everything below sits under Unreleased.
 
 ## Unreleased
 
+- Add fifteen looks to the base theme (`editorial`, `swiss`, `neon`, `terminal`, `blueprint`, `sunset`, `ocean`, `forest`, `mono`,
+  `candy`, `gold`, `newsprint`, `slate-pro`, `high-contrast`, `print`), chosen with `ndVariant`. They are listed in
+  `packages/theme/looks.json`, which `nimbledeck check` uses to reject an unknown `ndVariant`, and a test keeps it in step with the
+  stylesheet and checks contrast. `<Looks />` takes any ids and tours a wider default set. `plain` and `paper` have a slightly darker
+  muted colour and a chart palette that reaches 3:1, and `night` has dark quiz tints. See docs/THEMING.md.
 - Add docs/HANDOFF.md with the state of the work and the open items.
 - Add `nimbledeck record`: films the live components of a deck (LiveCode, PyStream, Demo) into `public/recordings`, with
   scripted typing, keys, sliders and clicks set in `nimbledeck.config.json`. The components play the recording when their
