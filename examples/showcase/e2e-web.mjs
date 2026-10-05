@@ -18,7 +18,8 @@ let failed = 0
 const check = (name, ok, detail = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ' (' + detail + ')' : ''}`); if (!ok) failed++ }
 const bad = [], media = new Set(), errors = []
 page.on('response', (r) => { if (r.status() >= 400) bad.push(`${r.status()} ${r.url()}`); if (/\.(mp4|webm|jpg|png)(\?|$)/.test(r.url())) media.add(r.url()) })
-page.on('requestfailed', (r) => bad.push(`FAILED ${r.url()}`))
+// Chrome cancels an in-flight <video> request when it switches to byte ranges or the slide is left: not a failure.
+page.on('requestfailed', (r) => { if (!(r.resourceType() === 'media' && /ERR_ABORTED/.test(r.failure()?.errorText ?? ''))) bad.push(`FAILED ${r.url()}`) })
 page.on('pageerror', (e) => errors.push(e.message.slice(0, 200)))
 
 await page.goto(base + '#/1', { waitUntil: 'domcontentloaded' })
