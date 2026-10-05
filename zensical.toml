@@ -16,6 +16,7 @@ nav = [
     { "Themes and brands" = "THEMING.md" },
     { "Architecture" = "ARCHITECTURE.md" },
     { "Working offline" = "OFFLINE.md" },
+    { "Recording live components" = "RECORDING.md" },
     { "Performance" = "PERFORMANCE.md" },
   ] },
   { "Live demos" = "demos.md" },

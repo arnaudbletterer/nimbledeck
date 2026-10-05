@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "demo-turing",
+      "kind": "demo",
+      "seconds": 12,
+      "width": 1074,
+      "height": 604,
+      "files": [
+        "demo-turing.webm"
+      ],
+      "poster": "demo-turing.jpg"
+    },
+    {
+      "id": "live-fft",
+      "kind": "live",
+      "seconds": 10,
+      "width": 1200,
+      "height": 604,
+      "files": [
+        "live-fft.webm"
+      ],
+      "poster": "live-fft.jpg"
+    },
+    {
+      "id": "live-fit",
+      "kind": "live",
+      "seconds": 9,
+      "width": 1200,
+      "height": 604,
+      "files": [
+        "live-fit.webm"
+      ],
+      "poster": "live-fit.jpg"
+    },
+    {
+      "id": "live-net",
+      "kind": "live",
+      "seconds": 9,
+      "width": 1200,
+      "height": 604,
+      "files": [
+        "live-net.webm"
+      ],
+      "poster": "live-net.jpg"
+    },
+    {
+      "id": "stream-lorenz",
+      "kind": "stream",
+      "seconds": 9,
+      "width": 1280,
+      "height": 720,
+      "files": [
+        "stream-lorenz.webm"
+      ],
+      "poster": "stream-lorenz.jpg"
+    }
+  ]
+}

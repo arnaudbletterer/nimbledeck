@@ -1,4 +1,5 @@
-// Builds the web edition of the showcase: the slides that need `nimbledeck run` (PyStream, Demo, LiveCode) are left out.
+// Builds the web edition of the showcase: the slides that need `nimbledeck run` (PyStream, Demo, LiveCode) are left out,
+// unless every live component on them has a recording in public/recordings.
 // Usage: npm run build:web            (env WEB_BASE sets the base path, WEB_OUT the output folder; default dist/)
 import { spawnSync } from 'node:child_process'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -13,8 +14,8 @@ const tmp = resolve(dir, '.web-build.md')
 
 const src = readFileSync(resolve(dir, 'showcase.md'), 'utf8')
 // A static host has no fallback to index.html for /3, so the web copy uses hash routes.
-const { markdown, skipped } = webEdition(src)
-console.log(`web edition: ${skipped.length} slides that need nimbledeck run are left out`)
+const { markdown, skipped, played } = webEdition(src, resolve(dir, 'public'))
+console.log(`web edition: ${skipped.length} slides that need nimbledeck run are left out, ${played} play a recording`)
 writeFileSync(tmp, markdown)
 try {
   const r = spawnSync('npx', ['slidev', 'build', '.web-build.md', '--base', base, '--out', out], { cwd: dir, stdio: 'inherit', shell: process.platform === 'win32' })

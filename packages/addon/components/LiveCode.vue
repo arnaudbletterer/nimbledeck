@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useSlideContext } from '@slidev/client'
 import { EditorView, keymap } from '@codemirror/view'
 import { EditorState, Prec } from '@codemirror/state'
@@ -9,6 +9,7 @@ import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags as t } from '@lezer/highlight'
 import { useActive } from '../composables/useActive'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
+import { useRecording } from '../composables/useRecording'
 
 // Live code: edit Python on the slide and the result (printed output and matplotlib figures) updates as you type.
 // The code runs in a local Python process started by `nimbledeck run` (config key `runner`), never in the browser.
@@ -22,8 +23,9 @@ import { useNimbleConfig, cssVar } from '../composables/useConfig'
 //
 //   </LiveCode>
 // `auto` re-runs while you type (default); set `:auto="false"` for heavy code: run with the button or Cmd/Ctrl+Enter.
-const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean }>(), { auto: true, timeout: 10, frame: false })
-const { $scale } = useSlideContext()
+// Without the runner it plays the recording live-<id> made by `nimbledeck record` (id defaults to the slide number).
+const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean; id?: string; recording?: string }>(), { auto: true, timeout: 10, frame: false })
+const { $scale, $page } = useSlideContext()
 const source = ref<HTMLElement>()
 const editorHost = ref<HTMLElement>()
 const result = ref<HTMLElement>()
@@ -108,6 +110,8 @@ function start() { closed = false; if (!view) mount(); connect() }
 function stop() { closed = true; clearTimeout(debounce); clearTimeout(reconnect); const w = ws; ws = null; w?.close() }
 
 const active = useActive()
+const recId = computed(() => `live-${props.id ?? $page.value}`)
+const rec = reactive(useRecording(() => recId.value, () => props.recording, computed(() => state.value === 'offline'), active))
 const mounted = ref(false)
 onMounted(() => { mounted.value = true })
 watch([active, mounted], ([a, m]) => { if (m && a) start(); else if (m) { stop(); state.value = 'idle' } }, { immediate: true })
@@ -115,9 +119,9 @@ onUnmounted(() => { stop(); view?.destroy() })
 </script>
 
 <template>
-  <div class="nd-live" :class="{ 'nd-framed': frame }" data-kind="livecode" :data-state="state" @click.stop @keydown.stop @keyup.stop>
+  <div class="nd-live" :class="{ 'nd-framed': frame }" data-kind="livecode" :data-rec-id="recId" :data-state="state" @click.stop @keydown.stop @keyup.stop>
     <div ref="source" class="nd-live-source"><slot /></div>
-    <div class="nd-live-code">
+    <div class="nd-live-code" :inert="rec.shown || undefined">
       <div ref="editorHost" class="nd-live-editor" />
       <div class="nd-live-bar">
         <button @click="reset">Reset</button>
@@ -125,12 +129,13 @@ onUnmounted(() => { stop(); view?.destroy() })
         <span class="nd-live-hint">Esc leaves the editor · Cmd/Ctrl+Enter runs</span>
       </div>
     </div>
-    <div ref="result" class="nd-live-out" :class="{ 'nd-stale': stale }">
-      <div v-if="state === 'offline'" class="nd-live-msg">The Python runner is not running. Start everything with <code>nimbledeck run</code>.</div>
+    <div ref="result" class="nd-live-out" :class="{ 'nd-stale': stale }" :inert="rec.shown || undefined">
+      <div v-if="state === 'offline' && !rec.shown" class="nd-live-msg">The Python runner is not running. Start everything with <code>nimbledeck run</code>.</div>
       <img v-for="(src, i) in images" :key="i" class="nd-live-img" :src="`data:image/png;base64,${src}`" alt="">
       <pre v-if="stdout" class="nd-live-stdout">{{ stdout }}</pre>
       <pre v-if="stderr" class="nd-live-stderr">{{ stderr }}</pre>
       <span class="nd-live-status" :class="`nd-st-${state}`">{{ state === 'running' ? 'running…' : state === 'ok' ? `ok · ${ms} ms` : state === 'error' ? `error · ${ms} ms` : '' }}</span>
     </div>
+    <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
   </div>
 </template>

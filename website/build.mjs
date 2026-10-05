@@ -41,9 +41,9 @@ const dir = resolve(root, 'examples/how-it-works')
 const tmp = resolve(dir, '.docs-build.md')
 const src = readFileSync(resolve(dir, 'how-it-works.md'), 'utf8')
 // A static host runs no Python: slides that need `nimbledeck run` are left out of the web edition (they are shown on
-// the "Run it locally" page instead). Slidev skips a slide whose frontmatter says `disabled: true`.
-const { markdown, skipped } = webEdition(src)
-console.log(`web edition: ${skipped.length} slides that need nimbledeck run are left out`)
+// the "Run it locally" page instead), unless every live component on them has a recording in public/recordings.
+const { markdown, skipped, played } = webEdition(src, resolve(dir, 'public'))
+console.log(`web edition: ${skipped.length} slides that need nimbledeck run are left out, ${played} play a recording`)
 writeFileSync(tmp, markdown)
 try {
   run('npx', ['slidev', 'build', '.docs-build.md', '--base', `${siteBase}demos/how-it-works/`,

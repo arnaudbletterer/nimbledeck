@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "demo-compute",
+      "kind": "demo",
+      "seconds": 9,
+      "width": 1140,
+      "height": 460,
+      "files": [
+        "demo-compute.webm"
+      ],
+      "poster": "demo-compute.jpg"
+    },
+    {
+      "id": "live-19",
+      "kind": "live",
+      "seconds": 12,
+      "width": 1140,
+      "height": 460,
+      "files": [
+        "live-19.webm"
+      ],
+      "poster": "live-19.jpg"
+    },
+    {
+      "id": "live-20",
+      "kind": "live",
+      "seconds": 9,
+      "width": 1140,
+      "height": 460,
+      "files": [
+        "live-20.webm"
+      ],
+      "poster": "live-20.jpg"
+    },
+    {
+      "id": "stream-nbody",
+      "kind": "stream",
+      "seconds": 9,
+      "width": 1100,
+      "height": 500,
+      "files": [
+        "stream-nbody.webm"
+      ],
+      "poster": "stream-nbody.jpg"
+    }
+  ]
+}
