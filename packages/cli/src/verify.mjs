@@ -40,7 +40,7 @@ export function measure({ chrome: chromeSelectors, bleed: bleedSelectors, lead: 
     const r = el.getBoundingClientRect()
     if (r.width < 2 || r.height < 2) continue
     if (cs.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1) issues.push({ kind: 'text cut off', el: label(el), detail: (el.textContent || '').trim().slice(0, 60) })
-    if ((cs.overflow === 'hidden') && el.scrollHeight > el.clientHeight + 2 && !el.classList.contains('nd-full') && !el.classList.contains('nd-lead') && !el.classList.contains('nd-media') && !el.classList.contains('slidev-layout'))
+    if ((cs.overflow === 'hidden') && el.scrollHeight > el.clientHeight + 2 && !el.classList.contains('nd-full') && !el.classList.contains('nd-lead') && !el.classList.contains('nd-media') && !el.classList.contains('slidev-layout') && !el.classList.contains('nd-bgx'))
       issues.push({ kind: 'content clipped', el: label(el), detail: `${el.scrollHeight}px of content in ${el.clientHeight}px` })
     // Crispness: the backing store must hold the pixels the screen will show (2x device pixel ratio in `verify`).
     const dpr = window.devicePixelRatio || 1
@@ -86,7 +86,12 @@ export async function verifyDeck(deckPath, root, url) {
       await page.waitForFunction(() => [...document.querySelectorAll('.slidev-layout')].some((e) => e.getBoundingClientRect().width > 0), null, { timeout: 15000 })
     } catch (e) { return [`ERROR slide ${n}: did not load (${String(e.message).split('\n')[0]})`] }
     await page.waitForTimeout(/<(Demo|PyStream|Scene3D|Site)\b/.test(slides[n - 1].body) ? 4500 : 1200)
-    const r = await page.evaluate(measure, { chrome: cfg.verify.chrome, bleed: cfg.verify.bleed, lead: cfg.leadLayouts })
+    // Motion presets move things for a second or two; measure the settled slide. Endless background animations are not waited for.
+    await page.evaluate(() => Promise.race([
+      Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]))
+    const r = await page.evaluate(measure, { chrome: [...cfg.verify.chrome, '.nd-bgx'], bleed: [...cfg.verify.bleed, '.nd-bgx'], lead: cfg.leadLayouts })
     if (r.error) return [`ERROR slide ${n}: ${r.error}`]
     if (r.frame[0] !== 1280 || r.frame[1] !== 720) return [`ERROR slide ${n}: frame is ${r.frame.join('x')}, expected 1280x720, so nothing can be trusted`]
     const seen = new Set()
