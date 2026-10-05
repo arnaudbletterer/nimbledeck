@@ -33,7 +33,7 @@ export function fromHsl([h, s, l]: [number, number, number]): RGB {
 }
 
 /** The colour turned `deg` degrees around the hue wheel (a neighbour of a token that still belongs to it). */
-export const hueShift = (c: RGB, deg: number): RGB => { const [h, s, l] = toHsl(c); return fromHsl([(h + deg + 360) % 360, s, l]) }
+export const hueShift = (c: RGB, deg: number): RGB => { const [h, s, l] = toHsl(c); return fromHsl([(((h + deg) % 360) + 360) % 360, s, l]) }
 
 export const mix = (a: RGB, b: RGB, t: number): RGB => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t)) as RGB
 export const rgba = (c: RGB, a = 1) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`

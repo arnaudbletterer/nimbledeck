@@ -25,7 +25,33 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: npm ci
       - run: npm test
-      - name: Check the example deck against the slide rules
-        run: node packages/cli/bin/nimbledeck.mjs check examples/how-it-works/how-it-works.md
+      - name: Check every example deck against the slide rules
+        shell: bash
+        run: |
+          for deck in examples/how-it-works/how-it-works.md examples/showcase/showcase.md examples/motion-lab/lab.md \
+                      examples/theme-lab/lab.md examples/theme-lab/lab-light.md examples/theme-lab/lab-plain.md; do
+            echo "== $deck"
+            node packages/cli/bin/nimbledeck.mjs check "$deck"
+          done
       - name: Build the example deck
         run: npx slidev build examples/how-it-works/how-it-works.md
+      - name: Build the web edition of the showcase
+        run: npm --workspace examples/showcase run build:web
+      - name: Walk the showcase web edition in Chrome
+        run: node examples/showcase/e2e.mjs --no-build
+      - name: Check the hosted example deck's media under its base path
+        run: node website/hosted-media-e2e.mjs
+
+  # The full edition needs uv, Python and the runner: it is the slow, network-dependent one, so it has its own job.
+  showcase-full:
+    name: showcase full edition (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+      - run: npm ci
+      - run: node examples/showcase/e2e.mjs --edition full
