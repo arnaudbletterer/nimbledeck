@@ -18,16 +18,55 @@ only says **where things go**.
 
 - **Pick a layout.** The **Slide** tab shows your slide in every layout. One click re-arranges it. The slide text
   below the cards is the whole slide: its first lines name the layout.
-- **Restyle it.** The **Style** tab has colour, title size, rounded corners, footer, page number and entrance motion.
-  Each control is plain CSS, shown underneath so you can paste it in your theme.
+- **Pick a look, a motion and a background.** The **Style** tab is three galleries, **Look**, **Motion** and
+  **Background**. Hover or focus a card to see your current slide play it; click to apply it. Every layout animates,
+  the cover and the closing slide included. The **Your recipe** box at the top is the result: the few lines of
+  frontmatter that make it happen, with a **Copy** button.
+- **Not sure?** **Surprise me** draws a look, a motion and a background that keep the text readable (the look must
+  reach 7:1 for body text, 4.5:1 for muted text and 3:1 for the accent). **Tour** steps through the presets of the open
+  gallery on your slide; **Keep this** applies the one on screen.
+- **Fine tune** (collapsed under the galleries) keeps the plain controls: accent colour, title size, rounded corners,
+  footer and page number, each shown as the CSS it produces.
 - **Read and change the code.** The **Code** tab holds the layout itself, a few lines of Vue. Edit it and the slide
   updates as you type. **Save as new layout** copies it under your own name.
-- Add, duplicate and delete slides in the strip on the left. Switch between the `plain`, `paper` and `night` looks at
-  the top. Your changes stay in your browser; **Start over** brings the originals back.
+- Add, duplicate and delete slides in the strip on the left. Your changes stay in your browser; **Start over**
+  brings the originals back.
+
+## The recipe
+
+Three keys, two places. The look and the default motion belong to the deck; a slide can override the motion and add
+a background.
+
+The header of the first slide, for the whole deck:
+
+```yaml
+---
+ndVariant: neon         # a look, see packages/theme/looks.json
+ndMotion: cascade       # the motion of every slide (optional)
+---
+```
+
+The header of one slide:
+
+```yaml
+---
+layout: cover
+motion: pop             # this slide's own motion
+background: aurora      # an animated background for this slide
+---
+```
+
+Motion and background are attributes of the slide's root (`data-nd-motion`, `data-nd-bg`), and the theme's stylesheet
+holds the keyframes, so they work with every layout, yours included. Ids come from `packages/theme/presets.json`.
+The **Every slide** switch in the playground writes the deck key (`ndMotion`, `ndBackground`) instead of the slide
+key. A slide that has its own `motion:` keeps it. Under a background, `scrim: none | soft | strong` (deck: `ndScrim`)
+sets how much of the page colour is laid over it to keep the text readable.
 
 !!! note "What the playground approximates"
     It compiles each layout's `<template>` in the browser and ignores its `<script>`. It has no live components
-    (`Orbit`, `Quiz`...) and no Slidev builds (`v-click`). Those work in a real deck.
+    (`Orbit`, `Quiz`...) and no Slidev builds (`v-click`). Those work in a real deck. A background that draws on a
+    canvas in a real deck shows its CSS stand-in here, and says so on its card. With the system setting "reduce
+    motion" on, the previews show the final state and nothing plays.
 
 ## Anatomy of a layout
 
@@ -92,7 +131,7 @@ the short form, the layout owns the geometry, and `nimbledeck check` rejects any
 
 In the **Code** tab, open `default` and delete the two `<span>` lines: the footer and the page number are gone from every slide that
 uses it. Other changes work the same way: a new class on the root, an extra element, a different slot order.
-Colours are not a layout matter: switch the **Look** menu to `night`, or override the `--nd-*` tokens in a theme.
+Colours are not a layout matter: pick another card in the **Look** gallery, or override the `--nd-*` tokens in a theme.
 
 ### 2. Make a new layout from a classic one
 
@@ -103,17 +142,19 @@ Colours are not a layout matter: switch the **Look** menu to `night`, or overrid
 
 ### 3. Add motion
 
-CSS animation in a layout needs no script. The `my-layout` layout is an example: a rail that grows in and bullets that
-fade up one after the other.
+Most decks do not need to write any: pick a card in the **Motion** gallery and the preset animates the slide, whatever
+its layout. A layout that wants a motion of its own can still write CSS, no script needed. The `my-layout` layout is an
+example: a rail that grows in and bullets that fade up one after the other, until a preset is chosen (the rule carries
+`:not([data-nd-motion])`, so the preset wins).
 
 ```css
-.my-layout .nd-body > * { animation: ml-up .5s ease-out both; }
-.my-layout .nd-body > :nth-child(2) { animation-delay: .12s; }
+.my-layout:not([data-nd-motion]) .nd-body > * { animation: ml-up .5s ease-out both; }
+.my-layout:not([data-nd-motion]) .nd-body > :nth-child(2) { animation-delay: .12s; }
 @keyframes ml-up { from { opacity: 0; transform: translateY(16px); } }
 @media (prefers-reduced-motion: reduce) { .my-layout * { animation: none !important; } }
 ```
 
-Press **Replay motion** to see it again; the Style tab adds the same kind of motion without writing CSS. For motion that depends on the slide, use the building blocks that already exist:
+Press **Replay** to see it again. For motion that depends on the slide, use the building blocks that already exist:
 `v-click` and `<v-clicks>` for builds, `<Fly>` for entrances, and the [live components](components.md) for canvas,
 3D and Python.
 

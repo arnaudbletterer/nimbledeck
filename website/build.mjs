@@ -7,10 +7,11 @@
 // Usage: node website/build.mjs        (--serve: the documentation only, with live reload; env DEMO_BASE overrides the base path)
 // The address of the site is read from zensical.toml by website/site.mjs, nowhere else.
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { firstSlidePreloads, homePage, slideTitles, writeNotFound, writeRedirects, writeRobotsAndSitemap } from './home.mjs'
 import { webEdition } from '../packages/cli/src/webedition.mjs'
+import { playgroundData } from './playground-data.mjs'
 import { root, siteConfig } from './site.mjs'
 
 const cfg = siteConfig()
@@ -27,16 +28,9 @@ const hidden = ['HANDOFF.md', 'RELEASING.md', 'DECISIONS.md']
 rmSync(resolve(root, 'site-src'), { recursive: true, force: true })
 cpSync(resolve(root, 'docs'), resolve(root, 'site-src'), { recursive: true, filter: (p) => !hidden.some((h) => p.endsWith(h)) })
 
-// The playground edits the real layouts: pack them with the theme CSS and its presets, and ship Vue next to it.
-const read = (...p) => readFileSync(resolve(root, ...p), 'utf8')
-const layoutDir = resolve(root, 'packages/theme/layouts')
-const layouts = Object.fromEntries(readdirSync(layoutDir).sort().map((f) => [f.replace(/\.vue$/, ''), read('packages/theme/layouts', f)]))
-layouts['my-layout'] = read('website/presets/my-layout.vue')
-const tokens = read('packages/addon/styles/index.css').match(/:where\(:root\) \{[^}]*\}/)[0]
+// The playground edits the real layouts: pack them with the theme CSS and its registries, and ship Vue next to it.
 mkdirSync(resolve(root, 'site-src/playground'), { recursive: true })
-writeFileSync(resolve(root, 'site-src/playground/data.json'), JSON.stringify({
-  layouts, slides: read('website/presets/slides.md'), css: `${tokens}\n${read('packages/theme/styles/index.css')}`,
-}))
+writeFileSync(resolve(root, 'site-src/playground/data.json'), JSON.stringify(playgroundData()))
 cpSync(resolve(root, 'node_modules/vue/dist/vue.esm-browser.prod.js'), resolve(root, 'site-src/playground/vue.js'))
 
 if (process.argv.includes('--serve')) { run('uvx', ['zensical@0.0.67', 'serve']); process.exit(0) }

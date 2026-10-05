@@ -4,12 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nimbledeck playground</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="playground.css">
 </head>
 <body>
+<p id="boot" class="boot" role="status">Loading the playground...</p>
 <header class="top">
   <div class="brand"><span class="logo" aria-hidden="true"></span><b>Playground</b></div>
-  <div class="seg" id="looks" role="radiogroup" aria-label="Look"></div>
+  <button class="lookbtn" id="lookbtn" title="Change the look"><i class="dot" id="lookdot"></i><span id="looktxt"></span></button>
+  <button class="primary" id="surprise" title="A random look, motion and background that keep the text readable">&#10022; Surprise me</button>
   <span class="grow"></span>
   <button class="ghost" id="reset" title="Discard every change">Start over</button>
 </header>
@@ -23,13 +26,14 @@
   <section class="center">
     <div class="stagewrap">
       <div id="frame"><div id="stage" class="pg-root"><div id="mount"></div></div></div>
+      <div id="tourbar" hidden><span id="tourtxt" aria-live="polite"></span><button class="soft" id="tourkeep">Keep this</button><button class="soft" id="tourstop">Stop</button></div>
       <div id="toast" role="status" hidden></div>
     </div>
     <div class="bar">
       <button class="icon" id="prev" aria-label="Previous slide">&#8592;</button>
       <span id="count" class="muted"></span>
       <button class="icon" id="next" aria-label="Next slide">&#8594;</button>
-      <button class="soft" id="replay">&#9654; Replay motion</button>
+      <button class="soft" id="replay">&#9654; Replay</button>
       <span class="grow"></span>
       <span class="chip" id="ms" title="Time to render the slide in your browser"></span>
     </div>
@@ -57,20 +61,43 @@
     </div>
 
     <div class="panel" id="p-style" hidden>
-      <h2>Colour</h2>
-      <div id="swatches" class="swatches"></div>
-      <h2>Title size <output id="o-title"></output></h2>
-      <input type="range" id="title" min="32" max="80" step="2" value="52">
-      <h2>Rounded corners <output id="o-radius"></output></h2>
-      <input type="range" id="radius" min="0" max="32" step="2" value="8">
-      <h2>Show</h2>
-      <label class="switch"><input type="checkbox" id="foot" checked><span></span>Footer title</label>
-      <label class="switch"><input type="checkbox" id="pagenum" checked><span></span>Page number</label>
-      <h2>Motion</h2>
-      <div class="seg" id="motion" role="radiogroup" aria-label="Motion"></div>
-      <h2>What this does</h2>
-      <p class="muted">Every control above is plain CSS. Paste it in your theme to keep the result.</p>
-      <div class="codeblock"><button class="soft copy" id="copycss">Copy</button><pre id="css"></pre></div>
+      <section class="recipe" aria-labelledby="h-recipe">
+        <div class="rhead"><h2 id="h-recipe">Your recipe</h2><button class="soft" id="copyrecipe">Copy</button></div>
+        <div id="recipe" class="rgrid" role="group" aria-label="Frontmatter to paste in your deck"><pre id="r-deck" tabindex="0"></pre><pre id="r-slide" tabindex="0"></pre></div>
+        <p class="muted small">Paste these lines in your deck. Nothing else is needed.</p>
+      </section>
+
+      <div class="seg tabs" id="gtabs" role="tablist" aria-label="What to change">
+        <button role="tab" id="gt-look" data-k="look">Look</button>
+        <button role="tab" id="gt-motion" data-k="motion">Motion</button>
+        <button role="tab" id="gt-bg" data-k="bg">Background</button>
+      </div>
+      <div class="gbar">
+        <input type="search" id="gq" autocomplete="off" spellcheck="false">
+        <label class="switch" id="allwrap"><input type="checkbox" id="all"><span></span>Every slide</label>
+        <label class="scrim" id="scrimwrap" hidden>Text scrim <select id="scrim"></select></label>
+        <button class="soft" id="tour">Tour</button>
+      </div>
+      <p class="muted small" id="allhint"></p>
+      <div id="gallery" role="tabpanel"></div>
+      <p class="muted small" id="gcount" aria-live="polite"></p>
+      <p class="muted small" id="ginfo"></p>
+
+      <details id="fine">
+        <summary>Fine tune</summary>
+        <h2>Colour</h2>
+        <div id="swatches" class="swatches"></div>
+        <h2>Title size <output id="o-title"></output></h2>
+        <input type="range" id="title" min="32" max="80" step="2" value="52" aria-label="Title size">
+        <h2>Rounded corners <output id="o-radius"></output></h2>
+        <input type="range" id="radius" min="0" max="32" step="2" value="8" aria-label="Rounded corners">
+        <h2>Show</h2>
+        <label class="switch"><input type="checkbox" id="foot" checked><span></span>Footer title</label>
+        <label class="switch"><input type="checkbox" id="pagenum" checked><span></span>Page number</label>
+        <h2>The CSS of these controls</h2>
+        <p class="muted small">Plain CSS. Paste it in your theme to keep the result.</p>
+        <div class="codeblock"><button class="soft copy" id="copycss">Copy</button><pre id="css"></pre></div>
+      </details>
     </div>
 
     <div class="panel" id="p-code" hidden>
