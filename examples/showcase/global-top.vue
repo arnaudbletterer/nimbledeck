@@ -8,11 +8,11 @@ import { useNav } from '@slidev/client'
 type SiteLinks = { docs: string; playground: string; science?: string; github: string }
 const site: SiteLinks | undefined = (window as unknown as { __ND_SITE__?: SiteLinks }).__ND_SITE__
 
-const { currentPage, total, clicks, clicksTotal, hasNext, next, prev, currentSlideRoute, isPrintMode } = useNav()
+const { currentPage, total, clicks, clicksTotal, hasNext, next, prev, go, slides, currentSlideRoute, isPrintMode } = useNav()
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const touch = window.matchMedia('(pointer: coarse)').matches
 
-const DEFAULT_DWELL = 10   // seconds a slide stays on screen in the tour, unless its frontmatter says `tour: <seconds>`
+const DEFAULT_DWELL = 8    // seconds a slide stays on screen in the tour, unless its frontmatter says `tour: <seconds>`
 const MIN_STEP = 2.5       // seconds, floor for one click build
 
 const playing = ref(false)
@@ -21,25 +21,46 @@ const moved = ref(false)   // the visitor has left the first slide: the hint goe
 let tourTimer = 0
 let idleTimer = 0
 
-const dwell = () => {
-  const v = Number((currentSlideRoute.value?.meta as any)?.slide?.frontmatter?.tour)
+const dwellOf = (route: any) => {
+  const v = Number(route?.meta?.slide?.frontmatter?.tour)
   return v > 0 ? v : DEFAULT_DWELL
 }
+const dwell = () => dwellOf(currentSlideRoute.value)
+// The tour is a video: it has a length, and a clock. The length is the sum of the slides' times (a slide's click builds share its time).
+const durations = computed(() => (slides.value as any[]).map(dwellOf))
+const length = computed(() => durations.value.reduce((a, b) => a + b, 0))
+const stepStart = ref(0)
+const now = ref(0)
+let clock = 0
+const elapsed = computed(() => {
+  const before = durations.value.slice(0, currentPage.value - 1).reduce((a, b) => a + b, 0)
+  const d = dwell(), steps = clicksTotal.value + 1
+  const inSlide = Math.min(d, (clicks.value / steps) * d + (playing.value ? Math.max(0, (now.value - stepStart.value) / 1000) : 0))
+  return before + inSlide
+})
+const mmss = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`
+const atEnd = computed(() => !hasNext.value)
 function clearTour() { clearTimeout(tourTimer); tourTimer = 0 }
-function stop() { playing.value = false; clearTour() }
+function stop() { playing.value = false; clearTour(); clearInterval(clock) }
 function schedule() {
   clearTour()
   if (!playing.value) return
   // The slide's time is shared by its click builds, so a slide with three steps does not take four times as long.
   const ms = Math.max(MIN_STEP, dwell() / (clicksTotal.value + 1)) * 1000
+  stepStart.value = now.value = performance.now()
   tourTimer = window.setTimeout(() => { if (hasNext.value) next(); else stop() }, ms)
 }
 watch([currentPage, clicks, playing], schedule)
 watch([currentPage, clicks], () => { if (currentPage.value > 1 || clicks.value > 0) moved.value = true })
 
-function toggle(e: Event) {
-  playing.value = !playing.value
-  ;(e.currentTarget as HTMLElement).blur()   // a focused button would also react to the Space key that Slidev uses for "next"
+function play() {
+  if (atEnd.value) go(1)   // a finished tour plays again from the start
+  playing.value = true
+  clearInterval(clock); clock = window.setInterval(() => { now.value = performance.now() }, 200)
+}
+function toggle(e?: Event) {
+  if (playing.value) stop(); else play()
+  ;(e?.currentTarget as HTMLElement | undefined)?.blur()   // a focused button would also react to the Space key that Slidev uses for "next"
 }
 function press(fn: () => void) { return (e: Event) => { stop(); fn(); (e.currentTarget as HTMLElement).blur() } }
 
@@ -58,6 +79,7 @@ onMounted(() => {
   for (const t of ['pointermove', 'keydown', 'pointerdown', 'touchstart'] as const) window.addEventListener(t, wake, { passive: true })
   document.addEventListener('visibilitychange', hidden)
   wake()
+  if (new URLSearchParams(location.search).has('tour')) window.setTimeout(play, 600)   // /?tour starts the video by itself
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', interact, true)
@@ -65,10 +87,10 @@ onUnmounted(() => {
   window.removeEventListener('wheel', interact)
   for (const t of ['pointermove', 'keydown', 'pointerdown', 'touchstart'] as const) window.removeEventListener(t, wake)
   document.removeEventListener('visibilitychange', hidden)
-  clearTour(); clearTimeout(idleTimer)
+  clearTour(); clearInterval(clock); clearTimeout(idleTimer)
 })
 
-const progress = computed(() => `${(currentPage.value / total.value) * 100}%`)
+const progress = computed(() => (playing.value || elapsed.value > 0 ? `${Math.min(100, (elapsed.value / length.value) * 100)}%` : `${(currentPage.value / total.value) * 100}%`))
 const showHint = computed(() => !moved.value && !playing.value)
 const links = computed(() => [
   { label: 'Docs', href: site!.docs },
@@ -99,12 +121,20 @@ const links = computed(() => [
       <button class="ndb-btn ndb-arrow" type="button" aria-label="Previous slide" :disabled="currentPage === 1 && clicks === 0" @click="press(prev)($event)">&#8592;</button>
       <span class="ndb-count" aria-live="off">{{ currentPage }} / {{ total }}</span>
       <button class="ndb-btn ndb-arrow" type="button" aria-label="Next slide" :disabled="!hasNext" @click="press(next)($event)">&#8594;</button>
-      <button class="ndb-btn ndb-tour" type="button" :aria-pressed="playing" :title="playing ? 'Pause the tour' : 'The deck plays itself, about 3 minutes'" @click="toggle">
-        <span aria-hidden="true">{{ playing ? '❚❚' : '▶' }}</span> {{ playing ? 'Pause the tour' : 'Play the tour' }}
+      <button class="ndb-btn ndb-tour" type="button" :aria-pressed="playing" :title="playing ? 'Pause the tour' : 'Watch the deck play itself, about ' + mmss(length)" @click="toggle">
+        <span class="ndb-ico" aria-hidden="true">{{ playing ? '❚❚' : atEnd && moved ? '↻' : '▶' }}</span>
+        <span class="ndb-label">{{ playing ? 'Pause' : atEnd && moved ? 'Replay the tour' : 'Play the tour' }}</span>
+        <span class="ndb-time" aria-hidden="true">{{ mmss(playing || elapsed > 0 ? elapsed : length) }}<template v-if="playing || elapsed > 0"> / {{ mmss(length) }}</template></span>
       </button>
       <span class="ndb-line" aria-hidden="true"><i :style="{ width: progress }" /></span>
     </nav>
-    <p v-if="showHint" class="ndb-hint" role="note">{{ touch ? 'Swipe left to begin' : 'Press the right arrow to begin' }}</p>
+    <div v-if="showHint" class="ndb-cta">
+      <button class="ndb-play" type="button" @click="toggle">
+        <span class="ndb-play-ico" aria-hidden="true">&#9654;</span>
+        <span>Watch the {{ mmss(length) }} tour</span>
+      </button>
+      <p class="ndb-hint" role="note">{{ touch ? 'or swipe left to browse' : 'or press the right arrow to browse' }}</p>
+    </div>
   </Teleport>
 </template>
 
@@ -139,21 +169,28 @@ const links = computed(() => [
 .ndb .ndb-btn { font: inherit; color: inherit; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
 .ndb .ndb-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--nd-ink, #fff) 8%, transparent); }
 .ndb .ndb-btn:disabled { opacity: .35; cursor: default; }
-.ndb .ndb-tour { margin-left: 6px; color: var(--nd-bg, #07090f); background: var(--nd-accent, #22d3ee); font-weight: 600; border-radius: 999px; padding: 7px 14px; }
+.ndb .ndb-tour { margin-left: 6px; color: var(--nd-bg, #07090f); background: var(--nd-accent, #22d3ee); font-weight: 600; border-radius: 999px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 8px; }
+.ndb-time { font-variant-numeric: tabular-nums; opacity: .75; font-weight: 500; min-width: 2.6em; text-align: right; }
 .ndb .ndb-tour:hover:not(:disabled) { background: var(--nd-accent, #22d3ee); filter: brightness(1.12); }
 .ndb .ndb-tour[aria-pressed="true"] { background: transparent; color: var(--nd-ink, #e5e7eb); border-color: var(--nd-accent, #22d3ee); }
 .ndb a:focus-visible, .ndb button:focus-visible, .ndb summary:focus-visible { outline: 2px solid var(--nd-accent, #22d3ee); outline-offset: 2px; }
 .ndb-line { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; }
 .ndb-line i { display: block; height: 100%; background: var(--nd-gradient, var(--nd-accent, #22d3ee)); transition: width .6s ease; }
 
-.ndb-hint { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 55; margin: 0; pointer-events: none;
-  padding: 8px 16px; border-radius: 999px; font: 500 13px/1 var(--nd-font-body, system-ui, sans-serif); color: var(--nd-ink, #e5e7eb);
-  background: color-mix(in srgb, var(--nd-bg, #07090f) 80%, transparent); border: 1px solid var(--nd-line, #232b42);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); animation: ndb-pulse 2.4s ease-in-out infinite; }
+.ndb-cta { position: fixed; right: 40px; bottom: 36px; z-index: 55; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }   /* the hero text is on the left */
+.ndb-play { display: inline-flex; align-items: center; gap: 12px; padding: 14px 26px 14px 18px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--nd-accent, #22d3ee) 60%, transparent);
+  font: 600 17px/1 var(--nd-font-body, system-ui, sans-serif); letter-spacing: -0.01em; color: var(--nd-bg, #07090f); background: var(--nd-accent, #22d3ee); cursor: pointer;
+  box-shadow: 0 10px 40px -8px var(--nd-accent, #22d3ee); animation: ndb-glow 2.6s ease-in-out infinite; }
+.ndb-play:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.ndb-play-ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: color-mix(in srgb, var(--nd-bg, #07090f) 88%, transparent); color: var(--nd-accent, #22d3ee); font-size: 12px; padding-left: 2px; }
+@keyframes ndb-glow { 50% { box-shadow: 0 10px 56px -2px var(--nd-accent, #22d3ee); } }
+.ndb-hint { margin: 0; pointer-events: none; padding: 5px 12px; border-radius: 999px; font: 500 12px/1 var(--nd-font-body, system-ui, sans-serif); color: var(--nd-muted, #9aa3b8);
+  background: color-mix(in srgb, var(--nd-bg, #07090f) 70%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 @keyframes ndb-pulse { 50% { opacity: .55; } }
-@media (prefers-reduced-motion: reduce) { .ndb-hint { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ndb-play { animation: none; } }
 
 @media (max-width: 760px) {
+  .ndb-cta { left: 50%; right: auto; transform: translateX(-50%); align-items: center; }
   .ndb .ndb-links > .ndb-wide { display: none; }
   .ndb-more { display: block; }
   .ndb-brand span { display: none; }
@@ -162,10 +199,9 @@ const links = computed(() => [
 @media (max-width: 480px) {
   .ndb { padding-left: 8px; padding-right: 6px; gap: 0; }
   .ndb .ndb-btn.ndb-arrow, .ndb .ndb-count { display: none; }   /* Slidev shows its own arrows on a narrow screen */
-  .ndb .ndb-tour { padding: 7px 11px; margin-left: 2px; }
-  .ndb .ndb-tour { font-size: 0; }          /* the icon alone, the label stays for screen readers */
-  .ndb .ndb-tour span { font-size: 13px; }
+  .ndb .ndb-tour { padding: 7px 11px; margin-left: 2px; gap: 6px; }
+  .ndb .ndb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }   /* icon and clock only, the label stays for screen readers */
 }
-@media (pointer: coarse) { .ndb-hint { bottom: 64px; } .ndb .ndb-btn, .ndb-links > a, .ndb-more > summary { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; } }
-@media print { .ndb, .ndb-hint { display: none; } }
+@media (pointer: coarse) { .ndb-cta { bottom: 64px; } .ndb .ndb-btn, .ndb-links > a, .ndb-more > summary { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; } }
+@media print { .ndb, .ndb-cta { display: none; } }
 </style>
