@@ -163,7 +163,7 @@ input[type=range] { width: 100%; accent-color: var(--acc); }
 .recipe { padding: .7rem .8rem .6rem; border-radius: 12px; background: var(--acc-soft); border: 1px solid color-mix(in srgb, var(--acc) 35%, var(--line)); }
 .rhead { display: flex; align-items: center; justify-content: space-between; }
 .rhead h2 { margin: 0; color: var(--fg); }
-.rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .4rem; margin: .5rem 0 .4rem; }
+.rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .4rem; margin: .5rem 0 .4rem; }
 .rgrid pre { margin: 0; padding: .5rem .7rem; border-radius: 8px; background: var(--card); font: 12.5px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow: auto; white-space: pre; }
 .gbar { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin: .8rem 0 0; }
 #gq { flex: 1 1 100%; min-width: 0; padding: .4rem .7rem; border-radius: 8px; border: 1px solid var(--line); background: var(--card); }
@@ -215,3 +215,13 @@ details#fine summary:focus-visible { outline: 2px solid var(--acc); outline-offs
   .panel { animation: none; } .gcard { transition: none; }
   .pg-root *, .pg-root *::before, .pg-root *::after { animation: none !important; }
 }
+
+/* Stand-ins for the two backgrounds a real deck draws on a canvas (Aurora, Shader): blurred shapes in the look's colours */
+.pg-root .nd-bgx.pg-approx > i { position: absolute; display: block; border-radius: 50%; filter: blur(70px); opacity: .75; animation: pg-orbit 16s ease-in-out infinite alternate; }
+.pg-root .nd-bgx.pg-approx > i:nth-child(1) { left: -12%; top: -25%; width: 62%; height: 80%; background: var(--nd-accent); }
+.pg-root .nd-bgx.pg-approx > i:nth-child(2) { right: -14%; bottom: -30%; width: 66%; height: 85%; background: var(--nd-accent-2, var(--nd-accent)); animation-delay: -5s; animation-duration: 20s; }
+.pg-root .nd-bgx.pg-approx > i:nth-child(3) { left: 30%; top: 25%; width: 40%; height: 55%; background: color-mix(in srgb, var(--nd-accent) 50%, var(--nd-accent-2, var(--nd-accent))); animation-delay: -9s; animation-duration: 24s; }
+[data-nd-bg="shader"] > .nd-bgx.pg-approx > i { filter: blur(40px); border-radius: 0; animation-name: pg-fold; }
+@keyframes pg-orbit { to { transform: translate(24%, 18%) scale(1.25); } }
+@keyframes pg-fold { to { transform: translate(-12%, 10%) rotate(14deg) scale(1.3); } }
+.scrim { display: inline-flex; align-items: center; gap: .4rem; font-size: 13px; color: var(--mut); } .scrim select { padding: .25rem .4rem; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }

@@ -59,7 +59,8 @@ background: aurora      # an animated background for this slide
 Motion and background are attributes of the slide's root (`data-nd-motion`, `data-nd-bg`), and the theme's stylesheet
 holds the keyframes, so they work with every layout, yours included. Ids come from `packages/theme/presets.json`.
 The **Every slide** switch in the playground writes the deck key (`ndMotion`, `ndBackground`) instead of the slide
-key. A slide that has its own `motion:` keeps it.
+key. A slide that has its own `motion:` keeps it. Under a background, `scrim: none | soft | strong` (deck: `ndScrim`)
+sets how much of the page colour is laid over it to keep the text readable.
 
 !!! note "What the playground approximates"
     It compiles each layout's `<template>` in the browser and ignores its `<script>`. It has no live components

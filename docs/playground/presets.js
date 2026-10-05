@@ -43,7 +43,34 @@ export function normalize(data) {
     looks: (looks ?? FALLBACK.looks).map((l) => ({ ...l, label: l.label ?? l.id, dark: !!l.dark })),
     motions: [NONE('motion'), ...(motions ?? FALLBACK.motions)],
     backgrounds: [NONE('animated background'), ...(backgrounds ?? FALLBACK.backgrounds)],
+    scrims: Array.isArray(data.presets?.scrims) ? data.presets.scrims : [],
   }
+}
+
+// Backgrounds the real deck draws on a canvas (the Aurora and Shader components). The playground cannot run them, so it
+// lays a CSS stand-in under the same attribute and says so on the card.
+export const CANVAS_BG = new Set(['aurora', 'shader'])
+
+// The layer a real deck lays into the slide for a background (packages/addon/slide-bottom.vue): a few empty shapes that
+// the CSS of backgrounds.css moves; stars and waves carry their own geometry. Same seed, same field.
+export function layerHtml(bg) {
+  if (bg === 'stars') {
+    let seed = 7
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 }
+    return [[70, 2], [38, 3], [16, 4]].map(([n, size]) => {
+      const shadow = Array.from({ length: n }, () => `${Math.round(rnd() * 1280)}px ${Math.round(rnd() * 720)}px 0 ${rnd() < 0.5 ? 0 : 1}px var(--nd-ink)`).join(',')
+      return `<i class="nd-star" style="width:${size}px;height:${size}px;box-shadow:${shadow}"></i>`
+    }).join('')
+  }
+  if (bg === 'waves') {
+    const paths = [[34, 0.0, 600], [22, 1.7, 520], [46, 3.1, 660]].map(([a, ph, y]) => {
+      let d = `M0 720 L0 ${y}`
+      for (let x = 0; x <= 2560; x += 32) d += ` L${x} ${(y + a * Math.sin((x / 1280) * Math.PI * 2 * 2 + ph)).toFixed(1)}`
+      return `<path d="${d} L2560 720 Z"/>`
+    })
+    return `<svg class="nd-waves" viewBox="0 0 2560 720" preserveAspectRatio="none">${paths.join('')}</svg>`
+  }
+  return '<i></i><i></i><i></i>'
 }
 
 // A swatch is a colour, a list of colours, or an object of colours: give back a list.
@@ -73,8 +100,8 @@ export function firstImpression(reg) {
 
 // The recipe: the lines to write in the deck header and on the slide.
 export function recipe(deck, fm) {
-  const deckLines = [`ndVariant: ${deck.ndVariant}`, deck.ndMotion && `ndMotion: ${deck.ndMotion}`, deck.ndBackground && `ndBackground: ${deck.ndBackground}`].filter(Boolean)
-  const slideLines = [fm.motion && `motion: ${fm.motion}`, fm.background && `background: ${fm.background}`].filter(Boolean)
+  const deckLines = [`ndVariant: ${deck.ndVariant}`, deck.ndMotion && `ndMotion: ${deck.ndMotion}`, deck.ndBackground && `ndBackground: ${deck.ndBackground}`, deck.ndScrim && `ndScrim: ${deck.ndScrim}`].filter(Boolean)
+  const slideLines = [fm.motion && `motion: ${fm.motion}`, fm.background && `background: ${fm.background}`, fm.scrim && `scrim: ${fm.scrim}`].filter(Boolean)
   return { deckLines, slideLines }
 }
 export const recipeText = ({ deckLines, slideLines }) => ['# deck header', ...deckLines, ...(slideLines.length ? ['', '# this slide', ...slideLines] : [])].join('\n')

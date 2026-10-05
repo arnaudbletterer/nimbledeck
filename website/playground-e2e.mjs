@@ -54,7 +54,7 @@ async function open(opts = {}) {
     external.push(u); return route.abort()
   })
   await page.goto(url)
-  await page.waitForSelector('#thumbs li')
+  await page.waitForSelector('#thumbs > li')
   await page.waitForSelector('#gallery .gcard')
   return page
 }
@@ -123,9 +123,9 @@ check('the recipe names it', (await recipe()).includes(`motion: ${motions[1]}`))
 await page.click('label:has(#all)')
 await cardOf(motions[2]).click()
 check('"every slide" writes ndMotion in the deck header', (await recipe()).includes(`ndMotion: ${motions[2]}`) && !/\nmotion:/.test(await slideText()))
-await page.click('#thumbs li:nth-child(2)')
+await page.click('#thumbs > li:nth-child(2)')
 check('the deck motion reaches another slide', (await motionOf()).attr === motions[2])
-await page.click('#thumbs li:nth-child(1)')
+await page.click('#thumbs > li:nth-child(1)')
 await page.click('label:has(#all)')   // back to this slide only
 const none = cardOf('none')
 await none.click()
@@ -196,7 +196,7 @@ const times = []
 for (let i = 0; i < 8; i++) { await page.click('#next'); times.push(parseFloat(await page.textContent('#ms'))) }
 times.sort((a, b) => a - b)
 check('the main stage renders in under 2 ms (median)', times[4] < 2, `median ${times[4]} ms, max ${times[7]} ms`)
-await page.click('#thumbs li:nth-child(1)')
+await page.click('#thumbs > li:nth-child(1)')
 
 // ---- Surprise me and Tour ----
 const seen = new Set()
@@ -214,23 +214,21 @@ check('Escape stops the Tour', await page.isHidden('#tourbar'))
 await page.click('#tour'); await page.click('#tourkeep')
 check('Keep this applies the preset on show', await page.isHidden('#tourbar') && /motion: \S+/.test(await recipe()))
 
-// ---- Screenshots of 8 combinations (full screen) ----
+// ---- Screenshots of 8 combinations: the eight slides of the sample deck, each with its own look, motion and background ----
 const combos = []
-const L = await (async () => { await kindTo('look'); return ids('#gallery .gcard') })()
-const B = bgs
-const pickAt = (xs, i) => xs[Math.min(xs.length - 1, i)]
-const plan = [['cover', 0, 0, 0], ['agenda', 1, 1, 1], ['default', 2, 2, 2], ['two-cols', 3, 3, 3], ['divider', 4, 4, 4], ['statement', 5, 5, 5], ['closing', 6, 6, 6], ['hero', 7, 7, 7]]
-for (const [layout, li, mi, bi] of plan) {
-  if (!layouts.includes(layout)) continue
-  await tabTo('slide')
-  await page.locator('#cards .card:not(.new)').filter({ has: page.locator('.l', { hasText: new RegExp(`^${layout}`) }) }).first().click()
-  await kindTo('look'); await cardOf(pickAt(L, li * 2 + 1)).click()
-  await kindTo('motion'); await cardOf(pickAt(motions, mi * 2)).click()
-  if (B.length) { await kindTo('bg'); await cardOf(pickAt(B, bi)).click() }
+await tabTo('style')
+const lookIds = await (async () => { await kindTo('look'); return ids('#gallery .gcard') })()
+const pickAt = (xs, i) => xs[((i % xs.length) + xs.length) % xs.length]
+await page.locator('#all').evaluate((e) => { if (e.checked) e.click() })
+for (let n = 1; n <= 8; n++) {
+  await page.click(`#thumbs > li:nth-child(${n})`)
+  await kindTo('look'); await cardOf(pickAt(lookIds, n * 3 - 1)).click()
+  await kindTo('motion'); await cardOf(pickAt(motions, n * 2)).click()
+  if (bgs.length) { await kindTo('bg'); await cardOf(pickAt(bgs, n)).click() }
   await page.mouse.move(5, 5)
-  await page.waitForTimeout(1500)
-  await shot(page, `3-combo-${layout}`)
-  combos.push(layout)
+  await page.waitForTimeout(1600)
+  await shot(page, `3-combo-${n}`)
+  combos.push(n)
 }
 await kindTo('look')
 await shot(page, '4-looks-gallery')
@@ -268,18 +266,23 @@ await tabTo('code'); await page.waitForTimeout(350); await shot(page, '7-code-ta
 }
 
 // ---- The embedded width: stacked, no sideways scroll ----
-for (const [w, h] of [[760, 900], [420, 900]]) {
+for (const [w, h] of [[760, 900], [760, 704], [900, 704], [420, 900]]) {
   const p = await open({ viewport: { width: w, height: h } })
   const over = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth)
-  check(`width ${w}: no horizontal scroll`, over <= 0, `${over}px`)
+  check(`width ${w}x${h}: no horizontal scroll`, over <= 0, `${over}px`)
+  if (w > 640) {
+    const fit = await p.evaluate(() => ['count', 'thumbs'].map((id) => document.getElementById(id).getBoundingClientRect().bottom <= innerHeight + 1))
+    const own = await p.evaluate(() => { const i = document.querySelector('.inspector'); return i.scrollHeight > i.clientHeight && getComputedStyle(i).overflowY === 'auto' })
+    check(`width ${w}x${h}: slide bar and thumbnails fit, the inspector scrolls by itself`, fit.every(Boolean) && own, `fit ${fit}, own scroll ${own}`)
+  }
   const reach = await p.evaluate(() => { const g = document.getElementById('gallery').getBoundingClientRect(); return g.width })
-  check(`width ${w}: the gallery has room`, reach >= 280, `${Math.round(reach)}px`)
-  await shot(p, `6-width-${w}`)
+  check(`width ${w}x${h}: the gallery has room`, reach >= 280, `${Math.round(reach)}px`)
+  await shot(p, `6-width-${w}x${h}`)
   await p.evaluate(() => document.getElementById('gallery').scrollIntoView({ block: 'end' }))
   await p.waitForTimeout(200)
   const top = await p.evaluate(() => { const r = document.getElementById('frame').getBoundingClientRect(); return [Math.round(r.top), Math.round(r.bottom)] })
-  check(`width ${w}: the slide stays in view while the gallery scrolls`, top[0] >= 0 && top[1] > 40 && top[1] <= h, top.join('..'))
-  await shot(p, `6-width-${w}-scrolled`)
+  check(`width ${w}x${h}: the slide stays in view while the gallery scrolls`, top[0] >= 0 && top[1] > 40 && top[1] <= h, top.join('..'))
+  await shot(p, `6-width-${w}x${h}-scrolled`)
   await p.context().close()
 }
 

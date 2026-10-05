@@ -16,9 +16,11 @@ export function playgroundData() {
   const tokens = read('packages/addon/styles/index.css').match(/:where\(:root\) \{[^}]*\}/)[0]
   // index.css first, then any other stylesheet of the theme (a preset library may live in a file of its own).
   const sheets = ['index.css', ...readdirSync(resolve(root, 'packages/theme/styles')).filter((f) => f.endsWith('.css') && f !== 'index.css').sort()]
+  // The motion and background presets live in the addon's stylesheets (imported by its index.css), once they exist.
+  const addon = ['motion.css', 'backgrounds.css'].filter((f) => existsSync(resolve(root, 'packages/addon/styles', f))).map((f) => read('packages/addon/styles', f))
   return {
     layouts, slides: read('website/presets/slides.md'),
-    css: [tokens, ...sheets.map((f) => read('packages/theme/styles', f))].join('\n'),
+    css: [tokens, ...addon, ...sheets.map((f) => read('packages/theme/styles', f))].join('\n'),
     presets: registry('presets.json'), looks: registry('looks.json'),
   }
 }

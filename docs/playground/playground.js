@@ -1,5 +1,5 @@
 import * as Vue from './vue.js'
-import { FALLBACK_CSS, firstImpression, hasRule, normalize, passes, ratio, recipe, recipeText, swatchColors } from './presets.js'
+import { CANVAS_BG, FALLBACK_CSS, firstImpression, hasRule, layerHtml, normalize, passes, ratio, recipe, recipeText, swatchColors } from './presets.js'
 
 const $ = (id) => document.getElementById(id)
 let data
@@ -88,7 +88,7 @@ function freshState() {
   slides[0] = withFm(slides[0], Object.fromEntries([['motion', fi.motion], ['background', fi.background]].filter(([, v]) => v)))
   return {
     slides, layouts: { ...originals }, tweaks: { accent: null, title: 52, radius: 8, foot: true, page: true },
-    deck: { ndVariant: fi.ndVariant, ndMotion: fi.ndMotion ?? null, ndBackground: null }, all: { motion: false, bg: false },
+    deck: { ndVariant: fi.ndVariant, ndMotion: fi.ndMotion ?? null, ndBackground: null, ndScrim: null }, all: { motion: false, bg: false },
   }
 }
 const defaults = freshState()
@@ -112,7 +112,8 @@ function decoOf(raw, index) {
   const fm = parseSlide(raw).fm
   let motion = real(fm.motion ?? S.deck.ndMotion), bg = real(fm.background ?? S.deck.ndBackground)
   if (tour && index === cur) { if (tour.kind === 'motion') motion = tour.id; if (tour.kind === 'bg') bg = tour.id }
-  return { motion, bg }
+  const scrim = String(fm.scrim ?? S.deck.ndScrim ?? 'soft').toLowerCase()
+  return { motion, bg, scrim: ['none', 'soft', 'strong'].includes(scrim) ? scrim : 'soft' }
 }
 
 // ---------- Layouts: the <template> is compiled in the browser, <style> is injected, <script> is ignored ----------
@@ -147,16 +148,46 @@ ctxApp.config.globalProperties.$slidev = { configs: { get title() { return title
 function setDeco(el, d) {
   const root = el.firstElementChild
   if (!root) return
-  for (const [a, v] of [['data-nd-motion', d.motion], ['data-nd-bg', d.bg]]) {
-    if (!v) root.removeAttribute(a)
-    else if (root.getAttribute(a) !== v) root.setAttribute(a, v)
+  const set = (a, v) => { if (!v) root.removeAttribute(a); else if (root.getAttribute(a) !== v) root.setAttribute(a, v) }
+  set('data-nd-motion', d.motion); set('data-nd-bg', d.bg); set('data-nd-scrim', d.bg ? d.scrim ?? 'soft' : null)
+  if (d.motion) root.style.setProperty('--nd-ch', String(Math.max(4, (root.querySelector('h1')?.textContent ?? '').trim().length || 20)))
+  if (d.motion === 'typewriter') measureTitle(root)
+  bgLayer(root, d.bg)
+}
+// A real deck lays the background into the slide as a layer (packages/addon/slide-bottom.vue); so does the playground.
+// The colours it paints with are the ones the layout paints, so a background under a dark cover is dark.
+function bgLayer(root, bg) {
+  let layer = root.querySelector(':scope > .nd-bgx')
+  if (layer && (!bg || layer.dataset.bg !== bg)) { layer.remove(); layer = null }
+  if (!bg) return
+  if (!layer) {
+    layer = document.createElement('div'); layer.dataset.bg = bg; layer.setAttribute('aria-hidden', 'true')
+    layer.className = `nd-bgx${CANVAS_BG.has(bg) ? ' pg-approx' : ''}`
+    layer.innerHTML = layerHtml(bg); root.append(layer)
   }
+  tone(root, layer)
+}
+// Needs the slide in the document: a detached element has no computed colours (the gallery calls it again once attached).
+function tone(root, layer) {
+  const cs = getComputedStyle(root), opaque = cs.backgroundColor && !/rgba\(.*,\s*0\)|transparent/.test(cs.backgroundColor)
+  layer.style.setProperty('--nd-bg', opaque ? cs.backgroundColor : ''); layer.style.setProperty('--nd-ink', cs.color)
+}
+// The typewriter preset types the title one character at a time: it needs where the text starts and how wide it is.
+function measureTitle(root) {
+  const title = root.querySelector('h1')
+  if (!title) return
+  const r = document.createRange(); r.selectNodeContents(title)
+  const t = r.getBoundingClientRect(), b = title.getBoundingClientRect(), k = title.offsetWidth ? b.width / title.offsetWidth : 0
+  if (!k || !t.width) return
+  root.style.setProperty('--nd-tw-x', `${((t.left - b.left) / k).toFixed(1)}px`); root.style.setProperty('--nd-tw-w', `${(t.width / k + 8).toFixed(1)}px`)
 }
 // Play the entrance again: take the attribute off, let the browser notice, put it back.
 function restart(el) {
   const root = el.firstElementChild, m = root?.getAttribute('data-nd-motion')
   if (!m) return
-  root.removeAttribute('data-nd-motion'); void root.offsetWidth; root.setAttribute('data-nd-motion', m)
+  root.removeAttribute('data-nd-motion'); void root.offsetWidth
+  if (m === 'typewriter') measureTitle(root)
+  root.setAttribute('data-nd-motion', m)
 }
 
 // Draw one slide into an element. Throws on a broken layout, so the caller decides what to show.
@@ -253,7 +284,7 @@ function update(o = {}) {
   $('ms').textContent = `${(performance.now() - t0).toFixed(1)} ms`
   $('count').textContent = `${cur + 1} / ${S.slides.length}`
   const look = lookOf(S.deck.ndVariant), sw = swatchColors(look.swatch)
-  $('looktxt').textContent = `Look: ${look.label}`; $('lookdot').style.background = sw[1] ?? sw[0] ?? 'var(--acc)'
+  $('looktxt').textContent = `Look: ${look.label}`; $('lookdot').style.background = (sw.length > 2 ? sw[2] : sw[1] ?? sw[0]) ?? 'var(--acc)'   // [page, ink, accent, ...] or [page, accent]
   const name = curLayout()
   if (o.cards !== false && tab === 'slide') cards(name)
   if (o.thumbs !== false) thumbs()
@@ -365,7 +396,7 @@ function slideHtml(raw, index, layout) {
 function missing(kind, it) {
   if (it.none || (kind === 'motion' && reg.fallback.motions)) return null
   const attr = kind === 'look' ? 'variant' : kind
-  return hasRule(data.css, attr, it.id) ? null : kind === 'bg' ? 'Needs its live component, not shown here' : 'No CSS for it in this build'
+  return hasRule(data.css, attr, it.id) ? null : 'No CSS for it in this build'
 }
 function buildGallery() {
   if (tab !== 'style') return
@@ -389,6 +420,7 @@ function buildGallery() {
   const had = G.contains(document.activeElement) ? document.activeElement.dataset.id : null   // keep the keyboard where it was
   host.replaceChildren(frag)
   setScale(); filter(); markPressed()
+  for (const m of host.querySelectorAll('.pg-g')) { const r = m.firstElementChild, l = r?.querySelector(':scope > .nd-bgx'); if (l) tone(r, l) }
   if (had) host.querySelector(`.gcard[data-id="${CSS.escape(had)}"]`)?.focus({ preventScroll: true })
 }
 function card(kind, it, html, bg) {
@@ -405,6 +437,7 @@ function card(kind, it, html, bg) {
   if (kind === 'look') { const sw = swatchColors(it.swatch); for (const c of sw.slice(0, 3)) { const d = el('i', 'swd'); d.style.background = c; name.append(d) } }
   name.append(it.label)
   b.append(box, name, el('span', 'gdesc', it.description ?? ''))
+  if (kind === 'bg' && CANVAS_BG.has(it.id)) b.append(el('span', 'gtag', 'CSS stand-in: a canvas in a real deck'))
   if (why) { b.append(el('span', 'gtag', why)); b.dataset.missing = why }
   else if (kind === 'look' && !passes(lookGuard(it.id))) b.append(el('span', 'gtag', 'Low contrast text'))
   return b
@@ -444,10 +477,11 @@ function info(card) {
 function hint() {
   const k = gkind
   $('allwrap').hidden = k === 'look'; $('all').checked = !!S.all[k]
+  $('scrimwrap').hidden = k !== 'bg' || !reg.scrims.length; scrimUi()
   const motionNote = reduce.matches ? ' Your system asks for reduced motion: previews show the final state and nothing plays.' : ''
   $('allhint').textContent = k === 'look' ? 'A look applies to the whole deck. It writes ndVariant in the deck header.'
     : (S.all[k] ? `Writes ${DECK_KEY[k]} in the deck header. A slide with its own ${SLIDE_KEY[k]} keeps it.` : `Writes ${SLIDE_KEY[k]} on this slide only.`)
-      + (k === 'bg' ? ' Previews use each background’s CSS. One that draws on a canvas in a real deck shows its CSS stand-in here.' : '') + (k === 'look' ? '' : motionNote)
+      + (k === 'bg' ? ' Aurora and Shader draw on a canvas in a real deck; here they show a CSS stand-in, marked on their cards.' : '') + (k === 'look' ? '' : motionNote)
   $('tour').disabled = k !== 'look' && reduce.matches
 }
 function setKind(k) {
@@ -472,6 +506,16 @@ function tablist(host) {
 tablist($('gtabs')); tablist($('tabs'))
 for (const host of [$('gtabs'), $('tabs')]) [...host.children].forEach((b) => { b.tabIndex = b.getAttribute('aria-selected') === 'true' ? 0 : -1 })
 $('gq').oninput = (e) => { gq = e.target.value; filter() }
+// Scrim: the page colour laid over a background so the text stays readable. Soft is the default and is not written.
+function scrimUi() {
+  const sel = $('scrim'); if (sel.options.length !== reg.scrims.length) sel.replaceChildren(...reg.scrims.map((v) => new Option(v, v)))
+  sel.value = String(parseSlide(S.slides[cur]).fm.scrim ?? S.deck.ndScrim ?? 'soft')
+}
+$('scrim').onchange = (e) => {
+  const v = e.target.value, s = parseSlide(S.slides[cur])
+  if (S.all.bg) { S.deck.ndScrim = v === 'soft' ? null : v; delete s.fm.scrim } else if (v === 'soft' && !S.deck.ndScrim) delete s.fm.scrim; else s.fm.scrim = v
+  S.slides[cur] = serialize(s); save(); update({ now: true })
+}
 $('all').onchange = (e) => { S.all[gkind] = e.target.checked; save(); hint() }
 
 // Live preview: only the card under the pointer or focus plays, the others stay still.
