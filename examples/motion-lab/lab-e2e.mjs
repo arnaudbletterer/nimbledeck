@@ -48,8 +48,8 @@ check('a held kinetic text stays hidden before the click', await page.evaluate((
 await key(page, 'ArrowRight')
 await page.waitForTimeout(300)
 check('the held kinetic text plays after the click', await page.evaluate(() => [...document.querySelectorAll('[data-kind=kinetic]')].some((k) => k.classList.contains('nd-k-play'))))
-await key(page, 'ArrowRight'); await page.waitForTimeout(300)   // now on the terminal slide
-check('leaving the slide resets the typewriter', await page.evaluate(() => [...document.querySelectorAll('[data-kind=typewriter]')].every((e) => !e.classList.contains('nd-done') && e.querySelector('.nd-tw-live').textContent === '')))
+await key(page, 'ArrowRight'); await page.waitForTimeout(900)   // now on the terminal slide (a left slide stays active for 650 ms while it fades out)
+check('leaving the slide resets the typewriter', await page.evaluate(() => { const left = [...document.querySelectorAll('[data-kind=typewriter]')].filter((e) => e.getBoundingClientRect().width === 0); return left.length > 0 && left.every((e) => !e.classList.contains('nd-done') && e.querySelector('.nd-tw-live').textContent === '') }))   // the one on the slide we came from, not the terminal that is typing on the new one
 
 // Terminal
 await page.waitForFunction(() => [...document.querySelectorAll('[data-kind=terminal]')].some((e) => e.getBoundingClientRect().width > 0 && e.classList.contains('nd-done')), null, { timeout: 20000 })
@@ -103,6 +103,42 @@ const rot = await vis(page, '.nd-tilt-card').evaluate((e) => { const m = e.style
 check('tilt leans toward the pointer within 8 degrees', !!rot && Math.abs(rot[0]) > 1 && Math.abs(rot[1]) > 1 && Math.abs(rot[0]) <= 8.01 && Math.abs(rot[1]) <= 8.01, JSON.stringify(rot))
 await page.mouse.move(5, 5); await page.waitForTimeout(1200)
 check('tilt settles flat again', await vis(page, '.nd-tilt-card').evaluate((e) => { const m = e.style.transform.match(/rotateX\((-?[\d.]+)deg\) rotateY\((-?[\d.]+)deg\)/); return !m || (Math.abs(+m[1]) < 0.05 && Math.abs(+m[2]) < 0.05) }))
+
+// Shader: draws while its slide is on screen, stops when it is left
+await go(page, 9)
+await page.waitForTimeout(900)
+const fr = () => page.evaluate(() => Number([...document.querySelectorAll('[data-kind=shader] canvas')].find((e) => e.getBoundingClientRect().width > 0)?.dataset.frame ?? 0))
+const f1 = await fr(); await page.waitForTimeout(500); const f2 = await fr()
+check('shader draws while its slide is on screen', f2 > f1 && f1 > 0, `${f1} -> ${f2}`)
+await go(page, 10); await page.waitForTimeout(900)
+const g0 = await page.evaluate(() => String(document.querySelector('[data-kind=shader] canvas').dataset.frame ?? 0)); await page.waitForTimeout(500)
+check('shader stops drawing when its slide is left', g0 === await page.evaluate(() => String(document.querySelector('[data-kind=shader] canvas').dataset.frame ?? 0)))
+
+// Looks: a key picks a look, the chip follows, leaving puts the deck look back
+const deck = await page.evaluate(() => document.documentElement.dataset.ndVariant)
+await page.waitForTimeout(300)
+await key(page, '1'); await page.waitForTimeout(1200)
+check('looks: key 1 switches to the plain look and checks its chip', (await page.evaluate(() => document.documentElement.dataset.ndVariant)) === 'plain' && (await vis(page, '.nd-look-on').textContent()).includes('Plain'))
+await key(page, '5'); await page.waitForTimeout(1200)
+check('looks: key 5 switches to the studio look and keeps the dark class', (await page.evaluate(() => [document.documentElement.dataset.ndVariant, document.documentElement.classList.contains('dark')])).join() === 'studio,true')
+await key(page, '2'); await page.waitForTimeout(1200)
+await key(page, 'ArrowRight'); await page.waitForTimeout(300)
+check('looks: leaving the slide puts the deck look back at once', (await page.evaluate(() => document.documentElement.dataset.ndVariant)) === deck, `${deck}`)
+
+// Livedeck: types the Markdown, the slides appear one by one, reset when left
+await go(page, 11); await page.waitForTimeout(1500)
+const built = () => vis(page, '[data-kind=livedeck]').evaluate((e) => [...e.querySelectorAll('.nd-ld-strip li.nd-ld-on')].length)
+const b1 = await built()
+await page.waitForTimeout(6500)
+const b2 = await built()
+check('livedeck builds its slides while the Markdown is typed', b1 < 2 && b2 === 2, `${b1} -> ${b2}`)
+check('livedeck shows the last slide when it is done', await vis(page, '[data-kind=livedeck]').evaluate((e) => e.classList.contains('nd-ld-done') && /Friday/.test(e.querySelector('.nd-ld-card')?.textContent ?? '')))
+
+// At: enter hides an element until its slide is on screen, then brings it in after its delay
+await go(page, 12); await page.waitForTimeout(250)
+const late = () => page.evaluate(() => { const e = [...document.querySelectorAll('.nd-at-enter')].find((x) => x.getBoundingClientRect().width > 0); return e ? +getComputedStyle(e).opacity : -1 })
+const l1 = await late(); await page.waitForTimeout(3000); const l2 = await late()
+check('at: an element with enter is hidden at first and visible after its delay', l1 < 0.1 && l2 === 1, `${l1.toFixed(2)} -> ${l2}`)
 await page.context().close()
 
 // Reduced motion: final states at once, no tilt
@@ -113,6 +149,10 @@ await go(rm, 3); await rm.waitForTimeout(300)
 check('reduced motion: typewriter is done at once', await rm.evaluate(() => [...document.querySelectorAll('[data-kind=typewriter]')].some((e) => e.getBoundingClientRect().width > 0 && e.classList.contains('nd-done'))))
 await go(rm, 8); await rm.mouse.move(900, 180); await rm.waitForTimeout(400)
 check('reduced motion: tilt does not tilt', (await vis(rm, '.nd-tilt-card').evaluate((e) => e.style.transform)) === '')
+await go(rm, 11); await rm.waitForTimeout(500)
+check('reduced motion: livedeck shows the finished deck at once', await rm.evaluate(() => [...document.querySelectorAll('[data-kind=livedeck]')].some((e) => e.getBoundingClientRect().width > 0 && e.classList.contains('nd-ld-done'))))
+await go(rm, 12); await rm.waitForTimeout(300)
+check('reduced motion: an element with enter is visible at once', await rm.evaluate(() => [...document.querySelectorAll('.nd-at-enter, .nd-at-frame')].filter((x) => x.getBoundingClientRect().width > 0).every((e) => +getComputedStyle(e).opacity === 1)))
 await rm.context().close()
 
 const real = errors.filter((e) => !/FloatingVue/.test(e))

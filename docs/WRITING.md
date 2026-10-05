@@ -32,7 +32,7 @@ layout: two-cols
 
 | Layout | Use for | Content |
 |---|---|---|
-| `cover`, `closing` | first and last slide | `# Title`, `#### date`, `#### subtitle` |
+| `cover`, `closing` | first and last slide | `# Title`, `#### date`, `#### subtitle`; `closing` also takes an optional `::bg::` |
 | `agenda` | 3 to 8 items | numbered list, subtitle in *italics* on the next line |
 | `divider` | section break | `# Section` |
 | `default` | bullets, tables, callouts | `# Title`, then Markdown |
@@ -45,10 +45,10 @@ Showcase layouts, for keynote-style decks (they look best with `ndVariant: studi
 | Layout | Use for | Content |
 |---|---|---|
 | `hero` | an opening or big-picture slide | `::bg::` for a background (`<Stage full>` with a live component or a video), then `# Title` and `#### subtitle` at the bottom left |
-| `statement` | one sentence, very large | `#### kicker` (small, above), then `# The sentence` (up to about 70 characters) |
-| `split` | words on the left, a live component on the right | `# Title`, `#### kicker`, a paragraph; `::right::` fills the right half (use `<Stage :w="640" :h="720">`) |
+| `statement` | one sentence, very large | optional `::bg::` (a `<Stage full>`), `#### kicker` (small, above), then `# The sentence` (up to about 70 characters) or a `<Kinetic>` |
+| `split` | words on the left, a live component on the right | `# Title`, `#### kicker`, a paragraph; `::right::` fills the right half (use `<Stage :w="640" :h="720">`); optional `::bg::` behind both |
 | `stage` | a live component with almost no chrome | the slot (`<Stage full>` or a 1200 x 604 `<Stage>`), `::caption::` bottom left, page pill bottom right |
-| `numbers` | 2 to 4 big figures | `# Title`, then `::a::`, `::b::`, `::c::`, `::d::`, each `## 60 fps` plus one line of text |
+| `numbers` | 2 to 4 big figures | `# Title`, then `::a::`, `::b::`, `::c::`, `::d::`, each `## 60 fps` plus one line of text, or a `<Stat>`. Four figures sit in a 2 x 2 grid and each card enters in turn |
 
 Diagrams: a fenced `mermaid` block. Builds: wrap a list in `<v-clicks>`. Speaker notes: an HTML comment at the end of
 a slide.
@@ -71,7 +71,7 @@ element. To combine elements (a video, an animation, text) put them in a `<Stage
 ```
 
 Coordinates are in slide units (the slide is 1280 x 720). A normal slide's content area is 1140 x 500; a `<Stage>` is
-clipped to its own box, so nothing can spill out. `<At v-click ...>` makes an element appear on click. For a full-frame
+clipped to its own box, so nothing can spill out. `<At v-click ...>` makes an element appear on click. `<At enter="up" :delay="120">` makes it arrive when its slide appears (`enter` is up, down, left, right, scale or fade; give a row of elements 0, 90, 180 ms to stagger them). `frame` adds a hairline border, rounded corners and a shadow, `:radius` rounds and clips, `:pad` pads (a number or a CSS value such as `"0 28px"`), `middle` centres the content vertically. For a full-frame
 slide use `layout: full` and `<Stage full>` (1280 x 720). `<Photo>` and `<Clip>` take `fit` (`cover` or `contain`) and
 `dim` (0 to 1, darkens them so text stays readable). `<Headline>` is large display text for impact slides.
 
@@ -85,26 +85,29 @@ images for a full-frame photo. Videos should be at least as wide as their box in
 
 | Tag | What it shows |
 |---|---|
-| `<Orbit />` | Canvas animation. `controls` adds play, pause, scrub, speed; `hud` shows the frame rate; `frame` adds a border. A template for your own canvas scene. |
+| `<Orbit />` | Canvas animation. `controls` adds play, pause, scrub, speed; `hud` shows the frame rate; `frame` adds a border; `full` draws the scene for a whole 16:9 slide (use it in a 1280 x 720 `<At>`). A template for your own canvas scene. |
 | `<Scene3D />` | three.js scene, drag to rotate. A template for your own 3D scene. |
 | `<PyStream name="x" />` | A Python process streaming state to a canvas. |
 | `<Demo name="x" />` | A local marimo app in an iframe, with an offline fallback. |
-| `<Clip src="/a.mp4" />` | A looping video. `fit`, `dim`, `controls`. |
+| `<Clip src="/a.mp4" webm="/a.webm" />` | A looping video. `fit`, `dim`, `controls`. `webm` is an optional second encoding for a browser built without H.264. A `/` address is a file of `public/` and follows the base path of the build. |
 | `<Chart type="bar" :labels="[...]" :data="[...]" />` | Chart.js chart (`bar`, `line`, `pie`, `doughnut`), coloured by `--nd-chart-1..4`, animated when its slide appears. `horizontal`, `stacked`, `values`, `legend`, `center="3,2K"` (donut). |
 | `<Quiz answer="B">` with `<Choice letter="A">` ... and `<Explain letter="B">` inside | Interactive quiz: the presenter clicks an answer (or presses 1 to 4); it turns good or bad, the right answer is revealed, the others fade, and the explanation appears. Leaving the slide resets it. Without `answer`, mark the right choice with `correct` for a static slide (use that for PDF handouts). |
 | `<Countdown :seconds="20" />` | Circular timer that starts when its slide appears; click pauses. |
 | `<Flip>` with `<template #front>` and `<template #back>` | A card that flips on click. |
-| `<Compare before="/a.jpg" after="/b.jpg" />` | Before and after images with a draggable divider (arrow keys work too). |
-| `<CountUp :to="3200" suffix="K" />` | A number that counts up when its slide appears. |
+| `<Compare before="/a.jpg" after="/b.jpg" />` | Before and after images with a draggable divider (arrow keys work too). `before-label` and `after-label` caption the corners, `sweep` glides the divider in once when the slide appears, `label` names the slider for screen readers. Give both images one layout so the divider reads as a restyle. |
+| `<CountUp :to="3200" suffix="K" />` | A number that counts up when its slide appears (`:delay` ms to wait first). |
 | `<Photo src="/a.jpg" />` | An image. `fit`, `position`, `dim`. |
 | `<Headline>text</Headline>` | Large display text (`size` xl, l, m; `tone` light, dark). |
 | `<Site url="https://..." />` | A website in a frame. Many sites forbid framing (GitHub does): use a screenshot or open it separately. |
 | `<Fly>text</Fly>` | Entrance motion. |
-| `<Kinetic text="Slides that move." />` | Kinetic headline in the display font, tight and balanced, filling its box. `mode` words, letters or lines (lines split on `\|`); `from` up, down, left, right, blur, scale or mask (a reveal from a clipping line); `:stagger` in ms; `size` xl (120 px), l, m, s; `tone` auto, light, dark; `accent="move,fast"` colours those words with `--nd-accent`. Plays when its slide appears and again on every re-entry. `hold` keeps it hidden until a `v-click` on it (`<Kinetic v-click hold ... />`) or until a bound `:trigger` number is above 0; any later change of `:trigger` replays it. |
-| `<Typewriter lang="md">` with a fenced block or plain text | Types its content with a blinking caret and simple highlighting (`md`, `sh`, `py`, `json`, `html`). `:speed` ms per character, `:delay` ms before it starts, `caret`, `:keep="false"` fades the text out after a moment. With `lang="sh"` a line starting with `$ ` is typed and any other line appears as output. When it is done the root gets the class `nd-done`. Leaving the slide resets it. Size it with `style="font-size: 28px"`. |
-| `<Terminal title="nimbledeck" :lines="[...]" />` | A window (three dots, a title) that types a shell session: `$ ` lines are typed, other lines appear as output. Same `nd-done` class and reset as Typewriter. |
-| `<Aurora :intensity="1" :speed="1" />` | An animated gradient mesh of the accent colours that fills its box. Put it in `<Stage full>` inside an `<At :w="1280" :h="720">`. Renders at half resolution, pauses off screen, suits dark and light variants. |
-| `<Stat value="60" suffix=" fps" label="smooth on a laptop" />` | A big number that counts up (`:decimals`, `prefix`, `:duration`), then its label fades up. The number never changes width while it counts. |
+| `<Kinetic text="Slides that move." />` | Kinetic headline in the display font, tight and balanced, filling its box. `mode` words, letters or lines (lines split on `\|`); `from` up, down, left, right, blur, scale or mask (a reveal from a clipping line); `:stagger` in ms; `:delay` ms before the first unit moves (a subtitle after its headline); `size` xl (120 px), l, m, s; `tone` auto, light, dark, muted; `accent="move,fast"` colours those words with `--nd-accent`. Plays when its slide appears and again on every re-entry. `hold` keeps it hidden until a `v-click` on it (`<Kinetic v-click hold ... />`) or until a bound `:trigger` number is above 0; any later change of `:trigger` replays it. |
+| `<Typewriter lang="md">` with a fenced block or plain text | Types its content with a blinking caret and simple highlighting (`md`, `sh`, `py`, `json`, `html`). `:speed` ms per character, `:delay` ms before it starts, `caret`, `:keep="false"` fades the text out after a moment. With `lang="sh"` a line starting with `$ ` is typed and any other line appears as output. When it is done the root gets the class `nd-done`. Leaving the slide resets it. `:size` sets the font size in slide pixels (22 by default, for example `:size="30"`). |
+| `<Terminal title="nimbledeck" :lines="[...]" />` | A window (three dots, a title) that types a shell session: `$ ` lines are typed, other lines appear as output. `:size` as for Typewriter. Same `nd-done` class and reset as Typewriter. |
+| `<Aurora :intensity="1" :speed="1" />` | An animated gradient mesh of the accent colours that fills its box. Put it in `<Stage full>` inside an `<At :w="1280" :h="720">`. `:hue` turns the colours (degrees), `:cx` and `:cy` move the centre of the drift (0 to 1), so neighbouring slides do not repeat one picture. Renders at half resolution, pauses off screen, suits dark and light variants. |
+| `<Stat value="60" suffix=" fps" label="smooth on a laptop" />` | A big number that counts up (`:decimals`, `prefix`, `:duration`, `:delay` to stagger several), then its label fades up and the number glows. The number never changes width while it counts. |
+| `<Shader :hue="0" :intensity="1" :lines="0.35" />` | A WebGL fragment shader that fills its box: slow folds of colour in the accent colours with fine contour lines. Use it like Aurora, in `<Stage full>` inside `<At :w="1280" :h="720">`, when a hero or a finale needs more depth. Half resolution, sleeps off screen, one still frame for reduced motion, a flat background where WebGL is missing. |
+| `<Livedeck>` with a fenced `md` block | Markdown typed on the left, the slides it describes appearing on the right as each is finished (`layout: hero`, `statement` or `closing`, `# Title` with `**bold**` in the accent colour, `#### kicker`). The preview is a sketch drawn from the colour tokens, not a screenshot. `:speed`, `:delay`, `:size` as for Typewriter. |
+| `<Looks />` | A look switcher. It steps through plain, paper, night, studio light and studio by itself when its slide appears (a soft cross-fade through View Transitions where the browser has them), keys 1 to 5 or a click on a chip pick one, and leaving the slide puts the deck's look back. `:looks`, `:interval`, `:delay`, `auto`. |
 | `<Marquee :speed="40" gap="2em">` with content | Content that scrolls sideways for ever (`speed` in slide pixels per second). Repeats its content to fill the slide; paused off screen. |
 | `<Spotlight>` with content | A soft pool of accent light that follows the pointer over the content, and drifts slowly by itself when the pointer is away. |
 | `<Tilt>` with content | Content that tilts in 3D toward the pointer (8 degrees at most) with a soft moving sheen. Off for reduced motion. Round the sheen with `--nd-tilt-radius` (16 px by default). |

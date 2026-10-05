@@ -3,69 +3,45 @@ theme: nimbledeck
 ndVariant: studio
 title: Slides that move
 layout: hero
-transition: fade
+class: nd-grid
+transition: nd-zoom
 ---
 
 ::bg::
 
 <Stage full>
-<At :w="1280" :h="720"><Aurora /></At>
+<At :w="1280" :h="720"><Shader :hue="0" /></At>
 </Stage>
 
 ::default::
 
-<Kinetic text="Slides that move." mode="words" from="up" :stagger="140" size="xl" accent="move." />
+<Kinetic text="Slides that move." mode="words" from="up" :stagger="140" size="xl" accent="move." :delay="300" />
 
-#### Nimbledeck. Markdown in, motion out.
+<Kinetic text="Nimbledeck. Markdown in, motion out." mode="lines" from="blur" size="s" tone="muted" :delay="1400" />
 
 <!--
-Everything you are about to see is one Markdown file. Nothing was exported from a design tool.
+Hook. Everything you are about to see is one Markdown file. Nothing was exported from a design tool. Let the headline land, then start.
 -->
 
 ---
 layout: statement
+class: nd-grid
 ---
+
+::bg::
+
+<Stage full>
+<At :w="1280" :h="720"><Aurora :intensity="0.5" :cx="0.5" :cy="1.05" /></At>
+</Stage>
+
+::default::
 
 #### The whole idea
 
-# A deck is a Markdown file.
+<Kinetic text="A deck is a Markdown file." mode="words" from="mask" :stagger="130" size="xl" accent="Markdown" :delay="200" />
 
 <!--
 No slide editor, no binary format. A file you can diff, review and hand to an agent.
--->
-
----
-layout: split
----
-
-::default::
-
-<Typewriter :speed="34" :delay="500" lang="md">
-
-````md
----
-layout: statement
----
-
-#### The plan
-
-# Ship it on Friday.
-````
-
-</Typewriter>
-
-::right::
-
-<Stage :w="640" :h="720">
-<At :w="640" :h="720"><Aurora :intensity="0.8" /></At>
-<At :x="70" :y="250" :w="520" :z="1">
-<Kinetic v-click hold text="The plan" mode="letters" from="up" :stagger="40" size="s" />
-<Kinetic v-click hold text="Ship it on Friday." mode="words" from="blur" :stagger="120" size="l" accent="Friday." />
-</At>
-</Stage>
-
-<!--
-Seven lines on the left. Click: the slide on the right is what they produce.
 -->
 
 ---
@@ -73,79 +49,140 @@ layout: stage
 ---
 
 <Stage full>
-<At :x="80" :y="50" :w="1100">
+<At :w="1280" :h="720" :z="1">
+<Livedeck :speed="26" :delay="900" :size="23">
+
+````md
+---
+layout: hero
+---
+# Slides that **move.**
+#### Markdown in, motion out.
+---
+layout: statement
+---
+#### The plan
+# Ship it on **Friday.**
+---
+layout: closing
+---
+# Questions?
+````
+
+</Livedeck>
+</At>
+</Stage>
+
+::caption::
+
+Type the Markdown. The slides appear as you finish them.
+
+<!--
+Fourteen lines of Markdown, three slides. The preview on the right is a sketch of the theme layouts, drawn from the same colour tokens.
+-->
+
+---
+layout: stage
+---
+
+<Stage full>
+<At :x="80" :y="84" :w="520">
 <Kinetic text="Layouts, not CSS." mode="words" from="mask" :stagger="160" size="l" accent="CSS." />
 </At>
-<At :x="80" :y="200" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+<At :x="80" :y="350" :w="470">
+<Kinetic text="One word in the frontmatter picks the layout." mode="words" from="up" :stagger="45" size="s" tone="muted" :delay="900" />
+</At>
+<At :x="560" :y="0" :w="720" :h="620" :opacity="0.45"><Spotlight /></At>
+<At :x="640" :y="64" :w="560" :h="72" :z="1" bg="var(--nd-surface)" frame middle pad="0 30px" enter="right" :delay="150">
 
-### hero
-
-`layout: hero`
-
-Big title over a live background
+[hero]{.nd-name} Big title over a live background
 
 </At>
-<At :x="460" :y="200" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+<At :x="640" :y="150" :w="560" :h="72" :z="1" bg="var(--nd-surface)" frame middle pad="0 30px" enter="right" :delay="250">
 
-### statement
-
-`layout: statement`
-
-One sentence, huge
+[statement]{.nd-name} One sentence, huge
 
 </At>
-<At :x="840" :y="200" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+<At :x="640" :y="236" :w="560" :h="72" :z="1" bg="var(--nd-surface)" frame middle pad="0 30px" enter="right" :delay="350">
 
-### split
-
-`layout: split`
-
-Words left, live element right
+[split]{.nd-name} Words left, a live element right
 
 </At>
-<At :x="80" :y="390" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+<At :x="640" :y="322" :w="560" :h="72" :z="1" bg="var(--nd-surface)" frame middle pad="0 30px" enter="right" :delay="450">
 
-### stage
-
-`layout: stage`
-
-A full pane for one element
+[stage]{.nd-name} A full pane for one element
 
 </At>
-<At :x="460" :y="390" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+<At :x="640" :y="408" :w="560" :h="72" :z="1" bg="var(--nd-surface)" frame middle pad="0 30px" enter="right" :delay="550">
 
-### numbers
-
-`layout: numbers`
-
-Four big stats
+[numbers]{.nd-name} Four big figures
 
 </At>
-<At :x="840" :y="390" :w="360" :h="170" :z="1" bg="var(--nd-surface)">
+<At :x="640" :y="494" :w="560" :h="72" :z="1" bg="var(--nd-surface)" frame middle pad="0 30px" enter="right" :delay="650">
 
-### closing
-
-`layout: closing`
-
-The last slide
+[closing]{.nd-name} The last slide, with a background
 
 </At>
-<At :x="0" :y="600" :w="1280" :h="60">
-<Marquee :speed="40">
+<At :x="0" :y="612" :w="1280" :h="52" enter="fade" :delay="900">
+<Marquee :speed="34">
 
-## cover · agenda · divider · default · two-cols · photo-right · full ·
+[cover · agenda · divider · default · two-cols · photo-right · full ·]{.nd-quiet}
 
 </Marquee>
 </At>
 </Stage>
 
+::caption::
+
+`layout: hero` is the whole instruction. The look lives in the theme.
+
 <!--
-One word in the frontmatter picks the whole look. The checker rejects inline HTML and CSS in slides, so the look stays in the theme.
+One word in the frontmatter picks the layout. The checker rejects inline HTML and CSS in slides, so the look stays in the theme.
+-->
+
+---
+layout: default
+class: nd-wide
+---
+
+# Same words. Five looks.
+
+<Stage :h="64">
+<At :w="1140" :h="64"><Looks /></At>
+</Stage>
+
+| Look | What it looks like |
+|---|---|
+| Plain | White page, blue accent |
+| Paper | Serif type on a warm page |
+| Night | Slate page, sky blue accent |
+| Studio light | Warm white page, violet accent |
+| Studio | Near black page, cyan to violet accent |
+
+> `ndVariant: studio`
+
+<!--
+Press 1 to 5, or click a chip. The slide steps through the looks by itself and ends on the deck's own. Same Markdown, nothing edited.
 -->
 
 ---
 layout: statement
 ---
+
+::bg::
+
+<Stage full>
+<At :w="1280" :h="720"><Aurora :intensity="0.55" :hue="70" :cx="0.25" :cy="0.5" /></At>
+<At :y="430" :w="1280" :h="270" :z="1" enter="fade" :delay="500">
+<Marquee :speed="30">
+
+[WORDS · LETTERS · LINES · MASKS · BLUR ·]{.nd-outline}
+
+</Marquee>
+</At>
+</Stage>
+
+::default::
 
 #### Motion
 
@@ -160,9 +197,12 @@ layout: full
 ---
 
 <Stage full>
-<At :w="1280" :h="720" :z="0"><Orbit /></At>
-<At :x="90" :y="40" :w="1000" :z="1">
-<Headline size="l">A canvas, built in.</Headline>
+<At :w="1280" :h="720" :z="0"><Orbit full /></At>
+<At :x="90" :y="48" :w="1000" :z="1">
+<Kinetic text="A canvas, built in." mode="words" from="mask" :stagger="130" size="l" accent="built" />
+</At>
+<At :x="90" :y="170" :w="760" :z="1">
+<Kinetic text="Drawn live at your screen's own resolution." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
 </At>
 </Stage>
 
@@ -183,7 +223,8 @@ Drag the scene. It is WebGL, and it is a file in your deck.
 ::right::
 
 <Stage :w="640" :h="720">
-<At :w="640" :h="720"><Scene3D controls /></At>
+<At :w="640" :h="720"><Aurora :intensity="0.55" :hue="-40" :cx="0.5" :cy="0.55" /></At>
+<At :w="640" :h="720" :z="1"><Scene3D controls /></At>
 </Stage>
 
 <!--
@@ -194,42 +235,42 @@ Drag it. A three.js scene, loaded only on the slide that uses it.
 layout: numbers
 ---
 
-# Measured, not claimed
+# Measured on one Mac
 
 ::a::
 
-<Stat value="13" label="layouts, one theme" />
+<Stat value="13" label="layouts in one theme" :delay="200" />
 
 ::b::
 
-<Stat value="0" label="lines of CSS per slide" />
+<Stat value="0.13" :decimals="2" suffix=" s" label="to check a 29 slide deck" :delay="340" />
 
 ::c::
 
-<Stat value="22" label="ms to run live code that prints" />
+<Stat value="22" suffix=" ms" label="to run Python that prints" :delay="480" />
 
 ::d::
 
-<Stat value="60" label="frames per second, GPU on" />
+<Stat value="60" suffix=" fps" label="drawn with a real GPU" :delay="620" />
 
 <!--
-Thirteen layout files in the theme. The checker refuses inline CSS. 22 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac.
+Thirteen layout files in the theme. 0.13 s, 22 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac, the 60 fps with a real GPU: read them as what one machine did, not as a promise.
 -->
 
 ---
 layout: default
 ---
 
-# Live code, before and after
+# What a live code run costs, in ms
 
 <Stage>
 <At :w="1140" :h="460">
-<Chart type="bar" :labels="['One plot run', 'A run that prints', 'Keystroke to output']" :data="[[626, 501, 1230], [132, 22, 431]]" :names="['Before', 'After']" legend values />
+<Chart type="bar" horizontal :labels="['Run that prints', 'Run that draws a plot', 'Keystroke to updated result']" :data="[22, 132, 431]" values />
 </At>
 </Stage>
 
 <!--
-Milliseconds, before and after the runner work in docs/PERFORMANCE.md. One machine, so read the ratios, not the promises.
+Measured on one Mac (docs/PERFORMANCE.md): 22 ms for a run that prints, 132 ms for a plot, 431 ms from a keystroke in the editor to the new result, which includes a 300 ms wait so a word is not run half typed.
 -->
 
 ---
@@ -238,8 +279,8 @@ layout: default
 
 # Which file holds the deck?
 
-<Stage>
-<At :x="0" :y="0" :w="1140" :h="460">
+<Stage :h="500">
+<At :w="1140" :h="500">
 <Quiz answer="C">
 <Choice letter="A">A database</Choice>
 <Choice letter="B">A .pptx file</Choice>
@@ -262,16 +303,16 @@ Click an answer, or press 1 to 4. Interaction is for the presenter and resets wh
 layout: stage
 ---
 
-<Stage :w="1074" :h="604">
-<At :w="1074" :h="604"><Compare before="/before.jpg" after="/after.jpg" :start="35" /></At>
+<Stage :w="1200" :h="604">
+<At :w="1200" :h="604"><Compare before="/source.jpg" after="/slide.jpg" :start="56" before-label="Markdown" after-label="Slide, sketched" sweep label="The Markdown of a slide and a sketch of the slide it makes, drag to compare" /></At>
 </Stage>
 
 ::caption::
 
-Same words. One line of layout. Drag the divider.
+Same words, two forms. Drag the divider.
 
 <!--
-Left: what a default template gives you. Right: the same text in the studio theme.
+Left: the Markdown. Right: a sketch of the slide in the studio colours, drawn by a script, not a screenshot. The divider glides once by itself; drag it or use the arrow keys.
 -->
 
 ---
@@ -279,9 +320,13 @@ layout: full
 ---
 
 <Stage full>
-<At :w="1280" :h="720" :z="0"><Clip src="/loop.mp4" fit="cover" /></At>
-<At :x="90" :y="470" :w="1000" :z="1">
-<Headline size="l" tone="dark">Video is an element too.</Headline>
+<At :w="1280" :h="720" :z="0"><Clip src="/loop.mp4" webm="/loop.webm" fit="cover" :dim="0.2" /></At>
+<At :y="340" :w="1280" :h="380" :z="1" bg="linear-gradient(0deg, color-mix(in srgb, var(--nd-bg) 92%, transparent) 15%, transparent)" />
+<At :x="90" :y="450" :w="1000" :z="2">
+<Kinetic text="Video is an element too." mode="words" from="mask" :stagger="120" size="l" tone="light" accent="element" />
+</At>
+<At :x="90" :y="600" :w="900" :z="2">
+<Kinetic text="A four second loop, 300 KB, made by a short numpy script." mode="words" from="up" :stagger="25" size="s" tone="light" :delay="800" />
 </At>
 </Stage>
 
@@ -334,22 +379,22 @@ Needs nimbledeck run. A numpy process computes every frame and streams it over a
 -->
 
 ---
-layout: split
+layout: stage
 ---
 
-::default::
-
+<Stage full>
+<At :w="1280" :h="720"><Aurora :intensity="0.5" :hue="25" :cx="0.85" :cy="0.15" /></At>
+<At :x="140" :y="64" :w="1000" :z="1">
 <Kinetic text="An agent writes it." mode="words" from="left" :stagger="150" size="l" accent="agent" />
-
-The checker gives it a pass or a fail.
-
-::right::
-
-<Stage :w="640" :h="720">
-<At :x="30" :y="210" :w="580" :h="300">
-<Terminal title="nimbledeck" :lines="['$ nimbledeck check showcase.md', '18 slides, 0 errors, 0 warnings', '$ nimbledeck verify showcase.md', '18 slides verified, 0 placement problems']" />
+</At>
+<At :x="140" :y="246" :w="1000" :h="296" :z="1">
+<Terminal title="nimbledeck" :size="30" :lines="['$ nimbledeck check showcase.md', '19 slides, 0 errors, 0 warnings', '$ nimbledeck verify showcase.md', '19 slides verified, 0 placement problems']" />
 </At>
 </Stage>
+
+::caption::
+
+The checker gives it a pass or a fail.
 
 <!--
 check lints the Markdown. verify opens the running deck in Chrome and reports clipped or blurry content.
@@ -357,13 +402,22 @@ check lints the Markdown. verify opens the running deck in Chrome and reports cl
 
 ---
 layout: statement
+class: nd-grid
 ---
+
+::bg::
+
+<Stage full>
+<At :w="1280" :h="720"><Aurora :intensity="0.45" :hue="-35" :cx="0.5" :cy="0.45" /></At>
+</Stage>
+
+::default::
 
 #### Offline
 
-# Works with no connection.
+<Kinetic text="Works with no connection." mode="words" from="mask" :stagger="130" size="l" accent="no" />
 
-Fonts, images, video, Python and live code all run from your machine.
+<Kinetic text="Fonts, images, video, Python and live code all run from your machine." mode="words" from="up" :stagger="25" size="s" tone="muted" :delay="900" />
 
 <!--
 Nimbledeck makes no network request of its own. Only a website embedded in a slide needs the internet.
@@ -374,19 +428,24 @@ layout: stage
 ---
 
 <Stage full>
-<At :x="90" :y="90" :w="1100">
+<At :w="1280" :h="720"><Aurora :intensity="0.4" :hue="-20" :cx="0.1" :cy="1" /></At>
+<At :x="90" :y="80" :w="1100" :z="1">
 <Kinetic text="Three commands." mode="words" from="up" :stagger="180" size="l" accent="Three" />
 </At>
-<At :x="90" :y="290" :w="1100" :h="260">
-<Typewriter :speed="30" :delay="900" lang="sh">
+<At :x="90" :y="250" :w="1100" :h="260" :z="1">
+<Typewriter :speed="30" :delay="900" lang="sh" :size="34">
 
 ```sh
 $ node packages/cli/bin/nimbledeck.mjs new my-deck
 $ cd my-deck && npm install
 $ npm run dev
+http://localhost:3030/
 ```
 
 </Typewriter>
+</At>
+<At :x="90" :y="540" :w="1100" :z="1">
+<Kinetic v-click hold text="Edit slides.md. The browser follows." mode="words" from="blur" :stagger="70" size="m" accent="follows." />
 </At>
 </Stage>
 
@@ -395,16 +454,25 @@ $ npm run dev
 After a git clone and one npm install of the repository.
 
 <!--
-That is docs/GETTING-STARTED.md in three lines.
+That is docs/GETTING-STARTED.md in three lines. Click for the last beat: edit the Markdown and the browser reloads.
 -->
 
 ---
 layout: closing
+class: nd-grid
 ---
+
+::bg::
+
+<Stage full>
+<At :w="1280" :h="720"><Shader :hue="20" :intensity="1.15" :speed="1.2" /></At>
+</Stage>
+
+::default::
 
 <Kinetic text="Write it. Run it." mode="letters" from="up" :stagger="45" size="xl" accent="Run" />
 
-#### github.com/arnaudbletterer/nimbledeck
+<Typewriter :speed="42" :delay="1900" lang="md" :size="30">github.com/arnaudbletterer/nimbledeck</Typewriter>
 
 <!--
 Markdown for the story, components for the motion. Thank you.

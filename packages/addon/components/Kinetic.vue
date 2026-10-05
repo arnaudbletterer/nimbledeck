@@ -5,18 +5,20 @@ import { useActive } from '../composables/useActive'
 // Kinetic typography: <Kinetic text="Slides that move." mode="words" from="up" :stagger="70" size="xl" accent="move" />
 // Plays when its slide becomes active and again on every re-entry. `mode` splits into words, letters or lines (lines
 // split on "|" in `text`). `hold` keeps it hidden until a v-click reveals it, or until `trigger` is above 0; any later
-// change of `trigger` replays it. Reduced motion shows the final text at once.
+// change of `trigger` replays it. `delay` (ms) waits before the first unit moves, so a subtitle can follow its headline;
+// `tone="muted"` uses the muted ink. Reduced motion shows the final text at once.
 const props = withDefaults(defineProps<{
   text: string
   mode?: 'words' | 'letters' | 'lines'
   from?: 'up' | 'down' | 'left' | 'right' | 'blur' | 'scale' | 'mask'
   stagger?: number
   size?: 'xl' | 'l' | 'm' | 's'
-  tone?: 'auto' | 'light' | 'dark'
+  tone?: 'auto' | 'light' | 'dark' | 'muted'
   accent?: string
   hold?: boolean
   trigger?: number
-}>(), { mode: 'words', from: 'up', size: 'xl', tone: 'auto', trigger: 0 })
+  delay?: number
+}>(), { mode: 'words', from: 'up', size: 'xl', tone: 'auto', trigger: 0, delay: 0 })
 
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 const root = ref<HTMLElement>()
@@ -64,7 +66,7 @@ onBeforeUnmount(() => mo?.disconnect())
 
 <template>
   <div ref="root" class="nd-kinetic" :class="[`nd-k-${size}`, `nd-k-tone-${tone}`, `nd-k-from-${from}`, `nd-k-mode-${mode}`, { 'nd-k-play': playing && !reduce, 'nd-k-final': reduce }]"
-       :style="{ '--nd-k-st': st + 'ms' }" :aria-label="text.replace(/\|/g, ' ')" data-kind="kinetic">
+       :style="{ '--nd-k-st': st + 'ms', '--nd-k-delay': delay + 'ms' }" :aria-label="text.replace(/\|/g, ' ')" data-kind="kinetic">
     <div :key="run" class="nd-k-in" aria-hidden="true">
       <template v-for="(line, li) in words" :key="li">
         <span v-if="mode === 'lines'" class="nd-k-line"><span class="nd-k-mask"><span class="nd-k-u" :style="{ '--i': index[li][0] }">{{ lines[li] }}</span></span></span>

@@ -10,6 +10,7 @@ endorsed by them.
 | Vue | UI components | MIT |
 | three.js | `Scene3D` | MIT |
 | Mermaid | Diagrams | MIT |
+| CodeMirror (`codemirror`, `@codemirror/*`, `@lezer/highlight`) | The `LiveCode` editor | MIT |
 | marimo | Demo processes (run as a separate process, not bundled) | Apache-2.0 |
 | websockets | Python stream servers | BSD-3-Clause |
 | numpy | Example demos | BSD-3-Clause |

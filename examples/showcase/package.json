@@ -8,6 +8,7 @@
     "verify": "nimbledeck verify showcase.md",
     "build": "slidev build showcase.md",
     "build:web": "node build-web.mjs",
+    "e2e:web": "node e2e-web.mjs",
     "export": "slidev export showcase.md --with-clicks"
   },
   "dependencies": {

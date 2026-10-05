@@ -61,7 +61,7 @@ clipping line. `accent` colours chosen words. Replays on re-entry; `hold` waits 
 <div markdown>
 ### `<Typewriter lang="md">`
 Types a fenced block or plain text with a blinking caret and simple highlighting. The root gets `nd-done` when it is
-finished, so a build can follow.
+finished, so a build can follow. `size` sets the font size in slide pixels (22 by default).
 </div>
 
 <div markdown>
@@ -71,13 +71,31 @@ A window with three dots and a title that types a shell session: `$ ` lines are 
 
 <div markdown>
 ### `<Aurora />`
-A slowly drifting gradient mesh built from the accent colours, for dark and light variants. Cheap: half resolution, off
-screen it sleeps.
+A slowly drifting gradient mesh built from the accent colours, for dark and light variants. `hue`, `cx` and `cy` vary it
+from slide to slide. Cheap: half resolution, off screen it sleeps.
 </div>
 
 <div markdown>
 ### `<Stat value="60" suffix=" fps" label="..." />`
-A big number that counts up, then its label fades in. It never changes width while counting.
+A big number that counts up, then its label fades in and the number glows. `delay` staggers several. It never changes width
+while counting.
+</div>
+
+<div markdown>
+### `<Shader />`
+A WebGL shader background: slow folds of colour with fine contour lines, in the accent colours. Half resolution, sleeps off
+screen, a still frame for reduced motion.
+</div>
+
+<div markdown>
+### `<Livedeck>`
+Markdown typed on the left, the slides it describes appearing on the right as each is finished.
+</div>
+
+<div markdown>
+### `<Looks />`
+The same slide in every look of the theme, live: it steps through them by itself, keys 1 to 5 pick one, and the deck's own
+look returns when you leave.
 </div>
 
 <div markdown>
@@ -113,7 +131,8 @@ An image with `fit`, `position` and `dim`. `nimbledeck verify` warns when it is 
 
 <div markdown>
 ### `<Compare before after />`
-Before and after images with a draggable divider. Arrow keys work too.
+Before and after images with a draggable divider. Arrow keys work too. Corner labels, a one-time `sweep` and a name for
+screen readers are props.
 </div>
 
 <div markdown>
@@ -165,7 +184,8 @@ The presenter clicks an answer (or presses 1 to 4). The right one is revealed, t
 
 <div markdown>
 ### `<Stage>` and `<At>`
-Layer any of the above, and text, in one 1280 by 720 coordinate space. `v-click` makes an element appear on click.
+Layer any of the above, and text, in one 1280 by 720 coordinate space. `v-click` makes an element appear on click;
+`enter` and `delay` make it arrive when the slide appears; `frame`, `radius` and `pad` give it a card.
 </div>
 
 </div>

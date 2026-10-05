@@ -5,6 +5,8 @@ import { EditorView, keymap } from '@codemirror/view'
 import { EditorState, Prec } from '@codemirror/state'
 import { basicSetup } from 'codemirror'
 import { python } from '@codemirror/lang-python'
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { tags as t } from '@lezer/highlight'
 import { useActive } from '../composables/useActive'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
 
@@ -66,6 +68,15 @@ function run() {
 function schedule() { stale.value = true; clearTimeout(debounce); if (props.auto) debounce = window.setTimeout(run, 300) }
 function reset() { view?.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: initial.value } }) }
 
+// Syntax colours from the tokens, so the code keeps its contrast in every look (the editor's own palette is made for white pages).
+const look = HighlightStyle.define([
+  { tag: [t.keyword, t.controlKeyword, t.operatorKeyword, t.definitionKeyword, t.moduleKeyword], color: 'var(--nd-accent)', fontWeight: '600' },
+  { tag: [t.number, t.bool, t.null], color: 'var(--nd-accent-2)' },
+  { tag: [t.string, t.special(t.string)], color: 'color-mix(in srgb, var(--nd-accent) 55%, var(--nd-ink))' },
+  { tag: [t.comment, t.lineComment], color: 'var(--nd-muted)', fontStyle: 'italic' },
+  { tag: [t.function(t.variableName), t.function(t.propertyName), t.className], color: 'color-mix(in srgb, var(--nd-accent-2) 55%, var(--nd-ink))' },
+])
+
 function mount() {
   // The starting code is the text of the fenced block rendered inside the component.
   initial.value = (source.value?.querySelector('pre')?.textContent ?? source.value?.textContent ?? '').replace(/\n$/, '')
@@ -82,7 +93,7 @@ function mount() {
     state: EditorState.create({
       doc: initial.value,
       extensions: [
-        basicSetup, python(), theme,
+        basicSetup, python(), theme, syntaxHighlighting(look),
         // Highest precedence: basicSetup's default keymap binds Mod-Enter to insertBlankLine and would win otherwise.
         Prec.highest(keymap.of([
           { key: 'Escape', run: (v) => { v.contentDOM.blur(); return true } },                     // give the keyboard back to the deck

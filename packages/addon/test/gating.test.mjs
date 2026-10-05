@@ -44,7 +44,7 @@ test('the quiz key handler ignores editable targets', () => {
 
 // The motion toolkit (Kinetic, Typewriter, Terminal, Aurora, Stat, Marquee, Spotlight, Tilt): every piece gates on the slide,
 // labels itself, cleans up its frame loop, and respects reduced motion. Terminal only wraps Typewriter, which does all of that.
-const MOTION = { Kinetic: 'kinetic', Typewriter: 'typewriter', Terminal: 'terminal', Aurora: 'aurora', Stat: 'stat', Marquee: 'marquee', Spotlight: 'spotlight', Tilt: 'tilt' }
+const MOTION = { Kinetic: 'kinetic', Typewriter: 'typewriter', Terminal: 'terminal', Aurora: 'aurora', Stat: 'stat', Marquee: 'marquee', Spotlight: 'spotlight', Tilt: 'tilt', Shader: 'shader', Livedeck: 'livedeck', Looks: 'looks' }
 const motionSrc = (name) => strip(readFileSync(new URL(`${name}.vue`, dir), 'utf8'))
 const sections = Object.fromEntries(readFileSync(new URL('../styles/index.css', import.meta.url), 'utf8').split('/* ==== Motion toolkit: ').slice(1).map((s) => [s.slice(0, s.indexOf(' ')), s]))
 
@@ -54,7 +54,7 @@ test('every motion component exists, is labelled with data-kind, has its CSS sec
     assert.ok(sections[name], `${name} has no "Motion toolkit: ${name}" section in the stylesheet`)
     const src = motionSrc(name)
     assert.match(src, new RegExp(`data-kind="${kind}"`), `${name} needs data-kind="${kind}"`)
-    if (name !== 'Terminal') assert.match(src, /\buseActive\(/, `${name} must call useActive()`)
+    if (name !== 'Terminal' && name !== 'Livedeck') assert.match(src, /\buseActive\(/, `${name} must call useActive()`)
   }
 })
 
