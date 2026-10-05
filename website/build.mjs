@@ -15,6 +15,7 @@ import { root, siteConfig } from './site.mjs'
 
 const cfg = siteConfig()
 const siteBase = cfg.base
+const NO_SESSION = '{"demos":{},"streams":{}}\n'
 const run = (cmd, args, cwd = root, env = {}) => {
   const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, ...env } })
   if (r.status !== 0) process.exit(r.status ?? 1)
@@ -62,7 +63,7 @@ try {
   rmSync(tmp, { force: true })
 }
 // The session file written by `nimbledeck run` holds a runner token: never publish it.
-rmSync(resolve(root, 'site/demos/how-it-works/nimbledeck.json'), { force: true })
+writeFileSync(resolve(root, 'site/demos/how-it-works/nimbledeck.json'), NO_SESSION)   // never the runner token; empty, so no request ends in a 404
 
 // 3. The science deck, if its package is there (it lands on its own branch). Its `build:web` script is called like the
 //    showcase's (env WEB_BASE and WEB_OUT, hash routes); a package with no such script is skipped without a word.
@@ -73,14 +74,15 @@ if (hasScience) {
   const out = resolve(sci, 'dist')
   run('npm', ['run', 'build:web'], sci, { WEB_BASE: `${siteBase}demos/science/`, WEB_OUT: out })
   cpSync(out, resolve(root, 'site/demos/science'), { recursive: true })
-  rmSync(resolve(root, 'site/demos/science/nimbledeck.json'), { force: true })
+  writeFileSync(resolve(root, 'site/demos/science/nimbledeck.json'), NO_SESSION)
 }
 
 // 4. The showcase deck is the front door: built for the site's root, then dressed by home.mjs.
 const showcase = resolve(root, 'examples/showcase')
 run('npm', ['run', 'build:web'], showcase, { WEB_BASE: siteBase, WEB_OUT: resolve(showcase, 'dist') })
 cpSync(resolve(showcase, 'dist'), resolve(root, 'site'), { recursive: true })
-for (const f of ['_redirects', 'nimbledeck.json']) rmSync(resolve(root, 'site', f), { force: true })   // a Netlify file, and the runner token
+rmSync(resolve(root, 'site/_redirects'), { force: true })   // a Netlify file
+writeFileSync(resolve(root, 'site/nimbledeck.json'), NO_SESSION)   // the runner token is replaced by an empty session
 const index = resolve(root, 'site/index.html')
 writeFileSync(index, homePage(readFileSync(index, 'utf8'), { cfg, hasScience, titles: slideTitles(resolve(showcase, 'showcase.md')), preloads: firstSlidePreloads(resolve(root, 'site'), resolve(showcase, 'showcase.md'), siteBase) }))
 writeNotFound(resolve(root, 'site'), cfg)

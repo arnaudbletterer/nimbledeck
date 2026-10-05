@@ -50,5 +50,6 @@ function preloadFirstSlide() {
   console.log(`preload: ${links.length} files of the first slide added to index.html`)
 }
 preloadFirstSlide()
-rmSync(resolve(out, 'nimbledeck.json'), { force: true })   // holds the runner token: never publish it
+// The session file holds the runner token: never publish it. An empty one stands in so that no request ends in a 404.
+writeFileSync(resolve(out, 'nimbledeck.json'), '{"demos":{},"streams":{}}\n')
 console.log(`web edition ready in ${out}`)

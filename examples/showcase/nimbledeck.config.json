@@ -15,5 +15,59 @@
   },
   "runner": {
     "port": 18900
+  },
+  "recordings": {
+    "live-14": {
+      "seconds": 9,
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "type": "\n"
+        },
+        {
+          "key": "ControlOrMeta+Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "End"
+        },
+        {
+          "key": "ArrowLeft"
+        },
+        {
+          "key": "ArrowLeft"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Digit7"
+        },
+        {
+          "wait": 3500
+        }
+      ]
+    },
+    "stream-swarm": {
+      "seconds": 9,
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    }
   }
 }

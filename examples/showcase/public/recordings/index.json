@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "live-14",
+      "kind": "live",
+      "seconds": 9,
+      "width": 1140,
+      "height": 500,
+      "files": [
+        "live-14.webm"
+      ],
+      "poster": "live-14.jpg"
+    },
+    {
+      "id": "stream-swarm",
+      "kind": "stream",
+      "seconds": 9,
+      "width": 1020,
+      "height": 560,
+      "files": [
+        "stream-swarm.webm"
+      ],
+      "poster": "stream-swarm.jpg"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ import { root, siteConfig } from './site.mjs'
 
 const dir = resolve(root, 'site')
 const { base } = siteConfig()
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.xml': 'application/xml', '.txt': 'text/plain' }
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.xml': 'application/xml', '.txt': 'text/plain' }
 const send = (res, status, f) => { res.statusCode = status; res.setHeader('content-type', types[extname(f)] ?? 'application/octet-stream'); res.end(readFileSync(f)) }
 
 // Also used by website/site-e2e.mjs, with port 0 for any free port.

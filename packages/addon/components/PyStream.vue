@@ -71,7 +71,7 @@ onUnmounted(stop)
 
 <template>
   <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream" :data-rec-id="`stream-${name}`">
-    <canvas ref="cv" :width="LW" :height="LH" />
+    <canvas v-show="!rec.shown" ref="cv" :width="LW" :height="LH" />
     <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
     <div v-else-if="state === 'offline'" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
     <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>

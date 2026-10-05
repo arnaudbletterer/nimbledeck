@@ -28,7 +28,7 @@ if (!base) {
   const b = spawnSync(process.execPath, [slidev, 'build', deckFile], { cwd: root, stdio: 'ignore' })
   if (b.status !== 0) throw new Error('slidev build failed')
   const dist = join(root, 'dist')
-  const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }
+  const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4', '.webm': 'video/webm', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }
   server = createServer((req, res) => {
     let f = join(dist, decodeURIComponent(new URL(req.url, 'http://x').pathname))
     if (!f.startsWith(dist) || !existsSync(f) || statSync(f).isDirectory()) f = join(dist, 'index.html')   // single-page fallback

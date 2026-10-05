@@ -19,7 +19,7 @@ import { loadConfig } from '../../packages/cli/src/config.mjs'
 import { killTree } from '../../packages/cli/src/run.mjs'
 import { splitSlides } from '../../packages/cli/src/slides.mjs'
 import { measure } from '../../packages/cli/src/verify.mjs'
-import { NEEDS_RUN, webEdition } from '../../packages/cli/src/webedition.mjs'
+import { webEdition } from '../../packages/cli/src/webedition.mjs'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
 const args = process.argv.slice(2)
@@ -29,8 +29,9 @@ if (!['web', 'full', 'all'].includes(edition)) { console.error('--edition must b
 
 const source = readFileSync(join(here, 'showcase.md'), 'utf8')
 const allSlides = splitSlides(source)
-// What the web edition shows: every slide that does not need `nimbledeck run` (the first one always stays).
-const webSlides = allSlides.filter((s, i) => i === 0 || !NEEDS_RUN.test(s.body))
+// What the web edition shows: every slide except those that need `nimbledeck run` and have no recording (the first stays).
+const leftOut = webEdition(source, join(here, 'public')).skipped
+const webSlides = allSlides.filter((_, i) => !leftOut.includes(i + 1))
 
 // Components of the motion toolkit and the built-in ones, by the data-kind each puts on its root.
 const KINDS = { Kinetic: 'kinetic', Typewriter: 'typewriter', Terminal: 'terminal', Aurora: 'aurora', Stat: 'stat', Marquee: 'marquee',
@@ -91,11 +92,11 @@ async function webTests(browser) {
     check('npm run build:web succeeds', b.status === 0, `${((Date.now() - t) / 1000).toFixed(1)} s`)
     if (b.status !== 0) return
   }
-  check('the build is there and holds no runner token', existsSync(join(dist, 'index.html')) && !existsSync(join(dist, 'nimbledeck.json')))
+  check('the build is there and holds no runner token', existsSync(join(dist, 'index.html')) && !(existsSync(join(dist, 'nimbledeck.json')) && /token/.test(readFileSync(join(dist, 'nimbledeck.json'), 'utf8'))))
   if (!existsSync(join(dist, 'index.html'))) return
 
   // A static server mounted at the deck's base path, like the real host. Unknown paths are 404s the page will report.
-  const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.wasm': 'application/wasm' }
+  const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4', '.webm': 'video/webm', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.wasm': 'application/wasm' }
   const server = createServer((req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://x').pathname)
     let file = path.startsWith(base) ? resolve(dist, path.slice(base.length)) : null
@@ -120,7 +121,7 @@ async function webTests(browser) {
 
   try {
     section('the deck, walked with the keyboard')
-    check('the source has slides to show', total >= 2 && allSlides.length > total, `${total} of ${allSlides.length} slides in the web edition`)
+    check('the source has slides to show', total >= 2 && allSlides.length >= total, `${total} of ${allSlides.length} slides in the web edition`)
     const { context, page, log } = await open(browser, { origin })
     await page.goto(url(1), { waitUntil: 'domcontentloaded' })
     await shown(page)
@@ -140,7 +141,7 @@ async function webTests(browser) {
         const kinds = await kindsHere(page)
         const miss = want.filter((k) => !kinds.includes(k))
         if (miss.length) bad.missing.push(`slide ${n}: ${miss.join(', ')}`)
-        const leaked = LIVE_KINDS.filter((k) => kinds.includes(k))
+        const leaked = kinds.includes('recording') ? [] : LIVE_KINDS.filter((k) => kinds.includes(k))   // a recorded live component is expected: it plays its clip
         if (leaked.length) bad.leaked.push(`slide ${n}: ${leaked.join(', ')}`)
         // Components that animate switch themselves on while their slide is on screen (and never before: see the next check).
         const ACTIVE = { aurora: 'nd-on', stat: 'nd-on', marquee: 'nd-mq-run' }
@@ -149,7 +150,7 @@ async function webTests(browser) {
           const ok = await page.waitForFunction(([k, c]) => { const r = [...document.querySelectorAll('.slidev-layout')].find((e) => e.getBoundingClientRect().width > 0); return !!r && [...r.querySelectorAll(`[data-kind=${k}]`)].some((e) => e.classList.contains(c)) }, [kind, cls], { timeout: 8000 }).then(() => true, () => false)
           if (!ok) bad.inactive.push(`slide ${n}: ${kind} never became active`)
         }
-        const off = await inSlide(page, (root) => root.querySelectorAll('[data-state=offline], .nd-off, .nd-site-off, .nd-live-msg').length)
+        const off = await inSlide(page, (root) => [...root.querySelectorAll('[data-state=offline], .nd-off, .nd-site-off, .nd-live-msg')].filter((e) => !e.closest('[data-kind=recording]') && !e.querySelector('[data-kind=recording]')).length)   // a recording that stands in for a process is not an offline panel
         if (off) bad.offline.push(`slide ${n}: ${off} offline panel(s)`)
         // Slides that are mounted but not on screen must be quiet.
         const awake = await page.evaluate(() => [...document.querySelectorAll('.slidev-layout')].filter((e) => e.getBoundingClientRect().width === 0).flatMap((e) => [...e.querySelectorAll('.nd-on, .nd-mq-run, .nd-k-play')]).length)
@@ -160,7 +161,7 @@ async function webTests(browser) {
       stuck = routeOf(page) === n && n === total ? stuck + 1 : 0   // at the last slide, clicks run out and the page stops moving
     }
     check('the keyboard reaches every slide of the web edition, in order, and stops at the last', seen.length === total && seen.every((n, i) => n === i + 1), `visited ${seen.join(',')} of ${total}`)
-    check('the two slides that need `nimbledeck run` are absent, no live-only component is mounted', bad.leaked.length === 0 && total === allSlides.filter((s, i) => i === 0 || !NEEDS_RUN.test(s.body)).length, bad.leaked.join('; ') || `${allSlides.length - total} left out`)
+    check('the slides that need `nimbledeck run` and have no recording are absent, no live-only component is mounted', bad.leaked.length === 0 && total === allSlides.length - leftOut.length, bad.leaked.join('; ') || `${allSlides.length - total} left out`)
     check('every slide mounts the live components its source asks for', bad.missing.length === 0, bad.missing.join('; '))
     check('animated components are active on their slide', bad.inactive.length === 0, bad.inactive.join('; '))
     check('no animation keeps running on a slide that is not shown', bad.stray.length === 0, bad.stray.join('; '))
