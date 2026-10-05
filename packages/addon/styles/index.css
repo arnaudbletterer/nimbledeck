@@ -1,3 +1,6 @@
+@import "./motion.css";
+@import "./backgrounds.css";
+
 /* Design tokens. A theme overrides these; components only ever use var(--nd-*). */
 :where(:root) {
   --nd-bg: #ffffff;

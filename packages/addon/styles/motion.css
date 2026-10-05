@@ -1,0 +1,169 @@
+/* Motion presets. `motion: <id>` on a slide (or `ndMotion: <id>` in the deck's headmatter) puts data-nd-motion="<id>" on the slide's
+   .slidev-layout root (packages/addon/slide-bottom.vue). Everything below is keyed on that attribute and reaches the parts of a slide by
+   role, so every layout gets every preset with no code of its own.
+
+   Roles: title (h1), sub (h2 to h4), block (p, quote, code, image, figure, a live component, a Stage), item (list item, table row,
+   .nd-num card). A preset names one keyframe per role and a few numbers; the rules below do the rest.
+   Rules every preset keeps:
+   - only opacity, translate, scale, rotate, filter, clip-path, mask and transform move, so nothing reflows and nothing is measured;
+   - animation-fill-mode is `backwards` only: the settled state is the element's own style, never a held keyframe;
+   - the individual properties (translate, scale, rotate) compose with the transforms components already use;
+   - elements Slidev reveals with v-click keep their own reveal (:not(.slidev-vclick-target));
+   - an element that animates itself (Kinetic, Typewriter, a Stage's children) is left alone;
+   - a stagger is the child index (--nd-i, set below) times --m-step, so no script touches an element. */
+
+/* Child index, up to 12. */
+.slidev-layout[data-nd-motion] { --nd-i: 0; }
+.slidev-layout[data-nd-motion] :nth-child(2) { --nd-i: 1; } .slidev-layout[data-nd-motion] :nth-child(3) { --nd-i: 2; } .slidev-layout[data-nd-motion] :nth-child(4) { --nd-i: 3; }
+.slidev-layout[data-nd-motion] :nth-child(5) { --nd-i: 4; } .slidev-layout[data-nd-motion] :nth-child(6) { --nd-i: 5; } .slidev-layout[data-nd-motion] :nth-child(7) { --nd-i: 6; }
+.slidev-layout[data-nd-motion] :nth-child(8) { --nd-i: 7; } .slidev-layout[data-nd-motion] :nth-child(9) { --nd-i: 8; } .slidev-layout[data-nd-motion] :nth-child(10) { --nd-i: 9; }
+.slidev-layout[data-nd-motion] :nth-child(11) { --nd-i: 10; } .slidev-layout[data-nd-motion] :nth-child(n + 12) { --nd-i: 11; }
+
+/* Title and sub: --mt-* falls back to the block values; a sub may name its own keyframe with --ms-in. */
+.slidev-layout[data-nd-motion] h1:not(:is(.nd-num, .nd-bg, .nd-bgx, .nd-kinetic, .nd-typewriter, [data-kind], .nd-stage, .nd-photo, .nd-split-r) *):not(.slidev-vclick-target) {
+  transform-origin: var(--mt-origin, var(--m-origin, 50% 50%));
+  animation: var(--mt-in, var(--m-in, none)) var(--mt-dur, var(--m-dur, 700ms)) var(--mt-ease, var(--m-ease, cubic-bezier(.16, 1, .3, 1)))
+    calc(var(--mt-base, var(--m-base, 80ms)) + var(--nd-i, 0) * var(--mt-step, var(--m-step, 90ms))) backwards;
+}
+.slidev-layout[data-nd-motion] :is(h2, h3, h4):not(:is(.nd-num, .nd-bg, .nd-bgx, .nd-kinetic, .nd-typewriter, [data-kind], .nd-stage, .nd-photo, .nd-split-r) *):not(.slidev-vclick-target) {
+  transform-origin: var(--mt-origin, var(--m-origin, 50% 50%));
+  animation: var(--ms-in, var(--mt-in, var(--m-in, none))) var(--ms-dur, var(--mt-dur, var(--m-dur, 700ms))) var(--ms-ease, var(--mt-ease, var(--m-ease, cubic-bezier(.16, 1, .3, 1))))
+    calc(var(--mt-base, var(--m-base, 80ms)) + var(--nd-i, 0) * var(--mt-step, var(--m-step, 90ms))) backwards;
+}
+/* Blocks. */
+.slidev-layout[data-nd-motion] :is(p, blockquote, pre, figure, img, video, .slidev-code-wrapper, .nd-stage:not(.nd-stage-full), .nd-photo, .nd-split-r, [data-kind], .nd-demo, .nd-site, .nd-chart, .nd-live, .nd-term, .nd-media, .nd-quiz, .mermaid):not(:is(p, ul, ol, blockquote, li, td, th, pre, figure, table, .slidev-code-wrapper, .nd-stage, .nd-num, .nd-photo, .nd-split-r, .nd-bg, .nd-bgx, .nd-kinetic, .nd-typewriter, [data-kind], .nd-demo, .nd-site, .nd-chart, .nd-live, .nd-term, .nd-media, .nd-quiz, .mermaid) *):not(.slidev-vclick-target) {
+  transform-origin: var(--m-origin, 50% 50%);
+  animation: var(--m-in, none) var(--m-dur, 700ms) var(--m-ease, cubic-bezier(.16, 1, .3, 1))
+    calc(var(--m-base, 80ms) + var(--nd-i, 0) * var(--m-step, 90ms)) backwards;
+}
+/* Items start after the title, so they count from the second step. */
+.slidev-layout[data-nd-motion] li:not(:is(li, blockquote, .nd-stage, .nd-bg, .nd-bgx, [data-kind], pre, .slidev-code-wrapper, .nd-photo, .nd-split-r) *):not(.slidev-vclick-target),
+.slidev-layout[data-nd-motion] tr:not(:is(blockquote, .nd-stage, .nd-bg, .nd-bgx, [data-kind], pre, .slidev-code-wrapper, .nd-photo, .nd-split-r) *):not(.slidev-vclick-target),
+.slidev-layout[data-nd-motion] .nd-num:not(.slidev-vclick-target) {
+  --nd-off: 1;
+  transform-origin: var(--mi-origin, var(--m-origin, 50% 50%));
+  animation: var(--mi-in, var(--m-in, none)) var(--mi-dur, var(--m-dur, 700ms)) var(--mi-ease, var(--m-ease, cubic-bezier(.16, 1, .3, 1)))
+    calc(var(--m-base, 80ms) + (var(--nd-i, 0) + var(--nd-off, 0)) * var(--m-step, 90ms)) backwards;
+}
+.slidev-layout[data-nd-motion] thead tr { --nd-off: 0; }
+
+/* Reduced motion: every slide settles at once. */
+@media (prefers-reduced-motion: reduce) {
+  .slidev-layout[data-nd-motion], .slidev-layout[data-nd-motion] *, .slidev-layout[data-nd-motion] *::before, .slidev-layout[data-nd-motion] *::after { animation: none !important; transition-duration: 0s !important; -webkit-mask-image: none !important; mask-image: none !important; }
+}
+
+/* ===== The presets. A preset sets --m-in (keyframe of blocks and items), --m-dur, --m-ease, --m-step (ms between children),
+   and optionally --mt-* for the title and sub, --mi-* for items, --m-origin, --m-base (first delay). ===== */
+
+/* fade-up: everything rises 56px and fades in, one after the other. The safe default. */
+@keyframes nd-m-fade-up { from { opacity: 0; translate: 0 56px; } }
+@keyframes nd-m-fade-up-t { from { opacity: 0; translate: 0 76px; } }
+.slidev-layout[data-nd-motion="fade-up"] { --m-in: nd-m-fade-up; --mt-in: nd-m-fade-up-t; --m-dur: 850ms; --m-step: 110ms; --m-ease: cubic-bezier(.16, 1, .3, 1); }
+
+/* cascade: the title slides in from the left out of a blur, then each block falls into place behind it. */
+@keyframes nd-m-cascade { from { opacity: 0; translate: 0 84px; scale: .94; filter: blur(10px); } }
+@keyframes nd-m-cascade-t { from { opacity: 0; translate: -150px 0; filter: blur(14px); } }
+.slidev-layout[data-nd-motion="cascade"] { --m-in: nd-m-cascade; --mt-in: nd-m-cascade-t; --m-dur: 800ms; --mt-dur: 900ms; --m-step: 170ms; --m-origin: 0 50%; --m-ease: cubic-bezier(.22, 1, .36, 1); }
+
+/* slide-left / slide-right: content travels 200px sideways across the slide. */
+@keyframes nd-m-slide-left { from { opacity: 0; translate: 220px 0; } }
+@keyframes nd-m-slide-left-t { from { opacity: 0; translate: 320px 0; } }
+.slidev-layout[data-nd-motion="slide-left"] { --m-in: nd-m-slide-left; --mt-in: nd-m-slide-left-t; --m-dur: 800ms; --m-step: 120ms; --m-ease: cubic-bezier(.22, 1, .36, 1); }
+@keyframes nd-m-slide-right { from { opacity: 0; translate: -220px 0; } }
+@keyframes nd-m-slide-right-t { from { opacity: 0; translate: -320px 0; } }
+.slidev-layout[data-nd-motion="slide-right"] { --m-in: nd-m-slide-right; --mt-in: nd-m-slide-right-t; --m-dur: 800ms; --m-step: 120ms; --m-ease: cubic-bezier(.22, 1, .36, 1); }
+
+/* drop: falls from above and lands with an overshoot, a little crooked on the way down. */
+@keyframes nd-m-drop { from { opacity: 0; translate: 0 -180px; rotate: -2.5deg; } }
+@keyframes nd-m-drop-t { from { opacity: 0; translate: 0 -260px; scale: 1.08; } }
+.slidev-layout[data-nd-motion="drop"] { --m-in: nd-m-drop; --mt-in: nd-m-drop-t; --m-dur: 950ms; --m-step: 130ms; --m-ease: cubic-bezier(.34, 1.56, .64, 1); }
+
+/* zoom: grows from a speck, out of a blur. */
+@keyframes nd-m-zoom { from { opacity: 0; scale: .5; filter: blur(12px); } }
+.slidev-layout[data-nd-motion="zoom"] { --m-in: nd-m-zoom; --m-dur: 800ms; --m-step: 110ms; --m-ease: cubic-bezier(.16, 1, .3, 1); }
+
+/* zoom-out: starts huge, close to the camera, and settles back to size. */
+@keyframes nd-m-zoom-out { from { opacity: 0; scale: 1.9; filter: blur(16px); } }
+.slidev-layout[data-nd-motion="zoom-out"] { --m-in: nd-m-zoom-out; --m-dur: 1000ms; --m-step: 120ms; --m-ease: cubic-bezier(.16, 1, .3, 1); }
+
+/* blur-in: no movement at all, a heavy blur resolves into text. Calm. */
+@keyframes nd-m-blur-in { from { opacity: 0; filter: blur(34px); scale: 1.05; } }
+.slidev-layout[data-nd-motion="blur-in"] { --m-in: nd-m-blur-in; --m-dur: 1200ms; --m-step: 170ms; --m-ease: cubic-bezier(.25, .8, .25, 1); }
+
+/* focus: a camera pulling focus. Everything, background included, starts out of focus and enlarged, and sharpens in turn. */
+@keyframes nd-m-focus { from { opacity: 0; scale: 1.18; filter: blur(28px); } }
+@keyframes nd-m-focus-t { from { opacity: 0; scale: 1.32; filter: blur(44px); } }
+@keyframes nd-m-focus-bg { from { scale: 1.3; filter: blur(46px); } }
+.slidev-layout[data-nd-motion="focus"] { --m-in: nd-m-focus; --mt-in: nd-m-focus-t; --m-dur: 1300ms; --m-step: 220ms; --m-ease: cubic-bezier(.3, .7, .2, 1); }
+.slidev-layout[data-nd-motion="focus"] > .nd-bgx, .slidev-layout[data-nd-motion="focus"] .nd-bg { animation: nd-m-focus-bg 1500ms cubic-bezier(.3, .7, .2, 1) backwards; }
+
+/* wipe: each block is uncovered from left to right, like a title wiped onto a screen. */
+@keyframes nd-m-wipe { from { clip-path: inset(-40px 100% -40px -40px); translate: -48px 0; } to { clip-path: inset(-40px); translate: 0 0; } }
+.slidev-layout[data-nd-motion="wipe"] { --m-in: nd-m-wipe; --m-dur: 850ms; --m-step: 140ms; --m-ease: cubic-bezier(.65, 0, .35, 1); }
+
+/* curtain: the title is let down like a curtain from the top; the blocks open from their middle, outwards. */
+@keyframes nd-m-curtain { from { clip-path: inset(-40px 50% -40px 50%); scale: .96; } to { clip-path: inset(-40px); scale: 1; } }
+@keyframes nd-m-curtain-t { from { clip-path: inset(-40px -40px 100% -40px); translate: 0 -48px; } to { clip-path: inset(-40px); translate: 0 0; } }
+.slidev-layout[data-nd-motion="curtain"] { --m-in: nd-m-curtain; --mt-in: nd-m-curtain-t; --m-dur: 900ms; --mt-dur: 1000ms; --m-step: 150ms; --m-ease: cubic-bezier(.7, 0, .2, 1); }
+
+/* flip: each block turns up on a hinge at its top edge, in 3D. */
+@keyframes nd-m-flip { from { opacity: 0; transform: perspective(900px) rotateX(-88deg); } to { transform: perspective(900px) rotateX(0deg); } }
+.slidev-layout[data-nd-motion="flip"] { --m-in: nd-m-flip; --m-dur: 900ms; --m-step: 140ms; --m-origin: 50% 0; --m-ease: cubic-bezier(.2, .9, .3, 1.15); }
+
+/* pop: springs up from nothing and overshoots a little. */
+@keyframes nd-m-pop { from { opacity: 0; scale: .35; } }
+.slidev-layout[data-nd-motion="pop"] { --m-in: nd-m-pop; --m-dur: 700ms; --m-step: 100ms; --m-ease: cubic-bezier(.34, 1.8, .5, 1); }
+
+/* rise: text climbs out of a hidden line below it; blocks follow, slower. */
+@keyframes nd-m-rise { from { opacity: 0; translate: 0 130px; clip-path: inset(100% -40px -40px -40px); } to { clip-path: inset(-40px); translate: 0 0; } }
+@keyframes nd-m-rise-t { from { translate: 0 96px; clip-path: inset(100% -40px -40px -40px); } to { clip-path: inset(-40px); translate: 0 0; } }
+.slidev-layout[data-nd-motion="rise"] { --m-in: nd-m-rise; --mt-in: nd-m-rise-t; --m-dur: 1050ms; --mt-dur: 900ms; --m-step: 150ms; --m-ease: cubic-bezier(.16, 1, .3, 1); }
+
+/* typewriter: the title is typed one character at a time (its length is read by slide-bottom.vue); blocks flicker on after it. */
+@keyframes nd-m-typewriter-t { from { clip-path: inset(-40px calc(100% - var(--nd-tw-x, 0px)) -40px -40px); } to { clip-path: inset(-40px calc(100% - var(--nd-tw-x, 0px) - var(--nd-tw-w, 100%)) -40px -40px); } }
+@keyframes nd-m-typewriter { 0% { opacity: 0; } 25% { opacity: 1; } 40% { opacity: .25; } 60% { opacity: 1; } 75% { opacity: .55; } 100% { opacity: 1; } }
+.slidev-layout[data-nd-motion="typewriter"] { --m-in: nd-m-typewriter; --mt-in: nd-m-typewriter-t; --ms-in: nd-m-typewriter; --ms-dur: 520ms; --ms-ease: steps(1, end); --m-dur: 520ms; --m-ease: steps(1, end);
+  --mt-dur: min(calc(var(--nd-ch, 20) * 55ms), 1900ms); --mt-ease: steps(var(--nd-ch, 20), end); --mt-base: 160ms; --mt-step: min(calc(var(--nd-ch, 20) * 55ms), 1900ms);
+  --m-base: calc(min(var(--nd-ch, 20) * 55ms, 1900ms) + 260ms); --m-step: 260ms; }
+
+/* glitch: a short RGB split and a jitter on entry, then dead still. */
+@keyframes nd-m-glitch-t {
+  0% { opacity: 0; translate: -18px 0; transform: skewX(-12deg); text-shadow: -8px 0 var(--nd-accent), 8px 0 var(--nd-accent-2); }
+  14% { opacity: 1; translate: 12px 0; transform: skewX(8deg); text-shadow: 7px 0 var(--nd-accent), -7px 0 var(--nd-accent-2); clip-path: inset(-40px -40px 55% -40px); }
+  28% { translate: -9px 0; transform: skewX(-5deg); text-shadow: -5px 0 var(--nd-accent), 5px 0 var(--nd-accent-2); clip-path: inset(40% -40px -40px -40px); }
+  42% { translate: 6px 0; transform: skewX(3deg); text-shadow: 4px 0 var(--nd-accent), -4px 0 var(--nd-accent-2); clip-path: inset(-40px); }
+  60% { translate: -2px 0; text-shadow: -2px 0 var(--nd-accent), 2px 0 var(--nd-accent-2); }
+  100% { translate: 0 0; transform: none; text-shadow: 0 0 0 transparent; clip-path: inset(-40px); }
+}
+@keyframes nd-m-glitch { 0% { opacity: 0; translate: 26px 0; } 30% { opacity: .9; translate: -10px 0; } 42% { opacity: .15; translate: 6px 0; } 60% { opacity: 1; translate: -3px 0; } 100% { translate: 0 0; } }
+.slidev-layout[data-nd-motion="glitch"] { --m-in: nd-m-glitch; --mt-in: nd-m-glitch-t; --m-dur: 640ms; --mt-dur: 760ms; --m-step: 110ms; --m-ease: linear; }
+
+/* spotlight: the slide is dark, then a soft circle of light opens from the middle and the content settles into it. */
+@keyframes nd-m-spotlight { from { opacity: 0; translate: 0 36px; filter: blur(10px); } }
+@keyframes nd-m-spotlight-iris {
+  from { mask: radial-gradient(circle closest-side, black 55%, transparent) 50% 46% / 0% 0% no-repeat; }
+  to { mask: radial-gradient(circle closest-side, black 55%, transparent) 50% 46% / 340% 340% no-repeat; }
+}
+.slidev-layout[data-nd-motion="spotlight"] { --m-in: nd-m-spotlight; --m-dur: 1000ms; --m-base: 450ms; --mt-base: 300ms; --m-step: 160ms; --m-ease: cubic-bezier(.16, 1, .3, 1);
+  animation: nd-m-spotlight-iris 1500ms cubic-bezier(.4, 0, .2, 1) backwards; }
+
+/* swing: hangs from its top-left corner and swings into place, like a sign. */
+@keyframes nd-m-swing { 0% { opacity: 0; rotate: -26deg; translate: -50px -40px; } 40% { opacity: 1; rotate: 10deg; } 65% { rotate: -5deg; } 85% { rotate: 2deg; } 100% { rotate: 0deg; translate: 0 0; } }
+.slidev-layout[data-nd-motion="swing"] { --m-in: nd-m-swing; --m-dur: 1100ms; --m-step: 150ms; --m-origin: 0 0; --m-ease: ease-out; }
+
+/* rubber: stretches and squashes like rubber before it settles. */
+@keyframes nd-m-rubber { 0% { opacity: 0; scale: .2 1.7; } 25% { opacity: 1; scale: 1.35 .75; } 45% { scale: .85 1.12; } 65% { scale: 1.08 .95; } 82% { scale: .97 1.02; } 100% { scale: 1 1; } }
+.slidev-layout[data-nd-motion="rubber"] { --m-in: nd-m-rubber; --m-dur: 1000ms; --m-step: 130ms; --m-ease: ease-out; --m-origin: 50% 100%; }
+
+/* parallax: the title, the body and the background travel different distances at different speeds. */
+@keyframes nd-m-parallax { from { opacity: 0; translate: 0 190px; } }
+@keyframes nd-m-parallax-t { from { opacity: 0; translate: 0 64px; } }
+@keyframes nd-m-parallax-bg { from { scale: 1.2; translate: 0 -48px; } }
+.slidev-layout[data-nd-motion="parallax"] { --m-in: nd-m-parallax; --mt-in: nd-m-parallax-t; --m-dur: 1000ms; --mt-dur: 1500ms; --m-step: 100ms; --m-ease: cubic-bezier(.2, .8, .2, 1); }
+.slidev-layout[data-nd-motion="parallax"] > .nd-bgx, .slidev-layout[data-nd-motion="parallax"] .nd-bg { animation: nd-m-parallax-bg 1900ms cubic-bezier(.2, .8, .2, 1) backwards; }
+
+/* count: for the numbers layout. Cards rise in turn and each big figure rolls up from behind a line, as if a counter had stopped on it. */
+@keyframes nd-m-count { from { opacity: 0; translate: 0 100px; scale: .9; } }
+@keyframes nd-m-count-roll { from { opacity: 0; translate: 0 .9em; clip-path: inset(0 -20px 100% -20px); } to { clip-path: inset(-20px); } }
+.slidev-layout[data-nd-motion="count"] { --m-in: nd-m-count; --m-dur: 900ms; --m-step: 170ms; --m-ease: cubic-bezier(.16, 1, .3, 1); }
+.slidev-layout[data-nd-motion="count"] .nd-num h2 { animation: nd-m-count-roll 900ms cubic-bezier(.16, 1, .3, 1) calc(var(--m-base, 80ms) + (var(--nd-i, 0) + 1) * 170ms + 260ms) backwards; }

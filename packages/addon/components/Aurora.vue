@@ -28,8 +28,8 @@ interface Blob { img: HTMLCanvasElement; fx: number; fy: number; px: number; py:
 let blobs: Blob[] = [], bg = '', dark = true
 function build() {
   const shift = (c: RGB): RGB => (props.hue ? hueShift(c, props.hue) : c)
-  const a1 = shift(rgbOf('--nd-accent')), bgc = rgbOf('--nd-bg')
-  let a2 = shift(rgbOf('--nd-accent-2'))
+  const a1 = shift(rgbOf('--nd-accent', 'black', root.value)), bgc = rgbOf('--nd-bg', 'black', root.value)
+  let a2 = shift(rgbOf('--nd-accent-2', 'black', root.value))
   if (toHsl(a2)[1] < 0.18) a2 = hueShift(a1, -48)                  // a grey second accent would only dull the mesh
   const a3 = hueShift(a1, 52), a4 = mix(a1, a2, 0.5)
   dark = luma(bgc) < 0.5

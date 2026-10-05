@@ -5,10 +5,10 @@ export type RGB = [number, number, number]
 let probe: CanvasRenderingContext2D | null = null
 
 // Any CSS colour a token can hold (hex, rgb(), a name) to [r, g, b] in 0..255: the canvas normalises it for us.
-export function rgbOf(token: string, fallback = '#000'): RGB {
+export function rgbOf(token: string, fallback = '#000', el?: Element): RGB {
   probe ??= document.createElement('canvas').getContext('2d')!
   probe.fillStyle = '#000'
-  probe.fillStyle = cssVar(token, fallback)
+  probe.fillStyle = cssVar(token, fallback, el)
   const s = String(probe.fillStyle)
   if (s[0] === '#') { const n = parseInt(s.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
   const m = s.match(/[\d.]+/g)

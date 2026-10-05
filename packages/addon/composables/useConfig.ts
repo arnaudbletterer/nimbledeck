@@ -9,7 +9,8 @@ export function useNimbleConfig(): Promise<NimbleConfig> {
   return cached
 }
 
-// Read a theme token, e.g. cssVar('--nd-ink') -> "#1f2328".
-export function cssVar(name: string, fallback = '#000'): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
+// Read a theme token, e.g. cssVar('--nd-ink') -> "#1f2328". `el` reads it where that element sits, so a layer that
+// redefines a token (a background over a dark cover) is followed; by default it is read on the page root.
+export function cssVar(name: string, fallback = '#000', el: Element = document.documentElement): string {
+  return getComputedStyle(el).getPropertyValue(name).trim() || fallback
 }

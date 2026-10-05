@@ -76,8 +76,8 @@ function setup() {
   loc = Object.fromEntries(['uRes', 'uT', 'uBg', 'uA', 'uB', 'uC', 'uI', 'uL', 'uDark'].map((n) => [n, gl!.getUniformLocation(prog!, n)]))
 }
 function palette() {
-  const a1 = rgbOf('--nd-accent'), bgc = rgbOf('--nd-bg')
-  let a2 = rgbOf('--nd-accent-2')
+  const a1 = rgbOf('--nd-accent', 'black', root.value), bgc = rgbOf('--nd-bg', 'black', root.value)
+  let a2 = rgbOf('--nd-accent-2', 'black', root.value)
   if (toHsl(a2)[1] < 0.18) a2 = hueShift(a1, -48)
   const shift = (c: RGB) => (props.hue ? hueShift(c, props.hue) : c)
   const dark = luma(bgc) < 0.5
