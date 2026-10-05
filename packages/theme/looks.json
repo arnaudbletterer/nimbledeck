@@ -1,0 +1,22 @@
+[
+  {"id":"plain","label":"Plain","description":"White page, ink, one blue accent. The neutral default.","dark":false,"swatch":["#ffffff","#1f2328","#2563eb","#9ca3af"]},
+  {"id":"paper","label":"Paper","description":"Warm paper and a serif, with a rust accent.","dark":false,"swatch":["#faf6ee","#2b2118","#9a3412","#b8a58c"]},
+  {"id":"night","label":"Night","description":"Slate blue-black with a sky-blue accent.","dark":true,"swatch":["#0f172a","#e5e7eb","#38bdf8","#64748b"]},
+  {"id":"studio","label":"Studio","description":"Keynote dark: near-black blue, cyan to violet, heavy tight type.","dark":true,"swatch":["#07090f","#f2eee6","#22d3ee","#a78bfa"]},
+  {"id":"studio-light","label":"Studio light","description":"The studio identity on a warm white page.","dark":false,"swatch":["#f7f6f2","#0b0f1a","#6d28d9","#0e7490"]},
+  {"id":"editorial","label":"Editorial","description":"Serif display on warm paper, double rules, small-caps kickers.","dark":false,"swatch":["#f6f1e7","#1c1a17","#a1281f","#b79a5b"]},
+  {"id":"swiss","label":"Swiss","description":"White, black and one red. Huge grotesk, hard rules, a grid feel.","dark":false,"swatch":["#ffffff","#111111","#d4001a","#8c8c8c"]},
+  {"id":"neon","label":"Neon","description":"Near-black with electric magenta and cyan, glowing edges.","dark":true,"swatch":["#0a0612","#f5eefc","#ff2bd6","#19e3ff"]},
+  {"id":"terminal","label":"Terminal","description":"Green phosphor on black, monospace everywhere, a blinking caret.","dark":true,"swatch":["#050a06","#9dffb3","#e9ff70","#ffb000"]},
+  {"id":"blueprint","label":"Blueprint","description":"Deep blue drafting paper with white line work and a measured grid.","dark":true,"swatch":["#0a2a5e","#f2f7ff","#8fe3ff","#ffd45e"]},
+  {"id":"sunset","label":"Sunset","description":"Deep plum with a coral to gold glow, warm and cinematic.","dark":true,"swatch":["#1d0f2b","#fff1e6","#ff8a5b","#ffcf5a"]},
+  {"id":"ocean","label":"Ocean","description":"Airy seafoam page, deep-water covers with a wave line, blue and teal.","dark":false,"swatch":["#f2fafb","#0b2b3a","#0069a8","#00a99d"]},
+  {"id":"forest","label":"Forest","description":"Deep green with leaf and amber accents, soft organic corners.","dark":true,"swatch":["#0f1d17","#eaf3e6","#8bd17c","#e0b95c"]},
+  {"id":"mono","label":"Mono","description":"Grayscale brutalism: black bars, thick borders, hard offset shadows.","dark":false,"swatch":["#ececec","#0a0a0a","#0a0a0a","#6e6e6e"]},
+  {"id":"candy","label":"Candy","description":"Playful pastel, rounded type, bubbly corners and dotted rules.","dark":false,"swatch":["#fff7fb","#3b1d5a","#c81e73","#6c5ce7"]},
+  {"id":"gold","label":"Gold","description":"Black and gold, Didone capitals with wide tracking, a fine frame.","dark":true,"swatch":["#0b0b0c","#f3ead7","#d4af37","#8a6d1f"]},
+  {"id":"newsprint","label":"Newsprint","description":"Grey newsprint, condensed black headlines, serif text, thick-thin rules.","dark":false,"swatch":["#e9e4d8","#161616","#b3151f","#8b8579"]},
+  {"id":"slate-pro","label":"Slate Pro","description":"Corporate and calm: slate neutrals, one blue, a short accent bar.","dark":false,"swatch":["#f8fafc","#0f172a","#1d4ed8","#64748b"]},
+  {"id":"high-contrast","label":"High contrast","description":"White on black with yellow, 7:1 or better, large muted text, thick outlines.","dark":true,"swatch":["#000000","#ffffff","#ffe600","#00e5ff"]},
+  {"id":"print","label":"Print","description":"Ink-friendly for PDF handouts: white page, no gradients, thin black rules.","dark":false,"swatch":["#ffffff","#000000","#1d3f8a","#7a7a7a"]}
+]

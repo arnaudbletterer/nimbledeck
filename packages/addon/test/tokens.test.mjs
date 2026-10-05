@@ -12,6 +12,16 @@ test('the stylesheet declares the state ink tokens and uses them instead of raw 
   assert.doesNotMatch(css, /#c0392b|#b03030/, 'use var(--nd-bad-ink) for error and urgent states')
 })
 
+test('every look sets its own chart palette and state tints, so none falls back to the addon defaults', async () => {
+  const { lookTokens } = await import('../../theme/looks-lib.mjs')
+  const theme = read('../../theme/styles/index.css')
+  for (const l of JSON.parse(read('../../theme/looks.json'))) {
+    const t = lookTokens(theme, l.id)
+    for (const k of ['--nd-chart-1', '--nd-chart-2', '--nd-chart-3', '--nd-chart-4', '--nd-good', '--nd-bad', '--nd-good-ink', '--nd-bad-ink', '--nd-node-border', '--nd-font-mono'])
+      assert.ok(t[k], `${l.id} must define ${k}`)
+  }
+})
+
 test('chart fallbacks are neutral tokens, not a brand colour', () => {
   assert.doesNotMatch(read('../components/Chart.vue'), /#e8cdba/i)
 })
