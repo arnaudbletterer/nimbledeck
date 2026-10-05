@@ -23,7 +23,8 @@ function move(e: PointerEvent) {
   const r = box.value!.getBoundingClientRect()
   if (r.width > 0) pos.value = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100))
 }
-function down(e: PointerEvent) { stopSweep(); dragging = true; grabbed.value = true; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); move(e) }
+function down(e: PointerEvent) { stopSweep(); dragging = true; grabbed.value = true; try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) } catch { /* a pointer the browser does not track, such as a scripted tour's */ }
+  move(e) }
 function up() { dragging = false; grabbed.value = false }
 function key(e: KeyboardEvent) {
   if (e.key === 'ArrowLeft') { stopSweep(); pos.value = Math.max(0, pos.value - 5); e.preventDefault(); e.stopPropagation() }
