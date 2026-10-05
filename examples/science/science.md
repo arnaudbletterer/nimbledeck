@@ -175,6 +175,7 @@ layout: stage
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+plt.figure(figsize=(7, 5))
 rng = np.random.default_rng(0)
 a, y = rng.uniform(0, 6.3, 200), np.arange(200) // 100
 r = 1 + y + rng.normal(0, .12, 200)     # two rings
@@ -273,16 +274,16 @@ layout: stage
 <Kinetic text="Run it. Record it. Check it." mode="words" from="up" :stagger="170" size="l" accent="Record" />
 </At>
 <At :x="90" :y="260" :w="1100" :h="330">
-<Terminal title="science" :lines="['$ nimbledeck run science.md', 'demo turing -> http://127.0.0.1:2830', 'stream lorenz -> ws://127.0.0.1:18870', 'runner -> ws://127.0.0.1:18910 (live code)', '$ nimbledeck check science.md', '15 slides, 0 errors, 0 warnings']" />
+<Terminal title="science" :lines="['$ nimbledeck run science.md', 'runner -> ws://127.0.0.1:18910 (live code)', '$ nimbledeck record science.md', '5 recorded, manifest public/recordings/index.json', '$ nimbledeck check science.md', '15 slides, 0 errors, 0 warnings']" />
 </At>
 </Stage>
 
 ::caption::
 
-PLACEHOLDER for the record command.
+Record films each live slide once, on your machine.
 
 <!--
-Placeholder.
+run starts the deck and its Python processes, record films every live slide into public/recordings, check lints the Markdown.
 -->
 
 ---
@@ -293,8 +294,10 @@ layout: statement
 
 # No Python? It plays the recording.
 
+On a page with no Python process, each live slide plays a clip filmed from the real run. Start the process and it is live again.
+
 <!--
-Placeholder: depends on nimbledeck record.
+nimbledeck record films the Lorenz stream, the reaction-diffusion demo and the three code slides once, on your machine, into public/recordings. The web edition keeps those slides and plays the clips; the hosted copy has no Python.
 -->
 
 ---

@@ -21,5 +21,253 @@
   },
   "runner": {
     "port": 18910
+  },
+  "recordings": {
+    "stream-lorenz": {
+      "seconds": 9,
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "set": "speed",
+          "value": 0.06
+        }
+      ]
+    },
+    "demo-turing": {
+      "seconds": 12,
+      "steps": [
+        {
+          "wait": 1500
+        },
+        {
+          "set": "Feed rate",
+          "value": 0.0375
+        },
+        {
+          "wait": 6000
+        }
+      ]
+    },
+    "live-fft": {
+      "seconds": 10,
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "type": "\n"
+        },
+        {
+          "key": "ControlOrMeta+Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "Home"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "Comma"
+        },
+        {
+          "key": "Space"
+        },
+        {
+          "key": "Digit2"
+        },
+        {
+          "key": "Digit0"
+        },
+        {
+          "key": "Digit0"
+        },
+        {
+          "wait": 3500
+        }
+      ]
+    },
+    "live-fit": {
+      "seconds": 9,
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "type": "\n"
+        },
+        {
+          "key": "ControlOrMeta+Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "Home"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Digit8"
+        },
+        {
+          "wait": 3500
+        }
+      ]
+    },
+    "live-net": {
+      "seconds": 9,
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "type": "\n"
+        },
+        {
+          "key": "ControlOrMeta+Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "Home"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Digit2"
+        },
+        {
+          "key": "ControlOrMeta+Enter"
+        },
+        {
+          "wait": 3500
+        }
+      ]
+    }
   }
 }

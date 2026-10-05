@@ -31,10 +31,29 @@ the packages of `demos/requirements.txt` into uv's cache; after that it works wi
 | 9 | Measured, not claimed | Three measured numbers |
 | 10 | Notebook cell, two fences, a live slide | How a cell becomes a slide |
 | 11 | Run it. Record it. Check it. | The workflow, as a terminal |
-| 12 | No Python? It plays the recording. | The web edition |
+| 12 | No Python? It plays the recording. | The recordings, in one sentence |
 | 13 | Reviewed like code | A parameter change is a one line diff |
 | 14 | Your data stays on your machine. | Python runs locally, no network request |
 | 15 | Show the experiment. | Closing |
+
+## Two editions
+
+| Edition | How | Slides |
+|---|---|---|
+| Full | `npm run dev` | all 15, live |
+| Web | `npm run build:web` (static files in `dist/`) | all 15; slides 4 to 8 play the clips in `public/recordings` because no Python runs on a static host |
+
+`build:web` uses hash routes, removes `nimbledeck.json` (it holds the runner token) and honours `WEB_BASE` (default
+`/nimbledeck/demos/science/`) and `WEB_OUT`. With the recordings missing, it would leave those five slides out.
+
+## Recordings
+
+`public/recordings/` holds one clip and one still per live component (`stream-lorenz`, `demo-turing`, `live-fft`,
+`live-fit`, `live-net`), 0.5 to 1.7 MB each, 5.7 MB for `public/` in total. They are made by `nimbledeck record science.md`
+following the scripted steps in `nimbledeck.config.json` (Lorenz speed slider to maximum, Feed rate slider, and typed
+edits on the three code slides: add a 200 Hz line, raise the degree to 8, drop to 2 hidden units). Re-record after a change
+to the code on a slide, because the keystrokes address lines by number. `public/posters/turing.png` is the still shown
+by the Demo slide while the clip loads.
 
 ## The demos
 
@@ -54,6 +73,7 @@ One Apple Silicon Mac, Chrome with the GPU on. Medians; read them as ratios, not
 - Lorenz stream, 200 trajectories: Python step 0.9 ms, 56 frames per second on screen (20 s of samples).
 - Gray-Scott, 192 by 192 cells, 3,000 steps: 1.3 s for the whole subprocess, including its start.
 - Live code: 0.12 to 0.29 s per run (FFT 0.15 to 0.22 s, fit 0.12 s, network 0.29 s), four loads each.
+- Web edition served under `/nimbledeck/demos/science/` with no Python: slides 4 to 8 each play their clip (video time advances), media requests answer 200 or 206.
 - `nimbledeck check`: 15 slides, 0 errors, 0 warnings. `nimbledeck verify`: 0 placement problems.
 
 ## Extending PyStream
