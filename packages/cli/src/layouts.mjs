@@ -35,3 +35,13 @@ export function knownLayouts(root, head) {
   for (const d of dirs.filter(Boolean)) vueNames(join(d, 'layouts')).forEach((n) => names.add(n))
   return names
 }
+
+// The ids a deck may give to `ndVariant`: the looks listed in the looks.json that its theme ships. null when the theme has
+// none (a brand theme with its own variants is not checked).
+export function knownLooks(root, head) {
+  const req = createRequire(join(root, 'noop.js'))
+  const theme = head.theme && head.theme !== 'none' ? resolvePackage(req, root, head.theme, 'slidev-theme-') : null
+  const file = theme && join(theme, 'looks.json')
+  if (!file || !existsSync(file)) return null
+  try { return new Set(JSON.parse(readFileSync(file, 'utf8')).map((l) => l.id)) } catch { return null }
+}
