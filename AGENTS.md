@@ -31,3 +31,4 @@ changing a component.
   It asserts structure and behaviour, not text, so reworded slides keep passing.
 - `node website/hosted-media-e2e.mjs` does the same base-path media check for the hosted example deck.
 - Both web builds share `packages/cli/src/webedition.mjs`, which leaves out the slides that need `nimbledeck run`.
+- A slide that should be interactive in the tour gets a `tourScript`, and `sounds` if it has sound (see `docs/TOUR.md`). Run `nimbledeck check` and `examples/showcase/e2e-tour.mjs` after changing them.

@@ -213,3 +213,7 @@ more than `maxChars` (900) characters or a `<Photo>` has too few pixels for its 
 
 When the theme lacks something, add a layout or component once and use it by name. Never patch a single slide
 with inline CSS.
+
+## Tour scripts and sounds
+
+A slide can script what the site tour does on it (`tourScript`) and ask for sounds (`sound`, `sounds`); the deck can set a bed (`ndSound`). See [Scripted tours and sounds](TOUR.md). `nimbledeck check` validates both.

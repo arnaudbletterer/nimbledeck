@@ -1,6 +1,6 @@
 # Showcase deck
 
-A 19 slide deck for a three minute demo: a shader opening, Markdown typed while its slides build themselves, five looks
+A 20 slide deck for a three minute demo: a shader opening, Markdown typed while its slides build themselves, five looks
 of one slide, motion text, a canvas, 3D, measured numbers, a quiz, a Markdown and slide comparison, video, live Python,
 an agent loop and a finale. It is plain Markdown in `showcase.md`.
 
@@ -63,3 +63,7 @@ into the page, and without it (dev server, PDF export, any other build) the bar 
 - A slide stays on screen for 8 seconds in the tour. `tour: 14` in a slide's frontmatter changes that; click builds share the
   slide's time (at least 2.5 seconds each).
 - `node website/make-social.mjs` regenerates `public/social.jpg`, the 1200 x 630 preview used by link cards.
+
+## Tour script and sound
+
+Slides carry `tourScript` and `sounds` in their frontmatter (quiz, compare, looks, 3D, live code, stream); slide 14 is the sound slide. Pacing is adaptive. See `docs/TOUR.md`. `node e2e-tour.mjs --dist dist --full` checks it in Chrome and prints the time per slide. The live code keeps `id="14"` so its recording still matches.

@@ -13,6 +13,7 @@ nav = [
   { "Get started" = "GETTING-STARTED.md" },
   { "Guide" = [
     { "Writing a deck" = "WRITING.md" },
+    { "Scripted tours and sounds" = "TOUR.md" },
     { "Layouts and playground" = "layouts.md" },
     { "Components gallery" = "components.md" },
     { "Themes and brands" = "THEMING.md" },
