@@ -2,6 +2,8 @@
 import { onMounted, onUnmounted } from 'vue'
 import CommandPalette from './components/CommandPalette.vue'
 import ShortcutHelp from './components/ShortcutHelp.vue'
+import SoundDirector from './components/SoundDirector.vue'
+import TourCursor from './components/TourCursor.vue'
 import { helpOpen, isEditable, paletteOpen } from './composables/palette'
 
 // Slidev renders this layer once, outside the slides. It owns the global keys of the palette and the cheat-sheet.
@@ -20,4 +22,6 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 <template>
   <CommandPalette />
   <ShortcutHelp />
+  <SoundDirector />
+  <TourCursor />
 </template>
