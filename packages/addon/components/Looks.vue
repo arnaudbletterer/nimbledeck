@@ -33,8 +33,12 @@ function apply(v: string) {
 }
 function swap(v: string, soft = true) {
   if (v === shown.value) return
-  const d = document as Document & { startViewTransition?: (cb: () => void) => unknown }
-  if (soft && !reduce && d.startViewTransition) d.startViewTransition(() => apply(v)); else apply(v)
+  const d = document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<unknown>; finished: Promise<unknown>; updateCallbackDone: Promise<unknown> } }
+  if (soft && !reduce && d.startViewTransition) {
+    // A newer transition skips the one in progress, which rejects its promises with an AbortError: expected, not an error.
+    const t = d.startViewTransition(() => apply(v))
+    for (const p of [t.ready, t.finished, t.updateCallbackDone]) p.catch(() => {})
+  } else apply(v)
 }
 function stop() { clearTimeout(timer); timer = 0 }
 function tour(i: number) {
