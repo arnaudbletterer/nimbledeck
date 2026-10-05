@@ -5,7 +5,7 @@ Every component is a Vue tag you write in a slide. They fill the box they are gi
 The syntax and every option are in [Writing a deck](WRITING.md#live-components).
 
 !!! tip "See them move"
-    All of the components below appear in the [live example deck](demos/how-it-works/){ target="_blank" }.
+    All of the components below appear in the [live example deck](../demos/how-it-works/){ target="_blank" }.
     Which ones work without a local Python process is listed on the [live demos](demos.md) page.
 
 ## Motion and graphics

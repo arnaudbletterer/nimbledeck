@@ -1,16 +1,22 @@
-// Builds the documentation site into site/: the Zensical pages, then the example deck under site/demos/.
-// Usage: node website/build.mjs        (env DEMO_BASE overrides the site's base path)
+// Builds the whole site into site/, deck first:
+//   /                      the showcase deck (web edition), with the bar, the head and the no-script content of home.mjs
+//   /docs/                 the Zensical documentation
+//   /playground/           the layout playground
+//   /demos/how-it-works/   the educational deck;  /demos/science/  the science deck, when examples/science exists
+//   old documentation addresses (/layouts/ ...) redirect into /docs/, plus 404.html, robots.txt, sitemap.xml
+// Usage: node website/build.mjs        (--serve: the documentation only, with live reload; env DEMO_BASE overrides the base path)
+// The address of the site is read from zensical.toml by website/site.mjs, nowhere else.
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { firstSlidePreloads, homePage, slideTitles, writeNotFound, writeRedirects, writeRobotsAndSitemap } from './home.mjs'
 import { webEdition } from '../packages/cli/src/webedition.mjs'
+import { root, siteConfig } from './site.mjs'
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-// GitHub Pages serves a project at /<repository>/. Change it if the repository or host changes.
-const siteBase = process.env.DEMO_BASE ?? '/nimbledeck/'
-const run = (cmd, args, cwd = root) => {
-  const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32' })
+const cfg = siteConfig()
+const siteBase = cfg.base
+const run = (cmd, args, cwd = root, env = {}) => {
+  const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, ...env } })
   if (r.status !== 0) process.exit(r.status ?? 1)
 }
 
@@ -33,7 +39,10 @@ writeFileSync(resolve(root, 'site-src/playground/data.json'), JSON.stringify({
 cpSync(resolve(root, 'node_modules/vue/dist/vue.esm-browser.prod.js'), resolve(root, 'site-src/playground/vue.js'))
 
 if (process.argv.includes('--serve')) { run('uvx', ['zensical@0.0.67', 'serve']); process.exit(0) }
-run('uvx', ['zensical@0.0.67', 'build', '--clean'])
+rmSync(resolve(root, 'site'), { recursive: true, force: true })
+run('uvx', ['zensical@0.0.67', 'build', '--clean'])   // into site/docs (site_dir in zensical.toml)
+// The playground is a page of its own, next to the documentation that embeds it.
+renameSync(resolve(root, 'site/docs/playground'), resolve(root, 'site/playground'))
 
 // 2. The deck. A static host has no fallback to index.html for /3, so the copy uses hash routes
 //    (a temporary deck file; the example itself keeps its normal routes for `npm run example`).
@@ -42,6 +51,7 @@ const tmp = resolve(dir, '.docs-build.md')
 const src = readFileSync(resolve(dir, 'how-it-works.md'), 'utf8')
 // A static host runs no Python: slides that need `nimbledeck run` are left out of the web edition (they are shown on
 // the "Run it locally" page instead), unless every live component on them has a recording in public/recordings.
+// Slidev skips a slide whose frontmatter says `disabled: true`.
 const { markdown, skipped, played } = webEdition(src, resolve(dir, 'public'))
 console.log(`web edition: ${skipped.length} slides that need nimbledeck run are left out, ${played} play a recording`)
 writeFileSync(tmp, markdown)
@@ -53,4 +63,30 @@ try {
 }
 // The session file written by `nimbledeck run` holds a runner token: never publish it.
 rmSync(resolve(root, 'site/demos/how-it-works/nimbledeck.json'), { force: true })
+
+// 3. The science deck, if its package is there (it lands on its own branch). Its `build:web` script is called like the
+//    showcase's (env WEB_BASE and WEB_OUT, hash routes); a package with no such script is skipped without a word.
+const sci = resolve(root, 'examples/science')
+const sciScripts = existsSync(resolve(sci, 'package.json')) ? JSON.parse(readFileSync(resolve(sci, 'package.json'), 'utf8')).scripts ?? {} : {}
+const hasScience = !!sciScripts['build:web']
+if (hasScience) {
+  const out = resolve(sci, 'dist')
+  run('npm', ['run', 'build:web'], sci, { WEB_BASE: `${siteBase}demos/science/`, WEB_OUT: out })
+  cpSync(out, resolve(root, 'site/demos/science'), { recursive: true })
+  rmSync(resolve(root, 'site/demos/science/nimbledeck.json'), { force: true })
+}
+
+// 4. The showcase deck is the front door: built for the site's root, then dressed by home.mjs.
+const showcase = resolve(root, 'examples/showcase')
+run('npm', ['run', 'build:web'], showcase, { WEB_BASE: siteBase, WEB_OUT: resolve(showcase, 'dist') })
+cpSync(resolve(showcase, 'dist'), resolve(root, 'site'), { recursive: true })
+for (const f of ['_redirects', 'nimbledeck.json']) rmSync(resolve(root, 'site', f), { force: true })   // a Netlify file, and the runner token
+const index = resolve(root, 'site/index.html')
+writeFileSync(index, homePage(readFileSync(index, 'utf8'), { cfg, hasScience, titles: slideTitles(resolve(showcase, 'showcase.md')), preloads: firstSlidePreloads(resolve(root, 'site'), resolve(showcase, 'showcase.md'), siteBase) }))
+writeNotFound(resolve(root, 'site'), cfg)
+console.log(`redirects: ${writeRedirects(resolve(root, 'site'), cfg).join(' ')}`)
+writeRobotsAndSitemap(resolve(root, 'site'), cfg, hasScience)
+
+// 5. Every link and asset of every page must resolve inside the site.
+run('node', ['website/check-links.mjs', '--check'])
 console.log('site ready in site/')

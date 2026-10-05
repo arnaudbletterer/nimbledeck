@@ -1,7 +1,8 @@
 ---
 theme: nimbledeck
 ndVariant: studio
-title: Slides that move
+title: "Nimbledeck: Markdown slides that run things"
+titleTemplate: "%s"
 layout: hero
 class: nd-grid
 transition: nd-zoom
@@ -46,6 +47,7 @@ No slide editor, no binary format. A file you can diff, review and hand to an ag
 
 ---
 layout: stage
+tour: 14
 ---
 
 <Stage full>
@@ -233,6 +235,7 @@ Drag it. A three.js scene, loaded only on the slide that uses it.
 
 ---
 layout: numbers
+tour: 9
 ---
 
 # Measured on one Mac
@@ -275,6 +278,7 @@ Measured on one Mac (docs/PERFORMANCE.md): 22 ms for a run that prints, 132 ms f
 
 ---
 layout: default
+tour: 7
 ---
 
 # Which file holds the deck?
