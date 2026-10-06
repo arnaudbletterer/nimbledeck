@@ -81,7 +81,7 @@ One Apple Silicon Mac, Chrome with the GPU on. Medians; read them as ratios, not
 - Gray-Scott, 192 by 192 cells, 3,000 steps: 1.3 s for the whole subprocess, including its start.
 - Live code: 0.12 to 0.29 s per run (FFT 0.15 to 0.22 s, fit 0.12 s, network 0.29 s), four loads each.
 - Web edition served under `/nimbledeck/demos/science/` with no Python: slides 4 to 12 each play their clip (video time advances), media requests answer 200 or 206, no `.katex-error`, no request to another origin, and the KaTeX fonts come from the deck.
-- `nimbledeck check`: 21 slides, 0 errors, 0 warnings. `nimbledeck verify`: 0 placement problems besides the fit slide, whose live figure can be a little soft at 2x.
+- `nimbledeck check`: 21 slides, 0 errors, 0 warnings. `nimbledeck verify`: 0 placement problems (with `NIMBLEDECK_VERIFY_PAGES=1`; four pages at once can make the live figure of the fit slide a little soft).
 
 ## Extending PyStream
 
