@@ -124,8 +124,10 @@ const interact = (e: Event) => { if (isViewer(e) && !inBar(e)) stop() }
 function wake() { idle.value = false; clearTimeout(idleTimer); idleTimer = window.setTimeout(() => { idle.value = true }, 2800) }
 const hidden = () => { if (document.hidden) stop() }
 
+function replay() { if (!site) return; stop(); go(1); spent.value = {}; window.setTimeout(() => play(true), 400) }
 onMounted(() => {
   if (!site) return
+  window.addEventListener('nd-tour-replay', replay)
   tourSound.value = sound.enabled || (() => { try { return localStorage.getItem('nimbledeck:sound') !== '0' } catch { return true } })()
   window.addEventListener('keydown', interact, true)
   window.addEventListener('pointerdown', interact, true)
@@ -137,6 +139,7 @@ onMounted(() => {
   if (new URLSearchParams(location.search).has('tour')) window.setTimeout(() => play(false), 600)   // /?tour starts the video by itself, with no gesture, so without sound
 })
 onUnmounted(() => {
+  window.removeEventListener('nd-tour-replay', replay)
   window.removeEventListener('keydown', interact, true)
   window.removeEventListener('pointerdown', interact, true)
   window.removeEventListener('wheel', interact)

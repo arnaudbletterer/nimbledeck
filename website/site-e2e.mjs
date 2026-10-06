@@ -157,6 +157,39 @@ for (const [name, vp] of [['1080p', { width: 1920, height: 1080 }], ['tablet', {
   await context.close()
 }
 
+// The ending: the last slide is a call to action. Its cards point at the docs, the playground and GitHub, and Replay plays the tour again.
+{
+  const { context, page } = await open({ width: 1440, height: 900 })
+  await page.goto(home, { waitUntil: 'domcontentloaded' })
+  await shown(page)
+  const total = Number((await page.locator('.ndb-count').innerText()).split('/')[1])
+  await page.goto(`${home}#/${total}`)
+  await page.waitForSelector('.nd-next-card', { state: 'visible', timeout: 8000 })
+  await page.waitForTimeout(1500)
+  const links = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.nd-next a.nd-next-card')].map((a) => [a.className.match(/nd-next-(docs|playground|science|github)/)[1], a.getAttribute('href')])))
+  check('the last slide links to the docs, the playground and GitHub', links.docs === `${base}docs/` && links.playground === `${base}playground/` && /^https:\/\/github\.com\//.test(links.github), JSON.stringify(links))
+  check('the site bar links stay visible on the last slide', await page.evaluate(() => { const d = document.querySelector('.ndb-docs').getBoundingClientRect(); return d.width > 20 && d.bottom <= document.querySelector('#slide-content').getBoundingClientRect().top + 1 }))
+  if (shots) await page.screenshot({ path: join(shots, 'ending.png') })
+  await page.locator('.nd-next-replay').focus()
+  check('the cards are reachable with the keyboard', await page.evaluate(() => document.activeElement.classList.contains('nd-next-replay')))
+  await page.locator('.nd-next-replay').click()
+  await page.waitForFunction(() => location.hash === '#/1' || location.hash === '#/', null, { timeout: 5000 }).catch(() => {})
+  await page.waitForTimeout(900)
+  check('Replay goes back to the first slide and plays the tour', (await aria(page)) === 'true' && ['#/1', '#/', ''].includes(await hash(page)), `${await hash(page)} ${await aria(page)}`)
+  await context.close()
+}
+{
+  const { context, page } = await open({ width: 390, height: 800 }, { hasTouch: true, isMobile: true })
+  await page.goto(home, { waitUntil: 'domcontentloaded' })
+  await shown(page)
+  const total = Number((await page.locator('.ndb-count').innerText().catch(() => '0 / 0')).split('/')[1]) || 20
+  await page.goto(`${home}#/${total}`)
+  await page.waitForSelector('.nd-next-card', { state: 'attached', timeout: 8000 })
+  await page.waitForTimeout(1200)
+  check('phone: the cards fit the screen width', await page.evaluate(() => [...document.querySelectorAll('.nd-next-card')].every((c) => { const r = c.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth })))
+  await context.close()
+}
+
 check('no request left the site', external.length === 0, [...new Set(external)].slice(0, 4).join(' ') || 'none')
 check('no page errors', errors.length === 0, errors.join(' | '))
 await browser.close()

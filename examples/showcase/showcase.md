@@ -554,7 +554,9 @@ That is docs/GETTING-STARTED.md in three lines. Click for the last beat: edit th
 layout: closing
 class: nd-grid
 motion: focus
-tour: 6
+tour: 8
+tourScript:
+  - { at: 3.2, hover: ".nd-next-playground", caption: "Your next step" }
 sounds:
   - { at: 0.0, src: riser, volume: 0.8 }
   - { at: 1.7, src: finale, volume: 0.8 }
@@ -570,7 +572,7 @@ sounds:
 
 <Kinetic text="Write it. Run it." mode="letters" from="up" :stagger="45" size="xl" accent="Run" />
 
-<Typewriter :speed="42" :delay="1900" lang="md" :size="30">github.com/arnaudbletterer/nimbledeck</Typewriter>
+<NextSteps />
 
 <!--
 Markdown for the story, components for the motion. Thank you.

@@ -146,6 +146,36 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: jo
   await context.close()
 }
 
+// 1b. Sound semantics: effects follow what the viewer does, the soundtrack belongs to the tour.
+{
+  const { context, page } = await open(`${origin}/#/1`)
+  await page.locator('.nd-sound-btn').click()                       // sound on, no tour
+  await page.waitForFunction(() => window.__ndSound.state === 'running')
+  const qNo = await page.evaluate(() => Number(document.querySelector('[data-kind="quiz"]').closest('[data-slidev-no]').dataset.slidevNo))
+  const names = () => page.evaluate(() => window.__ndSound.log.filter((l) => l.scope !== 'bed').map((l) => l.src))
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(700)
+  check('browsing by hand schedules no whoosh', !(await names()).includes('whoosh'), (await names()).join(','))
+  await page.goto(`${origin}/#/${qNo}`)
+  await page.waitForTimeout(900)
+  await page.locator('.nd-choice', { hasText: 'One .md file' }).click()
+  await page.waitForTimeout(300)
+  check('a real click on the right answer schedules success', (await names()).includes('success'), (await names()).join(','))
+  check('the music bed plays without a tour', await page.evaluate(() => window.__ndSound.log.some((l) => l.scope === 'bed')))
+  await page.locator('.ndb-tour').click()
+  await page.waitForTimeout(500)
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(900)
+  check('during the tour a slide change schedules the whoosh', (await names()).includes('whoosh'), (await names()).join(','))
+  await page.keyboard.press('Shift')                                 // a trusted key: the viewer takes over
+  await page.waitForTimeout(300)
+  const n = (await names()).length
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(1500)
+  check('after taking over, no soundtrack cue starts', !(await names()).slice(n).some((x) => ['whoosh', 'soft-boom', 'swell', 'riser', 'finale'].includes(x)), (await names()).slice(n).join(','))
+  await context.close()
+}
+
 // 2. A trusted click on the slide stops the tour; the speaker toggle persists the choice across a reload.
 {
   const { context, page } = await open(`${origin}/#/2`)
