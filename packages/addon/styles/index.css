@@ -477,7 +477,7 @@
 .nd-mw-slide.slidev-layout { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform: scale(var(--k, .12)); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
 .nd-mw-slide.slidev-layout { background-image: radial-gradient(ellipse 70% 80% at 92% 8%, color-mix(in srgb, var(--nd-accent) 26%, transparent), transparent 70%), radial-gradient(ellipse 60% 70% at 0% 110%, color-mix(in srgb, var(--nd-accent-2) 22%, transparent), transparent 70%); }
 .nd-mw-slide .nd-body { padding-top: 64px; }
-.nd-mw-slide.slidev-layout h1 { font-size: 150px; line-height: 1.12; padding-top: .1em; padding-bottom: .12em; border-bottom-width: 6px; }
+.nd-mw-slide.slidev-layout h1 { height: auto; font-size: 150px; line-height: 1.12; padding-top: .1em; padding-bottom: .12em; border-bottom-width: 6px; }
 .nd-mw-slide.slidev-layout ul { margin: 30px 70px 0; font-size: 72px; }
 .nd-mw-slide.slidev-layout li { margin: .2em 0; }
 .nd-mw-slide.slidev-layout blockquote { margin-top: 36px; margin-left: 70px; font-size: 62px; padding: .4em .9em; }
