@@ -27,6 +27,9 @@ compose components for common effects.
   (colour, highlighter, `useEntered`). A change in `packages/addon`
   (components, composables, global CSS) also needs the browser end-to-end test (`examples/how-it-works/e2e-interactions.mjs`
   against the running example), because no unit test exercises it.
+- A change to a look, a layout or the shared title, body, footer or page-number CSS also needs `node examples/theme-lab/align-audit.mjs --check`. It starts
+  its own sample deck (needs Chrome), measures every look against `plain` on every layout, and fails when content jumps by more than
+  2 px. It is not in `npm test`. The rule and its few exceptions are in `docs/THEMING.md` ("One grid for every look").
 - The showcase has its own browser test, `examples/showcase/e2e.mjs`, which CI runs too. `npm --workspace examples/showcase run e2e`
   builds the web edition, serves it under its real base path and walks every slide with the keyboard, loads each slide
   directly, measures it like `nimbledeck verify`, and checks reduced motion and a blocked network. It fails on any

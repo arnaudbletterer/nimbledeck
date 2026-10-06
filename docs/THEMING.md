@@ -73,6 +73,36 @@ Two states are meant to be dimmer. A faded answer in a finished quiz keeps 60 pe
 (85 percent there), because fading is how a quiz says "not this one"; a right or wrong answer is also marked by a glyph and a border,
 so colour is never the only signal.
 
+### One grid for every look
+
+Changing the look must not make content jump. The shared rules fix the grid, and a look only changes how things are drawn:
+
+- The title bar is one box in every look: 88 px high, its text starting 70 px from the left edge (`--nd-h1-padx`, 70 px by default),
+  its rule on the bottom edge (`--nd-h1-rule`, any style or width, drawn inside the box). Body blocks start 26 px below it, with the
+  same 70 px side gutters. A look that wants a bar above the title draws it inside the box (`box-shadow: inset`), never with a
+  border or padding of its own.
+- Line boxes do not follow the font size: the subtitle (`h4`) has a 60 px line box, a callout 39 px and table cells 36 px, so a
+  smaller or larger face does not move what follows. List text starts 29 px inside the gutter.
+- The footer is anchored 70 px from the left and 16 px from the bottom, the page number 28 px from the right and 14 px from the
+  bottom, in every look. Their size and style are free.
+- The lead layouts (`cover`, `divider`, `closing`, `statement` centred, `hero` and `split` flush left) keep their own composition
+  and the alignment of `plain`.
+
+What may differ is character: rule styles, fonts, colours, weights, ornaments, callout and table styling, the size of display type.
+
+Intentional exceptions, listed in `EXCEPTIONS` of `examples/theme-lab/align-audit.mjs`:
+
+| Look | Exception | Why |
+|---|---|---|
+| `swiss` | `cover`, `divider`, `closing` and `statement` titles are flush left | The grid look: everything hangs from one left edge |
+| `slate-pro` | `cover`, `divider` and `closing` titles are flush left | Corporate decks read from the left |
+| `high-contrast` | A list, callout or table below the first body block starts up to 9 px lower | Its text is 27 px, larger on purpose |
+
+Check it with `node examples/theme-lab/align-audit.mjs --check` (not part of `npm test`: it needs a browser). It serves
+`examples/theme-lab/align.md`, one slide per layout, and for every look of `looks.json` compares the boxes of the title, its rule,
+the first body block, a list item, a callout, a table, the footer and the page number with `plain`, within 2 px. Without `--check` it
+prints the deviations as a table (look, layout, element, dx, dy, dwidth); `--looks a,b` limits it to some looks.
+
 ### Choosing and showing looks
 
 ```yaml
@@ -92,14 +122,14 @@ twenty (give it a few rows of height). Keys 1 to 9 pick a look, and the deck's o
    must define every token that `packages/theme/looks-lib.mjs` lists as required (colours, chart colours, quiz tints, fonts, gradient,
    title size and transform, `--nd-scheme`). Do not start an id with `studio`: the studio rules match by prefix.
 2. Set the optional knobs that shape the shared rules: `--nd-h1-weight`, `--nd-h1-tracking`, `--nd-h1-rule` (the line under a title),
-   `--nd-h1-padx`, `--nd-h4-*` (subtitle), `--nd-bullet` and `--nd-marker-color`, `--nd-callout-radius`, `--nd-callout-bg`,
+   `--nd-h1-padx` (keep 70 px), `--nd-h4-*` (subtitle), `--nd-bullet` and `--nd-marker-color`, `--nd-callout-radius`, `--nd-callout-bg`,
    `--nd-callout-box` and `--nd-callout-bar`, `--nd-th-bg`, `--nd-th-ink`, `--nd-th-rule`, `--nd-zebra`, `--nd-td-rule`,
    `--nd-code-bg`, `--nd-code-border`, `--nd-code-radius`, `--nd-card-radius`, `--nd-card-border`, `--nd-page-image`,
    `--nd-cover-image`, `--nd-closing-image`, `--nd-body-size`, `--nd-faded-opacity`. With none set, the result is the plain look.
 3. Add the rules that give the look its character, each prefixed with `[data-nd-variant="id"]` so they win over the shared rules.
 4. Add the entry (`id`, `label`, `description`, `dark`, `swatch` = page, ink, accent, accent 2) to `looks.json`.
 5. Run `npm test`. It fails if the two disagree, if a token is missing or if a text pair falls under its ratio.
-6. Look at it: start the sample deck (`NIMBLEDECK_PORT_OFFSET=700 nimbledeck run looks.md` in `examples/theme-lab`) and run
+6. Run `node examples/theme-lab/align-audit.mjs --check` (see "One grid for every look"), then look at it: start the sample deck (`NIMBLEDECK_PORT_OFFSET=700 nimbledeck run looks.md` in `examples/theme-lab`) and run
    `node looks-shots.mjs http://localhost:3730 shots --looks id`. It writes a screenshot of each of the 18 slides under that look,
    a contact sheet, and lists any text that is cut off or leaves the slide. Read the PNGs.
 

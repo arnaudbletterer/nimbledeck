@@ -39,11 +39,6 @@ Body text opens the slide and says one thing.
 - First list item
 - Second list item
 
-| Token | Role |
-|---|---|
-| `--nd-accent` | links |
-| `--nd-ink` | text |
-
 > A callout keeps its place.
 
 ---
@@ -185,3 +180,14 @@ layout: closing
 # Thank you
 
 #### The end
+
+---
+layout: default
+---
+
+# A table first
+
+| Token | Role |
+|---|---|
+| `--nd-accent` | links |
+| `--nd-ink` | text |

@@ -27,7 +27,13 @@ const wanted = opt('looks')?.split(',')
 const looks = wanted ? registry.filter((l) => wanted.includes(l.id)) : registry
 
 // Deviations that are a look's character, on purpose (documented in docs/THEMING.md): `look/layout/element` with `*` as a wildcard.
-const EXCEPTIONS = []
+// `swiss` and `slate-pro` set their lead titles flush left, a grid look and a corporate one; `high-contrast` sets its text larger, so
+// what follows its first line of body text starts lower.
+const EXCEPTIONS = [
+  'swiss/cover/title', 'swiss/divider/title', 'swiss/closing/title', 'swiss/statement/title',
+  'slate-pro/cover/title', 'slate-pro/divider/title', 'slate-pro/closing/title',
+  'high-contrast/*/item', 'high-contrast/*/quote',
+]
 
 // What to measure, per layout: [name, selector, mode, after]. Text is compared by its box, never by glyph ink or width (fonts differ):
 //   text   left and top of the content box (a line box, so font size and glyph metrics do not count)
@@ -43,7 +49,7 @@ const CASES = [
   { n: 1, layout: 'cover', lead: true, els: [['title', 'h1', 'centre']] },
   { n: 2, layout: 'agenda', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['body', 'ol', 'block'], ['item', 'ol li', 'text', 'body'], ['foot', '.nd-foot', 'foot'], ['page', '.nd-page', 'page']] },
   { n: 3, layout: 'divider', lead: true, els: [['title', 'h1', 'centre']] },
-  { n: 4, layout: 'default', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['body', '.nd-body > p', 'block'], ['item', 'ul li', 'text', 'body'], ['table', 'table', 'fit', 'item'], ['quote', 'blockquote', 'fit', 'table'], ['foot', '.nd-foot', 'foot'], ['page', '.nd-page', 'page']] },
+  { n: 4, layout: 'default', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['body', '.nd-body > p', 'block'], ['item', 'ul li', 'text', 'body'], ['quote', 'blockquote', 'fit', 'item'], ['foot', '.nd-foot', 'foot'], ['page', '.nd-page', 'page']] },
   { n: 5, layout: 'default+h4', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['subtitle', 'h4', 'text'], ['body', '.nd-body > p', 'block', 'subtitle'], ['item', 'ul li', 'text', 'body']] },
   { n: 6, layout: 'two-cols', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['body', '.nd-col-l p', 'block'], ['item', '.nd-col-l li', 'text', 'body'], ['quote', 'blockquote', 'fit', 'item'], ['body-r', '.nd-col-r p', 'block'], ['foot', '.nd-foot', 'foot'], ['page', '.nd-page', 'page']] },
   { n: 7, layout: 'photo-right', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['body', '.nd-col-l p', 'block'], ['item', '.nd-col-l li', 'text', 'body'], ['quote', 'blockquote', 'fit', 'item'], ['foot', '.nd-foot', 'foot'], ['page', '.nd-page', 'page']] },
@@ -53,6 +59,7 @@ const CASES = [
   { n: 12, layout: 'stage', els: [['foot', '.nd-caption', 'foot'], ['page', '.nd-pill', 'page']] },
   { n: 13, layout: 'numbers', els: [['title', 'h1', 'text'], ['rule', 'h1', 'rule'], ['body', '.nd-num', 'box'], ['foot', '.nd-foot', 'foot'], ['page', '.nd-page', 'page']] },
   { n: 14, layout: 'closing', lead: true, els: [['title', 'h1', 'centre']] },
+  { n: 15, layout: 'default+table', els: [['title', 'h1', 'text'], ['table', 'table', 'fit']] },
   // `full` (n = 8) has no chrome: its slot is the whole slide, so there is nothing to align.
 ]
 
