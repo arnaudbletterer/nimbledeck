@@ -75,9 +75,14 @@ watch(active, async (a) => {
 watch(shown, paint, { flush: 'post' })
 onBeforeUnmount(() => { offTerm(); offParam(); if (root.value?.dataset.linked && links.term() === root.value.dataset.linked) links.setTerm(null) })
 
-const termOf = (e: Event) => (e.target as HTMLElement | null)?.closest?.('[data-term]') as HTMLElement | null
-function over(e: PointerEvent) { if (active.value) links.setTerm(termOf(e)?.dataset.term ?? null) }
-function out(e: PointerEvent) { if (active.value && !(e.relatedTarget as HTMLElement | null)?.closest?.('[data-term]')) links.setTerm(null) }
+// The term under an event target. \term puts its colour class on an outer span and its name on the span inside, and a tour hovers
+// the outer one, so look both ways.
+const termOf = (t: EventTarget | null) => {
+  const box = (t as HTMLElement | null)?.closest?.('.nd-tm, [data-term]') as HTMLElement | null
+  return (box?.matches('[data-term]') ? box : box?.querySelector('[data-term]')) as HTMLElement | null
+}
+function over(e: PointerEvent) { if (active.value) links.setTerm(termOf(e.target)?.dataset.term ?? null) }
+function out(e: PointerEvent) { if (active.value && !termOf(e.relatedTarget)) links.setTerm(null) }
 </script>
 
 <template>
