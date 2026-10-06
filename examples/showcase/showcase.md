@@ -52,11 +52,6 @@ No slide editor, no binary format. A file you can diff, review and hand to an ag
 ---
 layout: stage
 tour: 9
-sounds:
-  - { at: 0.9, src: typing, volume: 0.7 }
-  - { at: 2.2, src: typing, volume: 0.7 }
-  - { at: 3.5, src: typing, volume: 0.7 }
-  - { at: 4.8, src: typing, volume: 0.6 }
 ---
 
 <Stage full>
@@ -170,12 +165,6 @@ tourScript:
   - { at: 2.8, click: ".nd-look:nth-child(3)" }
   - { at: 3.7, click: ".nd-look:nth-child(4)" }
   - { at: 4.6, click: ".nd-look:nth-child(5)" }
-sounds:
-  - { at: 1.0, src: click, volume: 0.6 }
-  - { at: 1.9, src: click, volume: 0.6 }
-  - { at: 2.8, src: click, volume: 0.6 }
-  - { at: 3.7, src: click, volume: 0.6 }
-  - { at: 4.6, src: click, volume: 0.6 }
 ---
 
 # Same words. Five looks.
@@ -286,12 +275,6 @@ tourScript:
   - { at: 10.4, click: ".nd-lw-card:nth-child(19)" }
   - { at: 12.4, click: ".nd-lw-card:nth-child(1)" }
   - { at: 14.4, click: ".nd-lw-card:nth-child(4)", caption: "Back to the deck's look" }
-sounds:
-  - { at: 0.0, src: whoosh, volume: 0.5 }
-  - { at: 8.0, src: pop, volume: 0.5 }
-  - { at: 10.4, src: pop, volume: 0.5 }
-  - { at: 12.4, src: pop, volume: 0.5 }
-  - { at: 14.4, src: pop, volume: 0.5 }
 ---
 
 <Stage full>
@@ -320,15 +303,6 @@ tourScript:
   - { at: 10.0, click: ".nd-mw-card:nth-child(21)" }
   - { at: 11.8, click: ".nd-mw-bg:nth-child(4)", caption: "Backdrops too" }
   - { at: 13.6, click: ".nd-mw-card:nth-child(17)" }
-sounds:
-  - { at: 0.0, src: whoosh, volume: 0.5 }
-  - { at: 2.8, src: pop, volume: 0.45 }
-  - { at: 4.6, src: pop, volume: 0.45 }
-  - { at: 6.4, src: pop, volume: 0.45 }
-  - { at: 8.2, src: pop, volume: 0.45 }
-  - { at: 10.0, src: pop, volume: 0.45 }
-  - { at: 11.8, src: pop, volume: 0.45 }
-  - { at: 13.6, src: pop, volume: 0.45 }
 ---
 
 <WallDemo :x="64" :y="20" />
@@ -349,8 +323,6 @@ tour: 7
 tourScript:
   - { at: 1.2, hover: B, caption: "Which file holds the deck?" }
   - { at: 2.6, click: C, caption: "One .md file" }
-sounds:
-  - { at: 2.75, src: success, volume: 0.8 }
 ---
 
 # Which file holds the deck?
@@ -382,9 +354,6 @@ tour: 8
 tourScript:
   - { at: 2.4, drag: ".nd-compare", from: 0.56, to: 0.12, over: 1.2, caption: "Drag to compare" }
   - { at: 3.9, drag: ".nd-compare", from: 0.12, to: 0.88, over: 1.5 }
-sounds:
-  - { at: 2.4, src: whoosh, volume: 0.35 }
-  - { at: 3.9, src: whoosh, volume: 0.35 }
 ---
 
 <Stage :w="1200" :h="604">
@@ -445,7 +414,7 @@ sounds:
 
 ::caption::
 
-Sound is optional. The speaker in the bar switches it off. The music bed is one line, `ndSound: uplift`, and the deck can change it.
+Sound is optional, and the speaker in the bar switches it off. Music plays throughout, effects follow what you click, and the tour adds a soundtrack.
 
 <!--
 Click, tick, pop, chime, success, whoosh: each is synthesised with the Web Audio API, zero bytes, nothing fetched. The music under them is a generated bed called uplift, set by one line of headmatter; a deck can pick another (pad) or point it at its own file. Sound is off until the viewer asks, and the equalizer is drawn from the real output.
@@ -457,8 +426,6 @@ motion: typewriter
 tour: 9
 tourScript:
   - { at: 2.0, type: "\nplt.title('typed by the tour')", into: ".cm-content", speed: 60, caption: "Edit the code" }
-sounds:
-  - { at: 2.2, src: typing, volume: 0.7 }
 ---
 
 # Edit the code. The plot reruns.
@@ -510,9 +477,6 @@ layout: stage
 background: spotlight
 motion: none
 tour: 7
-sounds:
-  - { at: 1.3, src: typing, volume: 0.7 }
-  - { at: 3.2, src: success, volume: 0.6 }
 ---
 
 <Stage full>
@@ -555,10 +519,6 @@ layout: stage
 background: grid
 motion: none
 tour: 9
-sounds:
-  - { at: 1.1, src: typing, volume: 0.7 }
-  - { at: 2.6, src: typing, volume: 0.7 }
-  - { at: 4.1, src: typing, volume: 0.7 }
 ---
 
 <Stage full>
