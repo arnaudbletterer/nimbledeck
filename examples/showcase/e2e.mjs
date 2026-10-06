@@ -35,7 +35,9 @@ const webSlides = allSlides.filter((_, i) => !leftOut.includes(i + 1))
 
 // Components of the motion toolkit and the built-in ones, by the data-kind each puts on its root.
 const KINDS = { Kinetic: 'kinetic', Typewriter: 'typewriter', Terminal: 'terminal', Aurora: 'aurora', Stat: 'stat', Marquee: 'marquee',
-  Spotlight: 'spotlight', Tilt: 'tilt', Chart: 'chart', Scene3D: 'webgl', Orbit: 'orbit', Compare: 'compare', Quiz: 'quiz' }
+  Spotlight: 'spotlight', Tilt: 'tilt', Chart: 'chart', Scene3D: 'webgl', Orbit: 'orbit', Compare: 'compare', Quiz: 'quiz', LookWall: 'lookwall', MotionWall: 'wall-motion' }
+// A wall's cards are slides that carry their own presets, so MotionWall cannot carry data-kind (a preset leaves everything below a data-kind alone): it is found by data-wall.
+const selOf = (k) => (k.startsWith('wall-') ? `[data-wall=${k.slice(5)}]` : `[data-kind=${k}]`)
 const kindsOf = (slide) => [...new Set([...slide.body.matchAll(/<([A-Z]\w*)\b/g)].map((m) => KINDS[m[1]]).filter(Boolean))]
 const LIVE_KINDS = ['livecode', 'pystream', 'demo']
 
@@ -55,7 +57,7 @@ const inSlide = (page, fn, arg) => page.evaluate(([src, a]) => {
   const root = [...document.querySelectorAll('.slidev-layout')].find((e) => e.getBoundingClientRect().width > 0)
   return root ? new Function('root', 'arg', `return (${src})(root, arg)`)(root, a) : null
 }, [fn.toString(), arg])
-const kindsHere = (page) => inSlide(page, (root) => [...new Set([...root.querySelectorAll('[data-kind]')].map((e) => e.dataset.kind))])
+const kindsHere = (page) => inSlide(page, (root) => [...new Set([...root.querySelectorAll('[data-kind]')].map((e) => e.dataset.kind).concat([...root.querySelectorAll('[data-wall]')].map((e) => 'wall-' + e.dataset.wall)))])
 
 // A browser context that records what a deck must never do: throw, log errors, fail to load its own files, or talk to the
 // outside world. `network`: 'abort' answers every external request with a failure, 'hang' never answers (a dead connection).
@@ -137,7 +139,7 @@ async function webTests(browser) {
         await shown(page)
         const want = expected(n)
         // Components mount with their slide: wait for the expected ones rather than sleeping.
-        await page.waitForFunction((w) => { const r = [...document.querySelectorAll('.slidev-layout')].find((e) => e.getBoundingClientRect().width > 0); return !!r && w.every((k) => r.querySelector(`[data-kind=${k}]`)) }, want, { timeout: 8000 }).catch(() => {})
+        await page.waitForFunction((w) => { const r = [...document.querySelectorAll('.slidev-layout')].find((e) => e.getBoundingClientRect().width > 0); return !!r && w.every((k) => r.querySelector(k.startsWith('wall-') ? `[data-wall=${k.slice(5)}]` : `[data-kind=${k}]`)) }, want, { timeout: 8000 }).catch(() => {})
         const kinds = await kindsHere(page)
         const miss = want.filter((k) => !kinds.includes(k))
         if (miss.length) bad.missing.push(`slide ${n}: ${miss.join(', ')}`)
@@ -235,6 +237,82 @@ async function webTests(browser) {
       check('nothing is clipped, outside the slide, in the footer zone or soft', issues.length === 0, [...new Set(issues)].slice(0, 4).join(' | '))
       problems(s.log, 'the measured pass')
       await s.context.close()
+    }
+
+    section('the walls: every look and every motion, live')
+    {
+      const lookNo = webSlides.findIndex((x) => /<LookWall\b/.test(x.body)) + 1, motionNo = webSlides.findIndex((x) => /<MotionWall\b/.test(x.body)) + 1
+      check('the deck has a look wall and a motion wall', lookNo > 0 && motionNo > 0, `slides ${lookNo} and ${motionNo}`)
+      const s = await open(browser, { origin })
+      await s.page.goto(url(lookNo), { waitUntil: 'domcontentloaded' })
+      await shown(s.page)
+      await s.page.waitForFunction(() => document.querySelectorAll('.nd-lw-card').length > 0, null, { timeout: 8000 })
+      await s.page.waitForTimeout(3500)   // the cascade and the first ring step are over
+      const wall = await inSlide(s.page, (root) => {
+        const f = root.getBoundingClientRect(), cards = [...root.querySelectorAll('.nd-lw-card')], rects = cards.map((c) => c.getBoundingClientRect())
+        const ids = document.documentElement.dataset.ndLooks.split(',')
+        const tokens = cards.map((c) => getComputedStyle(c).getPropertyValue('--nd-bg').trim() + '|' + getComputedStyle(c).getPropertyValue('--nd-accent').trim())
+        const overlap = rects.some((a, i) => rects.some((b, j) => j > i && a.left < b.right - 4 && b.left < a.right - 4 && a.top < b.bottom - 4 && b.top < a.bottom - 4))
+        const inside = rects.every((r) => r.left >= f.left && r.top >= f.top && r.right <= f.right && r.bottom <= f.bottom)
+        const sized = cards.every((c) => { const t = c.querySelector('.nd-lw-title'); return t.scrollWidth <= t.clientWidth + 1 && t.clientHeight > 8 })
+        return { n: cards.length, ids: ids.length, ownIds: cards.every((c, i) => c.dataset.ndVariant === ids[i]), distinct: new Set(tokens).size, overlap, inside, sized, visible: cards.every((c) => +getComputedStyle(c).opacity === 1) }
+      })
+      check('the look wall shows one card for every look of the theme', wall.n === wall.ids && wall.ids >= 8 && wall.ownIds, `${wall.n} cards, ${wall.ids} looks`)
+      check('each card takes its own colours from its look', wall.distinct >= wall.ids - 2, `${wall.distinct} distinct colour sets`)
+      check('no card overlaps another, spills out of the slide, or loses its title', !wall.overlap && wall.inside && wall.sized && wall.visible, JSON.stringify({ overlap: wall.overlap, inside: wall.inside, sized: wall.sized, visible: wall.visible }))
+      const variant = () => s.page.evaluate(() => document.documentElement.dataset.ndVariant)
+      const deck = await variant()
+      const ids = await s.page.evaluate(() => document.documentElement.dataset.ndLooks.split(','))
+      const pick = ids.findIndex((v) => v !== deck)
+      await s.page.hover(`.nd-lw-card:nth-child(${pick + 1})`)
+      await s.page.waitForFunction((v) => document.documentElement.dataset.ndVariant === v, ids[pick], { timeout: 4000 }).catch(() => {})
+      check('hovering a card puts the whole slide in that look', (await variant()) === ids[pick], await variant())
+      await s.page.mouse.move(640, 710)
+      await s.page.waitForFunction((v) => document.documentElement.dataset.ndVariant === v, deck, { timeout: 4000 }).catch(() => {})
+      check('and moving away puts the deck look back', (await variant()) === deck, await variant())
+      const keep = ids.findIndex((v, i) => v !== deck && i !== pick)
+      await s.page.click(`.nd-lw-card:nth-child(${keep + 1})`)
+      await s.page.mouse.move(640, 710)
+      await s.page.waitForTimeout(1800)
+      check('clicking a card keeps its look after the pointer leaves', (await variant()) === ids[keep], await variant())
+      check('the click does not keep the arrow keys from turning the page', await s.page.evaluate(() => document.activeElement === document.body || !document.activeElement?.classList.contains('nd-lw-card')))
+      await s.page.keyboard.press('ArrowRight')
+      await s.page.waitForFunction((v) => document.documentElement.dataset.ndVariant === v, deck, { timeout: 4000 }).catch(() => {})
+      check('leaving the slide restores the deck look', (await variant()) === deck && routeOf(s.page) !== lookNo, `${await variant()} on slide ${routeOf(s.page)}`)
+
+      // The motion wall: every preset is a card, every card plays its own preset, the backdrops move.
+      await s.page.goto(url(motionNo), { waitUntil: 'domcontentloaded' })
+      await shown(s.page)
+      await s.page.waitForFunction(() => document.querySelectorAll('.nd-mw-card').length > 0, null, { timeout: 8000 })
+      await s.page.waitForTimeout(4200)
+      const mw = await inSlide(s.page, (root) => {
+        const f = root.getBoundingClientRect(), cards = [...root.querySelectorAll('.nd-mw-card')], motions = document.documentElement.dataset.ndMotions.split(','), bgs = document.documentElement.dataset.ndBackgrounds.split(',')
+        const roots = cards.map((c) => c.querySelector('.slidev-layout')), bgRoots = [...root.querySelectorAll('.nd-mw-bg .slidev-layout')]
+        const rects = [...cards, ...root.querySelectorAll('.nd-mw-bg')].map((c) => c.getBoundingClientRect())
+        return {
+          n: cards.length, motions: motions.length, own: roots.every((r, i) => r.getAttribute('data-nd-motion') === motions[i]),
+          bgs: bgRoots.length, bgsWant: bgs.length, bgOwn: bgRoots.every((r, i) => r.getAttribute('data-nd-bg') === bgs[i]), layers: bgRoots.filter((r) => r.querySelector(':scope > .nd-bgx')).length,
+          inside: rects.every((r) => r.left >= f.left && r.top >= f.top && r.right <= f.right && r.bottom <= f.bottom), seen: cards.filter((c) => +getComputedStyle(c.querySelector('.slidev-layout')).opacity === 1).length,
+        }
+      })
+      check('the motion wall has a card for every motion preset, each playing its own', mw.n === mw.motions && mw.n >= 10 && mw.own, `${mw.n} cards, ${mw.motions} motions`)
+      check('and a backdrop for every background preset, each with its layer', mw.bgs === mw.bgsWant && mw.bgOwn && mw.layers === mw.bgs, `${mw.bgs} backdrops, ${mw.layers} layers`)
+      check('every card is shown and the whole wall lies inside the slide', mw.seen === mw.n && mw.inside, `${mw.seen} shown`)
+      await s.page.evaluate(() => { window.__plays = 0; new MutationObserver((m) => { for (const r of m) if (r.target.getAttribute('data-nd-motion')) window.__plays++ }).observe(document.querySelector('.nd-mw'), { subtree: true, attributes: true, attributeFilter: ['data-nd-motion'] }) })
+      await s.page.click('.nd-mw-card:nth-child(3)')
+      await s.page.waitForTimeout(300)
+      check('clicking a motion card replays that card', (await s.page.evaluate(() => window.__plays)) >= 1)
+      check('walls ' + 'raise no page error', s.log.errors.length === 0, s.log.errors.slice(0, 2).join(' | '))
+      await s.context.close()
+      // Reduced motion: both walls are there at once, in their final state, with nothing to play.
+      const r = await open(browser, { origin, reduced: true })
+      await r.page.goto(url(lookNo), { waitUntil: 'domcontentloaded' }); await shown(r.page); await r.page.waitForTimeout(500)
+      const still = await inSlide(r.page, (root) => [...root.querySelectorAll('.nd-lw-card')].every((c) => +getComputedStyle(c).opacity === 1 && getComputedStyle(c).animationName === 'none'))
+      check('reduced motion: the look wall is complete at once', still)
+      await r.page.goto(url(motionNo), { waitUntil: 'domcontentloaded' }); await shown(r.page); await r.page.waitForTimeout(500)
+      const still2 = await inSlide(r.page, (root) => [...root.querySelectorAll('.nd-mw-card')].every((c) => +getComputedStyle(c).opacity === 1 && +getComputedStyle(c.querySelector('.slidev-layout')).opacity === 1 && !c.querySelector('.slidev-layout').hasAttribute('data-nd-motion')))
+      check('reduced motion: the motion wall shows every card finished, with nothing playing', still2)
+      await r.context.close()
     }
 
     section('reduced motion: the final state at once')

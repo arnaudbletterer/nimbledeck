@@ -13,6 +13,8 @@ import { extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-chromium'
 import { findChrome } from '../../packages/cli/src/chrome.mjs'
+import { splitSlides } from '../../packages/cli/src/slides.mjs'
+import { webEdition } from '../../packages/cli/src/webedition.mjs'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
 const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : null)
@@ -112,6 +114,36 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: jo
   await context.close()
 }
 
+
+// 1b. The two walls, played by the tour: a click on a look card makes the slide take that look, a click on a motion card
+// replays that card. The slide numbers come from the source, so a reordered deck keeps passing.
+{
+  const source = readFileSync(join(here, 'showcase.md'), 'utf8')
+  const all = splitSlides(source), left = webEdition(source, join(here, 'public')).skipped
+  const numberOf = (re) => { const i = all.findIndex((x) => re.test(x.body)) + 1; return i - left.filter((n) => n < i).length }
+  const lookNo = numberOf(/<LookWall\b/), motionNo = numberOf(/<MotionWall\b/)
+  check('the deck has a look wall and a motion wall', lookNo > 0 && motionNo > 0, `slides ${lookNo} and ${motionNo}`)
+  const { context, page } = await open(`${origin}/#/${lookNo}`)
+  const variant = () => page.evaluate(() => document.documentElement.dataset.ndVariant)
+  const deck = await variant()
+  const ids = (await page.evaluate(() => document.documentElement.dataset.ndLooks)).split(',')
+  await page.locator('.ndb-tour').click()
+  const seen = new Set()
+  for (let i = 0; i < 160; i++) { const v = await variant(); if (v !== deck) seen.add(v); await page.waitForTimeout(100) }
+  check('the tour clicks look cards and the slide takes those looks', seen.size >= 2 && [...seen].every((v) => ids.includes(v)), [...seen].join(','))
+  check('the tour was not stopped by the look wall', (await playing(page)) === 'true')
+  await page.waitForFunction((n) => location.hash !== `#/${n}`, lookNo, { timeout: 20000 }).catch(() => {})
+  await page.waitForTimeout(1200)
+  check('leaving the look wall puts the deck look back', (await variant()) === deck, await variant())
+  // The motion wall: a card replays when the tour clicks it (its root loses and regains data-nd-motion).
+  await page.waitForFunction((n) => location.hash === `#/${n}`, motionNo, { timeout: 20000 }).catch(() => {})
+  await page.evaluate(() => { window.__mw = 0; const root = document.querySelector('.nd-mw'); new MutationObserver((m) => { for (const r of m) if (r.attributeName === 'data-nd-motion' && r.target.getAttribute('data-nd-motion')) window.__mw++ }).observe(root, { subtree: true, attributes: true, attributeFilter: ['data-nd-motion'] }) })
+  await page.waitForTimeout(9000)
+  const replays = await page.evaluate(() => window.__mw)
+  check('the motion wall plays its cards, in waves and on the tour\'s clicks', replays >= 21, `${replays} plays`)
+  await context.close()
+}
+
 // 2. A trusted click on the slide stops the tour; the speaker toggle persists the choice across a reload.
 {
   const { context, page } = await open(`${origin}/#/2`)
@@ -167,7 +199,7 @@ if (full) {
   for (const l of log) console.log(`${String(l.page).padStart(6)}  ${l.settled == null ? '    -  ' : l.settled.toFixed(1).padStart(6) + 's'}  ${l.spent.toFixed(1).padStart(7)}s  ${l.why}`)
   console.log(`total ${total.toFixed(1)} s for ${log.length} slides`)
   check('the whole tour ends by itself', (await hash(page)).startsWith('#/'))
-  check('the tour is about two minutes or less', total < 150, `${total.toFixed(0)} s`)
+  check('the tour is about two and a half minutes or less', total < 165, `${total.toFixed(0)} s`)
   await context.close()
 }
 
