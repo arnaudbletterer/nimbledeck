@@ -56,6 +56,8 @@ const valuePlugin = {
   },
 }
 
+// A line of many points is drawn as a plain curve with no dots, and every label is kept (write '' for the ones to leave blank).
+const many = () => props.type === 'line' && props.labels.length > 30
 function build() {
   if (!cv.value) return
   const colors = palette(), ink = cssVar('--nd-ink'), line = cssVar('--nd-line'), font = cssVar('--nd-font-body', 'sans-serif')
@@ -66,7 +68,8 @@ function build() {
     backgroundColor: round ? props.labels.map((_, k) => colors[k % colors.length]) : colors[i % colors.length],
     borderColor: round ? cssVar('--nd-bg', '#fff') : colors[i % colors.length],
     borderWidth: round ? 2 : props.type === 'line' ? 3 : 0,
-    tension: 0.3,
+    tension: many() ? 0 : 0.3,
+    pointRadius: many() ? 0 : 3,
   }))
   const cfg: ChartConfiguration = {
     type: props.type,
@@ -80,7 +83,7 @@ function build() {
       cutout: props.type === 'doughnut' ? '62%' : undefined,
       plugins: { legend: { display: props.legend ?? (round || series().length > 1), labels: { color: ink, font: { family: font, size: 20 } } }, tooltip: { enabled: true } },
       scales: round ? {} : {
-        x: { stacked: props.stacked, grid: { color: line }, ticks: { color: ink, font: { family: font, size: 20 } } },
+        x: { stacked: props.stacked, grid: { color: line, display: !many() }, ticks: { color: ink, font: { family: font, size: 20 }, ...(many() ? { autoSkip: false, maxRotation: 0 } : {}) } },
         y: { stacked: props.stacked, grid: { color: line }, ticks: { color: ink, font: { family: font, size: 20 } }, beginAtZero: true },
       },
     },
