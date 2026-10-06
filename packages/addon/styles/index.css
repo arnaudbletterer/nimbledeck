@@ -31,6 +31,8 @@
 .nd-ctl { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 18px; align-items: center; font-size: 18px; flex-wrap: wrap;
   padding: 6px 10px; background: color-mix(in srgb, var(--nd-bg) 75%, transparent); }
 .nd-ctl label { color: var(--nd-muted); }
+.nd-ctl-many { gap: 6px 20px; padding: 6px 70px 18px; }
+.nd-ctl-many input[type="range"] { width: 92px; }
 .nd-ctl input[type="range"] { accent-color: var(--nd-accent); }
 .nd-ctl button { border: 1px solid var(--nd-ink); padding: 2px 14px; background: var(--nd-surface); color: var(--nd-ink); }
 .nd-fps { margin-left: auto; color: var(--nd-muted); }
@@ -230,7 +232,10 @@
 .nd-linkchip { position: absolute; left: 12px; top: 10px; z-index: 5; max-width: 80%; padding: 4px 14px; border-radius: 999px; pointer-events: none;
   font: 600 20px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-tc); animation: nd-linkchip 0.25s ease-out; }
 @keyframes nd-linkchip { from { opacity: 0; translate: 0 6px; } }
-@media (prefers-reduced-motion: reduce) { .nd-linkchip { animation: none; } }
+.nd-marker { display: inline-block; white-space: nowrap; padding: 4px 16px; border-radius: 999px; font: 600 22px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-tc);
+  opacity: 0; scale: 0.9; transition: opacity 0.25s, scale 0.25s; pointer-events: none; }
+.nd-marker-on { opacity: 1; scale: 1; }
+@media (prefers-reduced-motion: reduce) { .nd-linkchip { animation: none; } .nd-marker { transition: none; } }
 
 /* ==== Motion toolkit: Kinetic ==== */
 /* Fills its box, display font, tight and balanced. Every unit starts hidden and is animated by CSS; the component only
