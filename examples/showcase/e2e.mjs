@@ -275,6 +275,7 @@ async function webTests(browser) {
       await s.page.mouse.move(640, 710)
       await s.page.waitForTimeout(1800)
       check('clicking a card keeps its look after the pointer leaves', (await variant()) === ids[keep], await variant())
+      check('and the label on the slide names it', (await s.page.evaluate(() => document.querySelector('.nd-wd[data-wall=look] .nd-wd-pill')?.textContent)) === `ndVariant: ${ids[keep]}`)
       check('the click does not keep the arrow keys from turning the page', await s.page.evaluate(() => document.activeElement === document.body || !document.activeElement?.classList.contains('nd-lw-card')))
       await s.page.keyboard.press('ArrowRight')
       await s.page.waitForFunction((v) => document.documentElement.dataset.ndVariant === v, deck, { timeout: 4000 }).catch(() => {})
@@ -302,6 +303,20 @@ async function webTests(browser) {
       await s.page.click('.nd-mw-card:nth-child(3)')
       await s.page.waitForTimeout(300)
       check('clicking a motion card replays that card', (await s.page.evaluate(() => window.__plays)) >= 1)
+      // The slide itself plays the clicked preset: its own title carries the real preset's animation, the label and the typed line name it.
+      const pickId = await s.page.evaluate(() => document.documentElement.dataset.ndMotions.split(',')[10])
+      await s.page.click('.nd-mw-card:nth-child(11)')
+      await s.page.waitForTimeout(120)
+      const own = await s.page.evaluate(() => { const r = document.querySelector('.nd-wd-root'), h = r?.querySelector('h1'); return { id: r?.dataset.ndMotion, running: h ? h.getAnimations().length : 0, pill: document.querySelector('.nd-wd-pill')?.textContent, card: document.querySelector('.nd-mw-card:nth-child(11)').classList.contains('nd-mw-applied') } })
+      check('clicking a motion card plays that preset on the slide\'s own title', own.id === pickId && own.running > 0, JSON.stringify(own))
+      check('the label and the clicked card say what was applied', own.pill === `motion: ${pickId}` && own.card)
+      await s.page.waitForTimeout(2600)   // the typed block retypes the frontmatter
+      check('the typed block shows the clicked id', await s.page.evaluate((id) => document.querySelector('.nd-wd-root .nd-typewriter').textContent.includes(`motion: ${id}`), pickId))
+      const bgId = await s.page.evaluate(() => document.documentElement.dataset.ndBackgrounds.split(',')[3])
+      await s.page.click('.nd-mw-bg:nth-child(4)')
+      await s.page.waitForTimeout(900)
+      const bgs = await s.page.evaluate(() => ({ on: document.querySelector('.nd-wd-bgwrap').classList.contains('nd-wd-bgon'), id: document.querySelector('.nd-wd-bg')?.dataset.ndBg, layer: !!document.querySelector('.nd-wd-bg > .nd-bgx'), pill: document.querySelector('.nd-wd-pill')?.textContent }))
+      check('clicking a backdrop applies it behind the slide, for a few seconds', bgs.on && bgs.id === bgId && bgs.layer && bgs.pill === `background: ${bgId}`, JSON.stringify(bgs))
       check('walls ' + 'raise no page error', s.log.errors.length === 0, s.log.errors.slice(0, 2).join(' | '))
       await s.context.close()
       // Reduced motion: both walls are there at once, in their final state, with nothing to play.

@@ -2,9 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useActive } from '../composables/useActive'
 import { useEntered } from '../composables/useEntered'
-import { bgShapes } from '../composables/bgShapes'
-import Aurora from './Aurora.vue'
-import Shader from './Shader.vue'
+import { applyBackground, applyMotion, replayPreset, wall } from '../composables/wallState'
+import BgLayer from './BgLayer.vue'
 
 // Every motion preset and every background preset of the theme, playing at once. Each motion card is a real mini slide
 // (a `.slidev-layout` root carrying `data-nd-motion="<id>"`, 1280 x 720 scaled down), so the real preset CSS plays, not a
@@ -39,30 +38,22 @@ let cycle = 0
 const later = (fn: () => void, ms: number) => { const t = window.setTimeout(() => { timers.delete(t); fn() }, ms); timers.add(t) }
 function stop() { clearInterval(cycle); cycle = 0; for (const t of timers) clearTimeout(t); timers.clear() }
 
-// The typewriter preset types the title one character at a time: it needs where the text starts and how wide it is (the
-// one place this component measures, as the slide layer does for a real slide).
-function measureTitle(el: HTMLElement) {
-  const title = el.querySelector('h1') as HTMLElement | null
-  if (!title) return
-  const r = document.createRange(); r.selectNodeContents(title)
-  const t = r.getBoundingClientRect(), b = title.getBoundingClientRect(), k = title.offsetWidth ? b.width / title.offsetWidth : 0
-  if (!k || !t.width) return
-  el.style.setProperty('--nd-tw-x', `${((t.left - b.left) / k).toFixed(1)}px`); el.style.setProperty('--nd-tw-w', `${(t.width / k + 8).toFixed(1)}px`)
-}
 // Removing the attribute, letting the browser compute the style, and adding it back is what restarts the animations.
 function play(i: number) {
   const el = roots.get(i), id = motions.value[i]
   if (!el || !id) return
-  el.removeAttribute('data-nd-motion'); void el.offsetWidth
-  el.style.setProperty('--nd-ch', String(Math.max(4, (el.querySelector('h1')?.textContent ?? '').trim().length || 12)))
-  if (id === 'typewriter') measureTitle(el)
-  el.setAttribute('data-nd-motion', id)
+  replayPreset(el, id)
   const card = el.parentElement
   if (card) { card.classList.remove('nd-mw-ping'); void card.offsetWidth; card.classList.add('nd-mw-ping'); card.classList.add('nd-mw-seen') }
 }
 function click(i: number, e: MouseEvent) {
   if (e.detail) (e.currentTarget as HTMLElement | null)?.blur()          // a mouse click must not keep the arrow keys from turning the page
   play(i)
+  applyMotion(motions.value[i])          // and the slide itself plays it too (see <WallDemo>)
+}
+function pickBg(id: string, e: MouseEvent) {
+  if (e.detail) (e.currentTarget as HTMLElement | null)?.blur()
+  applyBackground(id)
 }
 function wave() { motions.value.forEach((_, i) => later(() => play(i), ((i % props.cols) + Math.floor(i / props.cols)) * 140)) }
 
@@ -74,14 +65,18 @@ watch(active, (a) => {
 }, { immediate: true, flush: 'post' })
 onBeforeUnmount(stop)
 
+// The two section tags are slide roots too: a click plays the clicked preset on them as well.
+const tags: HTMLElement[] = []
+const tagHook = (i: number) => (el: unknown) => { if (el) tags[i] = el as HTMLElement }
+watch(() => wall.n, () => { if (!reduce && active.value) tags.forEach((t) => t && replayPreset(t, wall.motion)) }, { flush: 'post' })
 const hook = (i: number) => (el: unknown) => { if (el) roots.set(i, el as HTMLElement); else roots.delete(i) }
 </script>
 
 <template>
   <div class="nd-mw" :class="{ 'nd-mw-on': on || reduce }" data-wall="motion" role="group" aria-label="Motion and background presets" :style="{ width: width + 'px' }">
-    <p class="nd-mw-tag"><b>{{ motions.length }}</b> motions<span>, one line each</span></p>
+    <div :ref="tagHook(0)" class="slidev-layout nd-mw-tagroot"><p class="nd-mw-tag"><b>{{ motions.length }}</b> motions<span>, one line each</span></p></div>
     <div class="nd-mw-grid" :style="{ gridTemplateColumns: `repeat(${cols}, ${cardW}px)`, gap: GAP + 'px' }">
-      <button v-for="(id, i) in motions" :key="id" type="button" class="nd-mw-card" :class="{ 'nd-mw-seen': reduce }" :style="{ ...cardStyle(cardW), '--i': i }" :data-nd-variant="lookOf(i)" :aria-label="`Replay ${name(id)}`"
+      <button v-for="(id, i) in motions" :key="id" type="button" class="nd-mw-card" :class="{ 'nd-mw-seen': reduce, 'nd-mw-applied': wall.n > 0 && wall.motion === id }" :style="{ ...cardStyle(cardW), '--i': i }" :data-nd-variant="lookOf(i)" :aria-label="`Replay ${name(id)}`"
         @click.stop="click(i, $event)" @pointerenter="active && !reduce && play(i)" @keydown.enter.stop @keydown.space.stop>
         <div :ref="hook(i)" class="slidev-layout nd-root nd-mw-slide" :class="cards(id) ? 'numbers' : 'default'">
           <div class="nd-body">
@@ -100,20 +95,14 @@ const hook = (i: number) => (el: unknown) => { if (el) roots.set(i, el as HTMLEl
         </div>
       </button>
     </div>
-    <p v-if="bgs.length" class="nd-mw-tag nd-mw-tag-b"><b>{{ bgs.length }}</b> backdrops<span>, same idea</span></p>
+    <div v-if="bgs.length" :ref="tagHook(1)" class="slidev-layout nd-mw-tagroot nd-mw-tag-b"><p class="nd-mw-tag"><b>{{ bgs.length }}</b> backdrops<span>, same idea</span></p></div>
     <div v-if="bgs.length" class="nd-mw-bgs" :style="{ gridTemplateColumns: `repeat(${bgs.length}, ${bgW}px)`, gap: GAP_B + 'px' }">
-      <div v-for="(id, i) in bgs" :key="id" class="nd-mw-bg" :style="{ ...cardStyle(bgW), '--i': i }" :data-bg-name="name(id)">
+      <button v-for="(id, i) in bgs" :key="id" type="button" class="nd-mw-bg" :class="{ 'nd-mw-applied': wall.bgOn && wall.bg === id }" :style="{ ...cardStyle(bgW), '--i': i }" :aria-label="`Apply ${name(id)} to the slide`" @click.stop="pickBg(id, $event)" @keydown.enter.stop @keydown.space.stop>
         <div class="slidev-layout nd-root nd-mw-slide nd-mw-bgslide" :data-nd-bg="active ? id : undefined" data-nd-scrim="none">
-          <div v-if="active" class="nd-bgx" aria-hidden="true">
-            <Aurora v-if="id === 'aurora'" :intensity="1" />
-            <Shader v-else-if="id === 'shader'" :intensity="1.1" :lines="0.4" />
-            <template v-else-if="id === 'stars'"><i v-for="(s, j) in bgShapes.stars" :key="j" class="nd-star" :style="{ width: s.size + 'px', height: s.size + 'px', boxShadow: s.shadow }" /></template>
-            <template v-else-if="id === 'waves'"><svg v-for="(d, j) in bgShapes.waves" :key="j" class="nd-waves" viewBox="0 0 2560 720" preserveAspectRatio="none"><path :d="d" /></svg></template>
-            <template v-else><i /><i /><i /></template>
-          </div>
+          <BgLayer v-if="active" :id="id" />
           <span class="nd-mw-bgname">{{ name(id) }}</span>
         </div>
-      </div>
+      </button>
     </div>
   </div>
 </template>

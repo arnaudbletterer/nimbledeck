@@ -298,9 +298,7 @@ sounds:
 <At :x="48" :y="26" :w="720" :h="80" :z="1">
 <Kinetic text="Twenty looks. One file." mode="words" from="mask" :stagger="110" size="m" accent="Twenty" />
 </At>
-<At :x="790" :y="22" :w="460" :h="84" :z="1" enter="fade" :delay="900">
-<Kinetic text="Hover to preview. Click to keep." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
-</At>
+<At :x="800" :y="26" :w="440" :h="86" :z="1"><WallDemo kind="look" /></At>
 <At :x="26" :y="118" :w="1228" :h="590">
 <At :x="14" :y="14" :w="1200" :h="562"><LookWall /></At>
 </At>
@@ -315,12 +313,12 @@ layout: full
 motion: none
 tour: 16
 tourScript:
-  - { at: 2.8, click: ".nd-mw-card:nth-child(13)", caption: "Click a card to replay it" }
+  - { at: 2.8, click: ".nd-mw-card:nth-child(13)", caption: "Click a card to apply it" }
   - { at: 4.6, click: ".nd-mw-card:nth-child(11)" }
   - { at: 6.4, click: ".nd-mw-card:nth-child(19)" }
   - { at: 8.2, click: ".nd-mw-card:nth-child(15)" }
   - { at: 10.0, click: ".nd-mw-card:nth-child(21)" }
-  - { at: 11.8, click: ".nd-mw-card:nth-child(7)" }
+  - { at: 11.8, click: ".nd-mw-bg:nth-child(4)", caption: "Backdrops too" }
   - { at: 13.6, click: ".nd-mw-card:nth-child(17)" }
 sounds:
   - { at: 0.0, src: whoosh, volume: 0.5 }
@@ -333,22 +331,11 @@ sounds:
   - { at: 13.6, src: pop, volume: 0.45 }
 ---
 
+<WallDemo :x="64" :y="20" />
+
 <Stage full>
-<At :x="64" :y="34" :w="620" :h="190" :z="1">
-<Kinetic text="One line. Any motion." mode="words" from="up" :stagger="120" size="l" accent="line." />
-</At>
-<At :x="730" :y="34" :w="480" :h="176" :z="1" frame bg="var(--nd-surface)" pad="14px 28px" middle enter="right" :delay="300">
-<Typewriter :speed="40" :delay="900" lang="md" :size="30">
-
-```yaml
-motion: pop
-background: aurora
-ndVariant: neon
-```
-
-</Typewriter>
-</At>
-<At :x="40" :y="232" :w="1200" :h="470"><MotionWall :width="1200" /></At>
+<At :w="1280" :h="720" :z="0"><WallDemo kind="bg" /></At>
+<At :x="40" :y="232" :w="1200" :h="470" :z="1"><MotionWall :width="1200" /></At>
 </Stage>
 
 <!--
