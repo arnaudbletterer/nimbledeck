@@ -50,6 +50,13 @@ Same slide, but the experiment is still running in the room.
 
 ---
 layout: full
+tour: 14
+tourScript:
+  - { at: 2.2, hover: ".nd-t1", caption: "x follows y" }
+  - { at: 4, hover: ".nd-t2", caption: "y is not drawn" }
+  - { at: 5.8, hover: ".nd-t3", caption: "z is the height" }
+  - { at: 7.6, hover: ".nd-eq" }
+  - { at: 8.4, drag: ".nd-ctl-many label:nth-child(4) input", from: 0.3, to: 0.9, over: 2.2, caption: "move sigma" }
 ---
 
 <Stage full>
@@ -407,19 +414,20 @@ $$
 </Stage>
 
 <!--
-Each ring pays its own half of the cross-entropy: the points with y = 1 through the first log, the points with y = 0 through the second. The network is the one of the live slide, with the bias folded into x as a constant 1. The boundary is where the output equals one half, which is where its input W2 transpose h is zero. The recording uses two hidden units, so the boundary is two straight lines.
+Each ring pays its own half of the cross-entropy: the points with y = 1 through the first log, the points with y = 0 through the second. The network is the one of the live slide, with the bias folded into x as a constant 1. The boundary is where the output equals one half, which is where its input W2 transpose h is zero. The recording uses two hidden units, so the boundary is close to two straight lines.
 -->
 
 ---
 layout: full
-tour: 18
+tour: 20
 tourScript:
   - { at: 3, key: "ArrowRight" }
   - { at: 5, key: "ArrowRight" }
   - { at: 7, key: "ArrowRight" }
-  - { at: 9, hover: ".nd-t2", caption: "the decay, in violet" }
-  - { at: 11, hover: ".nd-t1", caption: "x(t), in cyan" }
-  - { at: 13, key: "ArrowRight" }
+  - { at: 9, key: "ArrowRight" }
+  - { at: 10.5, hover: ".nd-t2", caption: "the decay, in violet" }
+  - { at: 12.5, hover: ".nd-t1", caption: "x(t), in cyan" }
+  - { at: 14.5, hover: ".nd-eq" }
 ---
 
 <Stage full>
@@ -521,9 +529,11 @@ Heat equation
 
 </At>
 <At :x="70" :y="500" :w="1140" :z="1" enter="up" :delay="1300">
-<Equation align="left" :size="42" label="Navier-Stokes for an incompressible fluid: rho times the material derivative of u equals minus the gradient of p plus mu times the Laplacian of u plus f">
+<Equation align="left" :size="42" label="Navier-Stokes for an incompressible fluid: rho times the material derivative of u equals minus the gradient of p plus mu times the Laplacian of u plus f, and the divergence of u is zero">
 
-$$ \rho\left(\partial_t \mathbf{u} + \mathbf{u}\cdot\nabla\mathbf{u}\right) = -\nabla p + \mu\,\nabla^2 \mathbf{u} + \mathbf{f} $$
+$$
+\rho\left(\partial_t \mathbf{u} + \mathbf{u}\cdot\nabla\mathbf{u}\right) = -\nabla p + \mu\,\nabla^2 \mathbf{u} + \mathbf{f}, \qquad \nabla\cdot\mathbf{u} = 0
+$$
 
 </Equation>
 
