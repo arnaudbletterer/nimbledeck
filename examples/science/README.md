@@ -1,8 +1,9 @@
 # Science, live
 
-A 15 slide deck for a three minute talk to researchers, data scientists and science communicators. The idea: a paper
+A 21 slide deck for a talk to researchers, data scientists and science communicators. The idea: a paper
 freezes a result into a picture; a Nimbledeck deck keeps the experiment running in the room. NumPy does the work on your
-machine, the audience can change the parameters and the code, and the whole talk is one Markdown file that diffs in git.
+machine, the audience can change the parameters and the code, the equations are LaTeX in the same file and light up the picture
+next to them, and the whole talk is one Markdown file that diffs in git.
 
 ## Run it
 
@@ -23,25 +24,31 @@ the packages of `demos/requirements.txt` into uv's cache; after that it works wi
 | 1 | Science, live. | Aurora and a kinetic title |
 | 2 | A paper freezes the result. | The problem, in one sentence |
 | 3 | Show the experiment, not the screenshot. | The idea |
-| 4 | Same start. Almost. Another future. | `PyStream`: 200 Lorenz trajectories, one part in 100,000 apart, coloured by starting order; sliders for the count, the speed and the shared digits |
+| 4 | Same start. Almost. Another future. | `PyStream`: 200 Lorenz trajectories, one part in 100,000 apart, coloured by starting order. Beside it the Lorenz equations, one coloured term per coordinate, and sliders for sigma, rho and beta that the Python process really reads and the equation shows |
 | 5 | Gray-Scott reaction-diffusion | `Demo`: a marimo app, three sliders, NumPy in a subprocess |
-| 6 | Find the signal in the noise | `LiveCode`: the Fourier transform of a noisy signal; edit the frequencies |
-| 7 | Raise the degree, watch the band | `LiveCode`: a polynomial fit with a bootstrap error band |
-| 8 | A neural net in plain NumPy | `LiveCode`: a tiny network learns the boundary between two rings |
-| 9 | Measured, not claimed | Three measured numbers |
-| 10 | Notebook cell, two fences, a live slide | How a cell becomes a slide |
-| 11 | Run it. Record it. Check it. | The workflow, as a terminal |
-| 12 | No Python? It plays the recording. | The recordings, in one sentence |
-| 13 | Reviewed like code | A parameter change is a one line diff |
-| 14 | Your data stays on your machine. | Python runs locally, no network request |
-| 15 | Show the experiment. | Closing |
+| 6 | Two chemicals. Two equations. | The Gray-Scott pair; F, k, the reaction and the diffusion are terms, and pointing at one names what it controls in the recording of slide 5 |
+| 7 | Find the signal in the noise | `LiveCode`: the Fourier transform of a noisy signal; edit the frequencies |
+| 8 | Fourier, term by term. | The signal, the transform and its discrete sum; the 50 Hz, 120 Hz and noise terms point at the spikes of the recorded spectrum |
+| 9 | Raise the degree, watch the band | `LiveCode`: a polynomial fit with a bootstrap error band |
+| 10 | The line, and its band. | The normal equations, the fitted curve and the percentile bootstrap interval, coloured like the line, the points and the band of the recorded fit |
+| 11 | A neural net in plain NumPy | `LiveCode`: a tiny network learns the boundary between two rings |
+| 12 | Two rings, one loss. | The network, the logistic output and the cross-entropy, one term per ring, and the decision boundary |
+| 13 | A damped oscillator. | A derivation that lights one line per click, and the solution as a `Chart`, coloured like its terms |
+| 14 | Typeset, not pasted. | Seven famous equations typeset big and entering in turn |
+| 15 | Measured, not claimed | Three measured numbers |
+| 16 | Notebook cell, two fences, a live slide | How a cell becomes a slide |
+| 17 | Run it. Record it. Check it. | The workflow, as a terminal |
+| 18 | No Python? It plays the recording. | The recordings, in one sentence |
+| 19 | Reviewed like code | A parameter change is a one line diff |
+| 20 | Your data stays on your machine. | Python runs locally, no network request |
+| 21 | Show the experiment. | Closing |
 
 ## Two editions
 
 | Edition | How | Slides |
 |---|---|---|
-| Full | `npm run dev` | all 15, live |
-| Web | `npm run build:web` (static files in `dist/`) | all 15; slides 4 to 8 play the clips in `public/recordings` because no Python runs on a static host |
+| Full | `npm run dev` | all 21, live; slides 6, 8, 10 and 12 play the recordings next to their equations |
+| Web | `npm run build:web` (static files in `dist/`) | all 21; slides 4, 5, 7, 9 and 11 play the clips in `public/recordings` because no Python runs on a static host |
 
 `build:web` uses hash routes, removes `nimbledeck.json` (it holds the runner token) and honours `WEB_BASE` (default
 `/nimbledeck/demos/science/`) and `WEB_OUT`. With the recordings missing, it would leave those five slides out.
@@ -73,8 +80,8 @@ One Apple Silicon Mac, Chrome with the GPU on. Medians; read them as ratios, not
 - Lorenz stream, 200 trajectories: Python step 0.9 ms, 56 frames per second on screen (20 s of samples).
 - Gray-Scott, 192 by 192 cells, 3,000 steps: 1.3 s for the whole subprocess, including its start.
 - Live code: 0.12 to 0.29 s per run (FFT 0.15 to 0.22 s, fit 0.12 s, network 0.29 s), four loads each.
-- Web edition served under `/nimbledeck/demos/science/` with no Python: slides 4 to 8 each play their clip (video time advances), media requests answer 200 or 206.
-- `nimbledeck check`: 15 slides, 0 errors, 0 warnings. `nimbledeck verify`: 0 placement problems.
+- Web edition served under `/nimbledeck/demos/science/` with no Python: slides 4 to 12 each play their clip (video time advances), media requests answer 200 or 206, no `.katex-error`, no request to another origin, and the KaTeX fonts come from the deck.
+- `nimbledeck check`: 21 slides, 0 errors, 0 warnings. `nimbledeck verify`: 0 placement problems besides the fit slide, whose live figure can be a little soft at 2x.
 
 ## Extending PyStream
 
@@ -82,3 +89,13 @@ The Lorenz slide needed more than the swarm demo, so `PyStream` gained optional 
 `docs/WRITING.md`): `:colors` (one colour per equal group of points), `:size` and `:fade` (dot size and trail length),
 `:w` and `:h` (canvas size) and `:sliders` (labels, ranges and starting values of the three sliders). Without them it
 looks and behaves as before.
+
+## Equations
+
+The equation slides are LaTeX in `science.md` and nothing else (see [docs/EQUATIONS.md](../../docs/EQUATIONS.md)). `\term{1}{...}`
+paints a part with the first chart colour of the look, which is also the colour of the first curve of a figure, so the
+equation and the picture agree in the `studio` look the recordings were filmed in. Slides 6, 8, 10 and 12 show the
+recording of the live slide before them (`<Clip src="/recordings/live-fft.webm" fit="cover" position="right" />` crops the
+right half, the plot) with `<Marker>` labels on the peaks, the curve or the rings. They name the clip files, so a re-recording
+that keeps the names keeps the slides. Slide 4 is the only one that changes the Python: `demos/stream_lorenz.py` also
+reads `sigma`, `rho` and `beta`, so moving their sliders changes the attractor and the numbers in the equation.
