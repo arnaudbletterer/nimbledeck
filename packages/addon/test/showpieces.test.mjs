@@ -16,7 +16,7 @@ test('Shader gates on the slide, cancels its frame loop, shows a still frame for
 })
 
 test('Looks puts the deck look back when its slide is left, honours View Transitions and reduced motion, and ignores typing', () => {
-  const src = read('../components/Looks.vue')
+  const src = read('../components/Looks.vue') + read('../composables/lookSwitch.ts')   // the cross-fade is shared with LookWall
   assert.match(src, /startViewTransition/)
   assert.match(src, /restore\(\)/)
   assert.match(src, /prefers-reduced-motion/)

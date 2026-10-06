@@ -62,7 +62,7 @@ test('Looks reads the scheme of a look from the stylesheet, and setup/main.ts de
   const main = read('../../theme/setup/main.ts')
   assert.match(main, /import looks from '\.\.\/looks\.json'/)
   assert.doesNotMatch(main, /\['night', 'studio'\]/)
-  assert.match(read('../components/Looks.vue'), /--nd-scheme/)
+  assert.match(read('../composables/lookSwitch.ts'), /--nd-scheme/)
 })
 
 test('the stylesheet fetches nothing: no remote font, image or import', () => {
