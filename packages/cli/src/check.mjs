@@ -15,6 +15,10 @@ const FRAME = new Set(['full', 'hero', 'split', 'stage', 'statement', 'closing']
 // Display layouts wrap their title instead of cutting it off, so a title may be longer (but a sentence of 80 characters is the most that fits).
 const WRAPS = new Set(['hero', 'statement', 'split'])
 const CONTENT = { w: 1140, h: 500 }, SLIDE = { w: 1280, h: 720 }
+// LaTeX is neither prose nor markup: `$$ ... $$` blocks and `$...$` spans are cut out before the text is counted and the tags
+// are stripped (a `<` or a `-` inside an equation is not an HTML tag or a bullet). Same delimiter rule as Slidev's KaTeX
+// plugin: no space after the opening `$`, none before the closing `$`, and no digit right after it ("$5 and $6" is money).
+const withoutMath = (s) => s.replace(/\$\$[\s\S]*?\$\$/g, ' ').replace(/(?<![\\$])\$(?=\S)(?:\\.|[^$\\\n])*?(?<=\S)\$(?!\d)/g, ' ')
 const num = (attrs, name) => { const m = attrs.match(new RegExp(`(?:^|\\s):?${name}="(-?\\d+(?:\\.\\d+)?)"`)); return m ? Number(m[1]) : undefined }
 
 // Placement rules for <Stage> and <At>: everything must fit its box, and the box must fit the slide.
@@ -77,7 +81,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
     if (h1 && h1[1].length > maxTitle) errors.push(`${where}: title ${h1[1].length} chars > ${maxTitle}, would be cut off`)
     const sub = body.match(/^#### (.+)$/m)
     if (!LEAD.has(layout) && sub && sub[1].length > cfg.limits.maxSubtitle) warnings.push(`${where}: subtitle ${sub[1].length} chars > ${cfg.limits.maxSubtitle}, would be cut off`)
-    const bullets = (body.match(/^\s*[-*] /gm) || []).length
+    const bullets = (withoutMath(body).match(/^\s*[-*] /gm) || []).length
     if (bullets > cfg.limits.maxBullets) warnings.push(`${where}: ${bullets} bullets > ${cfg.limits.maxBullets}, split the slide`)
     presetErrors(s.fm, where, [['motion', 'motion'], ['background', 'background'], ['scrim', 'scrim']])
     checkStages(body, layout, where, errors)
@@ -95,7 +99,7 @@ export function checkDeck(deckPath, root = dirname(deckPath)) {
       const sz = existsSync(file) ? imageSize(file) : null
       if (sz && sz.w < box * 1.5) warnings.push(`${where}: ${m[3]} is ${sz.w}px wide for a ${box}px box, it will look soft on high-resolution screens (use at least ${Math.round(box * 1.5)}px)`)
     }
-    const prose = body.replace(/```[\s\S]*?```/g, '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ')
+    const prose = withoutMath(body.replace(/```[\s\S]*?```/g, '')).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ')
     if (!LEAD.has(layout) && prose.length > cfg.limits.maxChars) warnings.push(`${where}: ${prose.length} characters > ${cfg.limits.maxChars}, the text may not fit`)
     for (const [re, msg] of [[/<style/, '<style> block'], [/style=/, 'inline style='], [/<div/, 'raw <div>']])
       if (re.test(body)) errors.push(`${where}: ${msg}, use a layout or component instead`)
