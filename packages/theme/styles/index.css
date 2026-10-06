@@ -896,6 +896,10 @@ html.nd-touring .nd-zoom-enter-active, html.nd-touring .nd-zoom-leave-active { t
 .nd-eq .katex .nd-tm[data-term] { cursor: default; }
 /* A derivation ($$ {1|2|all}): the lines that are not the current step recede. */
 .slidev-katex-wrapper .mord { transition: opacity 0.3s; }
-.slidev-katex-wrapper .mord.dishonored { opacity: 0.22; }
+.slidev-katex-wrapper .mord.dishonored { opacity: 0.3; }
 [data-nd-variant="print"] .katex .nd-tm { background: none; }
+/* High contrast keeps what recedes readable: the receding parts stay above half strength and the lit one gets a thicker rule. */
+[data-nd-variant="high-contrast"] .nd-eq[data-linked] .katex .nd-tm:not(.nd-on) { opacity: 0.6; }
+[data-nd-variant="high-contrast"] .slidev-katex-wrapper .mord.dishonored { opacity: 0.55; }
+[data-nd-variant="high-contrast"] .slidev-layout .katex .nd-tm { box-shadow: 0 0.1em 0 0 var(--nd-tc); }
 @media (prefers-reduced-motion: reduce) { .slidev-layout .katex .nd-tm, .slidev-katex-wrapper .mord { transition: none; } }
