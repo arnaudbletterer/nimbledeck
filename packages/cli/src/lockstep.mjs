@@ -118,10 +118,12 @@ export class LockstepClock {
     cdp.on('Emulation.virtualTimeBudgetExpired', () => this.expired?.())
   }
 
-  // Pauses the page's virtual time where it is (performance.now carries on from the same value) and takes over the animation sources.
+  // Takes over the animation sources, then pauses the page's virtual time where it is (performance.now carries on from the same
+  // value). In this order: once time is paused the browser stops producing frames by itself, and the callbacks it already holds
+  // need two real ones to move to the shim.
   async start() {
+    await withTimeout(this.page.evaluate((fps) => window.__ndLockstep.start(fps), this.fps), 10000, 'the page did not start lockstep (is the shim installed?)')
     await this.cdp.send('Emulation.setVirtualTimePolicy', { policy: 'pause' })
-    await withTimeout(this.page.evaluate((fps) => window.__ndLockstep.start(fps), this.fps), 10000, 'the page did not start lockstep')
   }
 
   async advance() {
