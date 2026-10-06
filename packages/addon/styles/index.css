@@ -229,9 +229,9 @@
    it, a label in the corner. Both are drawn by the page, so they show over a live component and over its recording. */
 .nd-eq { position: relative; color: var(--nd-ink); }
 [data-linked] { outline: 3px solid var(--nd-tc); outline-offset: 6px; border-radius: 4px; transition: outline-color 0.25s; }
-.nd-linkchip { position: absolute; left: 12px; top: 10px; z-index: 5; max-width: 80%; padding: 4px 14px; border-radius: 999px; pointer-events: none;
+.nd-linkchip { position: absolute; left: 50%; translate: -50% 0; top: 10px; z-index: 5; max-width: 80%; padding: 4px 14px; border-radius: 999px; pointer-events: none;
   font: 600 20px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-tc); animation: nd-linkchip 0.25s ease-out; }
-@keyframes nd-linkchip { from { opacity: 0; translate: 0 6px; } }
+@keyframes nd-linkchip { from { opacity: 0; translate: -50% 6px; } }
 .nd-marker { display: inline-block; white-space: nowrap; padding: 4px 16px; border-radius: 999px; font: 600 22px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-tc);
   opacity: 0; scale: 0.9; transition: opacity 0.25s, scale 0.25s; pointer-events: none; }
 .nd-marker-on { opacity: 1; scale: 1; }
