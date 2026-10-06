@@ -84,39 +84,44 @@ export const SYNTH = {
     hiss(ctx, out, sources, { f: 1400, q: 1, t, dur: 0.04, peak: 0.1 })
     return { dur: 0.2, sources }
   },
+  // A soft page-turn of air: short, low, dark, rounded. It plays at every slide change, so it has to stay out of the way.
   whoosh(ctx, out, t) {
     const sources = []
-    hiss(ctx, out, sources, { f: 260, f2: 2000, q: 0.8, t, dur: 0.6, peak: 0.3, attack: 0.28 })
-    hiss(ctx, out, sources, { f: 1400, f2: 500, q: 0.6, t: t + 0.18, dur: 0.45, peak: 0.07, attack: 0.12 })
-    return { dur: 0.8, sources }
+    hiss(ctx, out, sources, { type: 'lowpass', f: 500, f2: 1800, q: 0.5, t, dur: 0.5, peak: 0.45, attack: 0.22 })
+    return { dur: 0.6, sources }
   },
+  // A warm ascending arpeggio of plucked notes in G major, growing a little with each note: the lift into a big moment.
   riser(ctx, out, t) {
-    const sources = [], dur = 2.4
-    hiss(ctx, out, sources, { f: 300, f2: 4200, q: 1.0, t, dur, peak: 0.2, attack: dur * 0.9 })
-    tone(ctx, out, sources, { type: 'sawtooth', f: 110, f2: 880, t, dur, peak: 0.03, attack: dur * 0.9 })
-    tone(ctx, out, sources, { f: 220, f2: 1760, t, dur, peak: 0.1, attack: dur * 0.9 })
-    return { dur: dur + 0.1, sources }
+    const sources = []
+    ;[392, 493.88, 587.33, 783.99, 987.77].forEach((f, i) => {
+      const at = t + i * 0.2, v = 0.6 + i * 0.1
+      tone(ctx, out, sources, { f, t: at, dur: 0.9, peak: 0.16 * v, attack: 0.008 })
+      tone(ctx, out, sources, { type: 'triangle', f, t: at, dur: 0.4, peak: 0.06 * v, attack: 0.01 })
+      tone(ctx, out, sources, { f: f * 4, t: at, dur: 0.12, peak: 0.012 * v, attack: 0.005 })
+    })
+    return { dur: 2.0, sources }
   },
   chime(ctx, out, t) {
     const sources = []
-    tone(ctx, out, sources, { f: 987.8, t, dur: 1.6, peak: 0.22 })
-    tone(ctx, out, sources, { f: 1480, t, dur: 1.1, peak: 0.1 })
-    tone(ctx, out, sources, { f: 2960, t, dur: 0.5, peak: 0.04 })
-    return { dur: 1.7, sources }
+    tone(ctx, out, sources, { f: 783.99, t, dur: 1.8, peak: 0.15 })
+    tone(ctx, out, sources, { f: 1174.66, t, dur: 1.2, peak: 0.07 })
+    tone(ctx, out, sources, { f: 2349.3, t, dur: 0.4, peak: 0.02 })
+    return { dur: 1.9, sources }
   },
   success(ctx, out, t) {
     const sources = []
-    ;[523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
-      tone(ctx, out, sources, { type: 'triangle', f, t: t + i * 0.085, dur: i === 3 ? 1.1 : 0.45, peak: 0.2 })
-      tone(ctx, out, sources, { f: f * 2, t: t + i * 0.085, dur: 0.3, peak: 0.04 })
+    ;[392, 493.88, 587.33, 783.99].forEach((f, i) => {
+      tone(ctx, out, sources, { f, t: t + i * 0.09, dur: i === 3 ? 1.2 : 0.5, peak: 0.13, attack: 0.008 })
+      tone(ctx, out, sources, { type: 'triangle', f, t: t + i * 0.09, dur: 0.3, peak: 0.05, attack: 0.01 })
     })
     return { dur: 1.5, sources }
   },
+  // A soft, round thump like a felt mallet on a low drum: one low note and its fifth, no noise, no pitch sweep.
   'soft-boom'(ctx, out, t) {
     const sources = []
-    tone(ctx, out, sources, { f: 90, f2: 34, t, dur: 1.1, peak: 0.38, attack: 0.03 })
-    hiss(ctx, out, sources, { type: 'lowpass', f: 400, f2: 80, q: 0.7, t, dur: 0.7, peak: 0.25 })
-    return { dur: 1.2, sources }
+    tone(ctx, out, sources, { f: 98, f2: 90, t, dur: 1.0, peak: 0.3, attack: 0.02 })
+    tone(ctx, out, sources, { f: 147, t, dur: 0.7, peak: 0.08, attack: 0.02 })
+    return { dur: 1.1, sources }
   },
   typing(ctx, out, t, rnd = Math.random) {
     const sources = []
@@ -128,12 +133,23 @@ export const SYNTH = {
     }
     return { dur: at + 0.1, sources }
   },
+  // A warm chord that blooms and fades (G, D, B, G): triangle voices, no noise, no sawtooth.
   swell(ctx, out, t) {
     const sources = [], dur = 2.4
-    for (const [f, d] of [[220, -7], [220, 7], [330, 0], [440, 4]])
-      tone(ctx, out, sources, { type: 'sawtooth', f, t, dur, peak: 0.045, attack: dur * 0.55, detune: d * 3 })
-    hiss(ctx, out, sources, { type: 'lowpass', f: 300, f2: 2400, q: 0.6, t, dur, peak: 0.1, attack: dur * 0.6 })
+    for (const [f, d] of [[196, -4], [196, 4], [293.66, 0], [392, 0], [493.88, 0]])
+      tone(ctx, out, sources, { type: 'triangle', f, t, dur, peak: 0.05, attack: dur * 0.5, detune: d })
     return { dur: dur + 0.1, sources }
+  },
+  // The closing chord: a G major add 9 struck softly as marimba-like notes with a warm pad underneath, left to ring.
+  finale(ctx, out, t) {
+    const sources = []
+    ;[196, 293.66, 392, 493.88, 587.33, 739.99].forEach((f, i) => {
+      const at = t + i * 0.07
+      tone(ctx, out, sources, { f, t: at, dur: 2.4, peak: 0.12, attack: 0.01 })
+      tone(ctx, out, sources, { type: 'triangle', f, t: at, dur: 1.2, peak: 0.05, attack: 0.012 })
+    })
+    for (const f of [196, 392, 493.88]) tone(ctx, out, sources, { type: 'triangle', f, t, dur: 3.0, peak: 0.03, attack: 0.5 })
+    return { dur: 3.2, sources }
   },
   // A calm, dark drone for a bed: a loop that never ends by itself, slow beating between detuned voices. Moody on
   // purpose, and not for the showcase, which uses `uplift`.

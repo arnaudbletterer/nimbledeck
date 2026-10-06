@@ -452,7 +452,7 @@ sounds:
 </At>
 <At :x="140" :y="200" :w="1000" :h="230" :z="1" enter="fade" :delay="500"><Equalizer :bars="32" /></At>
 <At :x="140" :y="460" :w="1000" :z="1" enter="fade" :delay="900">
-<Kinetic text="Twelve sounds, made in the browser. No files." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
+<Kinetic text="Thirteen sounds, made in the browser. No files." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
 </At>
 </Stage>
 
@@ -610,8 +610,7 @@ motion: focus
 tour: 6
 sounds:
   - { at: 0.0, src: riser, volume: 0.8 }
-  - { at: 2.2, src: soft-boom, volume: 0.8 }
-  - { at: 2.3, src: chime, volume: 0.6 }
+  - { at: 1.7, src: finale, volume: 0.8 }
 ---
 
 ::bg::

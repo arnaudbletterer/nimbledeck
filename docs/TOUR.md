@@ -62,7 +62,7 @@ Off until the viewer opts in; the browser needs a gesture, so the `AudioContext`
 | `ndSlideSound: whoosh` | headmatter | a cue on every slide change |
 
 Built-in sounds, synthesised with the Web Audio API (no files, offline): the cues `click`, `tick`, `pop`, `whoosh`, `riser`,
-`chime`, `success`, `soft-boom`, `typing`, `swell`, and the beds `uplift` and `pad`. Everything passes through a limiter and a
+`chime`, `success`, `soft-boom`, `typing`, `swell`, `finale` (a soft G major chord for the last slide), and the beds `uplift` and `pad`. Everything passes through a limiter and a
 master gain, so stacked cues stay quiet. `<SoundToggle />` is the speaker button and `<Equalizer />` draws the real output.
 `nimbledeck check` rejects a name that is neither built in nor a file.
 
@@ -99,7 +99,7 @@ Last run, mono mix of the output, dBFS:
 | loop point, largest sample step within 20 ms | 5.2e-3 against 1.4e-2 elsewhere | no click |
 
 Cue peaks at volume 0.8, alone: `click` -13.7, `tick` -12.6, `pop` -7.6, `whoosh` -12.7, `riser` -7.0, `chime` -8.3, `success` -9.0,
-`soft-boom` -6.2, `typing` -14.6, `swell` -14.5. The quiet cues (`tick`, `typing`, `whoosh`) were raised for this, and the noise
+`soft-boom` -6.2, `typing` -14.6, `swell` -14.5 (before the later softening: the effects were then made rounder and more musical, with no noise sweeps except a soft page-turn whoosh, and play 6 dB lower; run `examples/showcase/measure-sound.mjs` for today's numbers). The quiet cues (`tick`, `typing`, `whoosh`) were raised for this, and the noise
 the cues use is now seeded, so a cue sounds and measures the same every time. The loop test renders at 52 kHz, where one eighth
 note is exactly 15000 samples, so the passes compare sample for sample. The scheduler itself (tempo, chord changes on bar lines,
 no repeated or past notes, a stalled clock) is unit tested with a fake clock in `packages/addon/test/upliftscore.test.mjs`.
