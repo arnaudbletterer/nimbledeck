@@ -185,6 +185,9 @@ const links = computed(() => [
       </button>
       <span class="ndb-line" aria-hidden="true"><i :style="{ width: progress }" /></span>
     </nav>
+    <!-- While the tour plays, the real pointer is kept off the slide: the tour's own cursor does the pointing, so where the mouse was
+         left cannot hover or click anything. A real click here (or any key, wheel or touch) takes over and ends the tour. -->
+    <div v-if="playing" class="ndb-shield" aria-hidden="true"><span class="ndb-take">Click anywhere to take over</span></div>
     <div v-if="showHint" class="ndb-cta">
       <button class="ndb-play" type="button" @click="toggle">
         <span class="ndb-play-ico" aria-hidden="true">&#9654;</span>
@@ -239,6 +242,12 @@ const links = computed(() => [
 .ndb-line { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; }
 .ndb-line i { display: block; height: 100%; background: var(--nd-gradient, var(--nd-accent, #22d3ee)); transition: width .6s ease; }
 
+.ndb-shield { position: fixed; inset: var(--nd-site-bar-h, 40px) 0 0 0; z-index: 58; cursor: none; background: transparent; touch-action: none; }
+.ndb-take { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; font: 500 12px/1 var(--nd-font-body, system-ui, sans-serif);
+  color: var(--nd-muted, #9aa3b8); background: color-mix(in srgb, var(--nd-bg, #07090f) 72%, transparent); border: 1px solid var(--nd-line, #232b42);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0; animation: ndb-take 6s ease .8s both; pointer-events: none; }
+@keyframes ndb-take { 0%, 100% { opacity: 0; } 15%, 80% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ndb-take { animation: none; opacity: 1; } }
 .ndb-cta { position: fixed; right: 40px; bottom: 36px; z-index: 55; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }   /* the hero text is on the left */
 .ndb-play { display: inline-flex; align-items: center; gap: 12px; padding: 14px 26px 14px 18px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--nd-accent, #22d3ee) 60%, transparent);
   font: 600 17px/1 var(--nd-font-body, system-ui, sans-serif); letter-spacing: -0.01em; color: var(--nd-bg, #07090f); background: var(--nd-accent, #22d3ee); cursor: pointer;
@@ -271,5 +280,5 @@ const links = computed(() => [
   .ndb .ndb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }   /* icon and clock only, the label stays for screen readers */
 }
 @media (pointer: coarse) { .ndb-cta { bottom: 64px; } .ndb .ndb-btn, .ndb-links > a, .ndb-more > summary { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; } }
-@media print { .ndb, .ndb-cta { display: none; } }
+@media print { .ndb, .ndb-cta, .ndb-shield { display: none; } }
 </style>
