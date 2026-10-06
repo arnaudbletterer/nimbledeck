@@ -118,8 +118,9 @@ the first cold load in the browser takes 5.9 s (Vite transforms, 400 modules, no
 - **Software GL (`--disable-gpu`).** The Orbit canvas and Scene3D are the cost: Scene3D runs at 10 to 16 fps with no GPU, as noted above. Pixel ratio steps
   gave 6 to 8 fps and turning antialiasing off gave between no change and 6x depending on the run, with the machine loaded: inconclusive, so
   nothing was changed. A real laptop GPU is not in this case.
-- **Chart entry.** Creating the Chart.js chart is a 57 to 96 ms task when entering slide 9. Creating it early would play its animation off screen;
+- **Chart entry.** Creating the Chart.js chart is a 57 to 96 ms task when entering a chart slide (the showcase deck no longer has one). Creating it early would play its animation off screen;
   not changed.
+- **The two walls.** `<LookWall />` is twenty cards of plain CSS and one ring moved by `transform`; `<MotionWall />` is twenty-one scaled mini slides, ten CSS backdrops and two small canvases (Aurora and Shader at half resolution of a 107 px card). Slides 9 and 10 of the showcase held 60 fps with a 16.7 ms median and a 16.8 ms worst frame over five seconds in headless Chrome on the same Mac, the same as the plain statement slide beside them. Nothing runs while the slide is off screen.
 - **Fewer bytes on slide 1.** The shiki and vue chunks (108 KB gzipped) belong to Slidev. No web fonts are used. WebP or AVIF: the file names are in
   `showcase.md`, so not changed.
 - **Dev edition walk.** Only the web edition was walked slide by slide; slides 13 and 14 (live code, Python stream) were not measured.

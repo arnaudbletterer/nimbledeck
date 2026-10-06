@@ -96,6 +96,11 @@ make text unreadable: the scrim keeps text at 4.5:1 or better against the local 
 `studio-light` and `plain` (`presets-e2e.mjs` measures it). Use `scrim: strong` for a dense slide, `scrim: none` for a
 decorative one.
 
+## See them all
+
+`<MotionWall />` plays every motion and background of this page at once, and `<LookWall />` shows every look; the showcase deck
+uses both (slides 9 and 10). See [components](components.md).
+
 ## Cost
 
 Only opacity, transforms, filters, clip-paths and masks move, so nothing is laid out again while a preset plays. Backgrounds

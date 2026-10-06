@@ -1,10 +1,12 @@
 ---
 theme: nimbledeck
 ndVariant: studio
+ndMotion: fade-up
 title: "Nimbledeck: Markdown slides that run things"
 titleTemplate: "%s"
 layout: hero
 class: nd-grid
+motion: spotlight
 transition: nd-zoom
 ndSound: uplift
 ndSlideSound: whoosh
@@ -32,18 +34,12 @@ Hook. Everything you are about to see is one Markdown file. Nothing was exported
 ---
 layout: statement
 class: nd-grid
+background: aurora
+motion: curtain
 tour: 5
 sounds:
   - { at: 1.2, src: soft-boom, volume: 0.5 }
 ---
-
-::bg::
-
-<Stage full>
-<At :w="1280" :h="720"><Aurora :intensity="0.5" :cx="0.5" :cy="1.05" /></At>
-</Stage>
-
-::default::
 
 #### The whole idea
 
@@ -166,6 +162,7 @@ One word in the frontmatter picks the layout. The checker rejects inline HTML an
 ---
 layout: default
 class: nd-wide
+motion: cascade
 tour: 7
 tourScript:
   - { at: 1.0, click: ".nd-look:nth-child(1)", caption: "Click a look" }
@@ -203,13 +200,14 @@ Press 1 to 5, or click a chip. The slide steps through the looks by itself and e
 
 ---
 layout: statement
+background: waves
+motion: rise
 tour: 5
 ---
 
 ::bg::
 
 <Stage full>
-<At :w="1280" :h="720"><Aurora :intensity="0.55" :hue="70" :cx="0.25" :cy="0.5" /></At>
 <At :y="430" :w="1280" :h="270" :z="1" enter="fade" :delay="500">
 <Marquee :speed="30">
 
@@ -251,6 +249,7 @@ This runs in the browser at the screen's own resolution. No video, no plugin.
 
 ---
 layout: split
+motion: slide-left
 tour: 7
 tourScript:
   - { at: 1.2, drag: ".nd-gl canvas", from: 0.3, to: 0.7, over: 2, caption: "Drag the scene" }
@@ -275,56 +274,90 @@ Drag it. A three.js scene, loaded only on the slide that uses it.
 -->
 
 ---
-layout: numbers
-tour: 6
+layout: full
+background: mesh
+motion: none
+tour: 17
+tourScript:
+  - { at: 2.6, hover: ".nd-lw-card:nth-child(4)", caption: "Hover: the slide follows" }
+  - { at: 4.4, hover: ".nd-lw-card:nth-child(11)" }
+  - { at: 6.2, hover: ".nd-lw-card:nth-child(16)" }
+  - { at: 8.0, click: ".nd-lw-card:nth-child(8)", caption: "Click to keep a look" }
+  - { at: 10.4, click: ".nd-lw-card:nth-child(19)" }
+  - { at: 12.4, click: ".nd-lw-card:nth-child(1)" }
+  - { at: 14.4, click: ".nd-lw-card:nth-child(4)", caption: "Back to the deck's look" }
 sounds:
-  - { at: 1.7, src: pop, volume: 0.5 }
-  - { at: 1.85, src: pop, volume: 0.5 }
-  - { at: 2.0, src: pop, volume: 0.5 }
-  - { at: 2.15, src: pop, volume: 0.5 }
+  - { at: 0.0, src: whoosh, volume: 0.5 }
+  - { at: 8.0, src: pop, volume: 0.5 }
+  - { at: 10.4, src: pop, volume: 0.5 }
+  - { at: 12.4, src: pop, volume: 0.5 }
+  - { at: 14.4, src: pop, volume: 0.5 }
 ---
 
-# Measured on one Mac
-
-::a::
-
-<Stat value="13" label="layouts in one theme" :delay="200" />
-
-::b::
-
-<Stat value="0.13" :decimals="2" suffix=" s" label="to check a 29 slide deck" :delay="340" />
-
-::c::
-
-<Stat value="22" suffix=" ms" label="to run Python that prints" :delay="480" />
-
-::d::
-
-<Stat value="60" suffix=" fps" label="drawn with a real GPU" :delay="620" />
-
-<!--
-Thirteen layout files in the theme. 0.13 s, 22 ms and 60 fps come from docs/PERFORMANCE.md, measured on one Apple Silicon Mac, the 60 fps with a real GPU: read them as what one machine did, not as a promise.
--->
-
----
-layout: default
-tour: 5
----
-
-# What a live code run costs, in ms
-
-<Stage>
-<At :w="1140" :h="460">
-<Chart type="bar" horizontal :labels="['Run that prints', 'Run that draws a plot', 'Keystroke to updated result']" :data="[22, 132, 431]" values />
+<Stage full>
+<At :x="48" :y="26" :w="720" :h="80" :z="1">
+<Kinetic text="Twenty looks. One file." mode="words" from="mask" :stagger="110" size="m" accent="Twenty" />
+</At>
+<At :x="790" :y="22" :w="460" :h="84" :z="1" enter="fade" :delay="900">
+<Kinetic text="Hover to preview. Click to keep." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
+</At>
+<At :x="26" :y="118" :w="1228" :h="590">
+<At :x="14" :y="14" :w="1200" :h="562"><LookWall /></At>
 </At>
 </Stage>
 
 <!--
-Measured on one Mac (docs/PERFORMANCE.md): 22 ms for a run that prints, 132 ms for a plot, 431 ms from a keystroke in the editor to the new result, which includes a 300 ms wait so a word is not run half typed.
+Every look of the theme, drawn at once: each card is a small slide that takes its colours from its own look. A ring tours them by itself. Hover a card and the whole slide takes that look, click one to keep it. Nothing is edited: the Markdown is the same.
+-->
+
+---
+layout: full
+motion: none
+tour: 16
+tourScript:
+  - { at: 2.8, click: ".nd-mw-card:nth-child(13)", caption: "Click a card to replay it" }
+  - { at: 4.6, click: ".nd-mw-card:nth-child(11)" }
+  - { at: 6.4, click: ".nd-mw-card:nth-child(19)" }
+  - { at: 8.2, click: ".nd-mw-card:nth-child(15)" }
+  - { at: 10.0, click: ".nd-mw-card:nth-child(21)" }
+  - { at: 11.8, click: ".nd-mw-card:nth-child(7)" }
+  - { at: 13.6, click: ".nd-mw-card:nth-child(17)" }
+sounds:
+  - { at: 0.0, src: whoosh, volume: 0.5 }
+  - { at: 2.8, src: pop, volume: 0.45 }
+  - { at: 4.6, src: pop, volume: 0.45 }
+  - { at: 6.4, src: pop, volume: 0.45 }
+  - { at: 8.2, src: pop, volume: 0.45 }
+  - { at: 10.0, src: pop, volume: 0.45 }
+  - { at: 11.8, src: pop, volume: 0.45 }
+  - { at: 13.6, src: pop, volume: 0.45 }
+---
+
+<Stage full>
+<At :x="64" :y="34" :w="620" :h="190" :z="1">
+<Kinetic text="One line. Any motion." mode="words" from="up" :stagger="120" size="l" accent="line." />
+</At>
+<At :x="730" :y="34" :w="480" :h="176" :z="1" frame bg="var(--nd-surface)" pad="14px 28px" middle enter="right" :delay="300">
+<Typewriter :speed="40" :delay="900" lang="md" :size="30">
+
+```yaml
+motion: pop
+background: aurora
+ndVariant: neon
+```
+
+</Typewriter>
+</At>
+<At :x="40" :y="232" :w="1200" :h="470"><MotionWall :width="1200" /></At>
+</Stage>
+
+<!--
+Twenty-one motions and ten backdrops, all running at once. Each card is a real slide with one line of frontmatter, so the real preset plays. They replay in a wave. Click a card to replay it.
 -->
 
 ---
 layout: default
+motion: flip
 tour: 7
 tourScript:
   - { at: 1.2, hover: B, caption: "Which file holds the deck?" }
@@ -357,6 +390,7 @@ Click an answer, or press 1 to 4. Interaction is for the presenter and resets wh
 
 ---
 layout: stage
+motion: blur-in
 tour: 8
 tourScript:
   - { at: 2.4, drag: ".nd-compare", from: 0.56, to: 0.12, over: 1.2, caption: "Drag to compare" }
@@ -400,6 +434,8 @@ A four second loop made by a short numpy script in the repo, 300 KB.
 
 ---
 layout: stage
+background: mesh
+motion: none
 tour: 9
 sounds:
   - { at: 1.0, src: click }
@@ -411,7 +447,6 @@ sounds:
 ---
 
 <Stage full>
-<At :w="1280" :h="720"><Aurora :intensity="0.45" :hue="-60" :cx="0.5" :cy="0.9" /></At>
 <At :x="140" :y="64" :w="1000" :z="1">
 <Kinetic text="It has a voice." mode="words" from="mask" :stagger="170" size="l" accent="voice." />
 </At>
@@ -431,6 +466,7 @@ Click, tick, pop, chime, success, whoosh: each is synthesised with the Web Audio
 
 ---
 layout: default
+motion: typewriter
 tour: 9
 tourScript:
   - { at: 2.0, type: "\nplt.title('typed by the tour')", into: ".cm-content", speed: 60, caption: "Edit the code" }
@@ -464,13 +500,14 @@ Needs nimbledeck run. Change a number, the figure follows. Python runs on this m
 
 ---
 layout: full
+background: aurora
+motion: none
 tour: 8
 tourScript:
   - { at: 2.0, drag: ".nd-ctl label:nth-child(1) input", from: 0.15, to: 0.7, over: 1.6, caption: "More particles" }
 ---
 
 <Stage full>
-<At :w="1280" :h="720" :z="0"><Aurora :intensity="0.6" /></At>
 <At :x="130" :y="40" :w="1020" :h="560" :z="1"><PyStream name="swarm" controls hud color="#ffffff" /></At>
 <At :x="90" :y="625" :w="1100" :z="2">
 <Headline size="m">Python pushes the particles. The browser draws them.</Headline>
@@ -483,6 +520,8 @@ Needs nimbledeck run. A numpy process computes every frame and streams it over a
 
 ---
 layout: stage
+background: spotlight
+motion: none
 tour: 7
 sounds:
   - { at: 1.3, src: typing, volume: 0.7 }
@@ -490,12 +529,11 @@ sounds:
 ---
 
 <Stage full>
-<At :w="1280" :h="720"><Aurora :intensity="0.5" :hue="25" :cx="0.85" :cy="0.15" /></At>
 <At :x="140" :y="64" :w="1000" :z="1">
 <Kinetic text="An agent writes it." mode="words" from="left" :stagger="150" size="l" accent="agent" />
 </At>
 <At :x="140" :y="246" :w="1000" :h="296" :z="1">
-<Terminal title="nimbledeck" :size="30" :lines="['$ nimbledeck check showcase.md', '19 slides, 0 errors, 0 warnings', '$ nimbledeck verify showcase.md', '19 slides verified, 0 placement problems']" />
+<Terminal title="nimbledeck" :size="30" :lines="['$ nimbledeck check showcase.md', '20 slides, 0 errors, 0 warnings', '$ nimbledeck verify showcase.md', '20 slides verified, 0 placement problems']" />
 </At>
 </Stage>
 
@@ -510,16 +548,10 @@ check lints the Markdown. verify opens the running deck in Chrome and reports cl
 ---
 layout: statement
 class: nd-grid
+background: stars
+motion: drop
 tour: 5
 ---
-
-::bg::
-
-<Stage full>
-<At :w="1280" :h="720"><Aurora :intensity="0.45" :hue="-35" :cx="0.5" :cy="0.45" /></At>
-</Stage>
-
-::default::
 
 #### Offline
 
@@ -533,6 +565,8 @@ Nimbledeck makes no network request of its own. Only a website embedded in a sli
 
 ---
 layout: stage
+background: grid
+motion: none
 tour: 9
 sounds:
   - { at: 1.1, src: typing, volume: 0.7 }
@@ -541,7 +575,6 @@ sounds:
 ---
 
 <Stage full>
-<At :w="1280" :h="720"><Aurora :intensity="0.4" :hue="-20" :cx="0.1" :cy="1" /></At>
 <At :x="90" :y="80" :w="1100" :z="1">
 <Kinetic text="Three commands." mode="words" from="up" :stagger="180" size="l" accent="Three" />
 </At>
@@ -573,6 +606,7 @@ That is docs/GETTING-STARTED.md in three lines. Click for the last beat: edit th
 ---
 layout: closing
 class: nd-grid
+motion: focus
 tour: 6
 sounds:
   - { at: 0.0, src: riser, volume: 0.8 }

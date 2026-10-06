@@ -5,6 +5,9 @@ has not had a tagged release yet, so everything below sits under Unreleased.
 
 ## Unreleased
 
+- Add `<LookWall />` (every look of the theme as a live card: hover previews a look on the whole slide, a click keeps it) and
+  `<MotionWall />` (every motion preset playing on a real mini slide in a wave, with a row of animated backdrops). The showcase deck
+  replaces its two benchmark slides with them and uses motion and background presets itself. See docs/components.md.
 - Add fifteen looks to the base theme (`editorial`, `swiss`, `neon`, `terminal`, `blueprint`, `sunset`, `ocean`, `forest`, `mono`,
   `candy`, `gold`, `newsprint`, `slate-pro`, `high-contrast`, `print`), chosen with `ndVariant`. They are listed in
   `packages/theme/looks.json`, which `nimbledeck check` uses to reject an unknown `ndVariant`, and a test keeps it in step with the
