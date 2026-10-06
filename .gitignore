@@ -21,5 +21,3 @@ dist-hosted/
 .looks-verify-*.md
 examples/theme-lab/shots/
 examples/*/public/.record-e2e/
-# the example keeps WebM only; mp4 is made when ffmpeg is on the PATH
-examples/*/public/recordings/*.mp4

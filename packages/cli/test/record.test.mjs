@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { loadConfig, validateConfig, validateRecordings } from '../src/config.mjs'
-import { encodeArgs, findFfmpeg, frameGeometry, keyName, parseRecordArgs, planTargets, Timeline, typingDelay } from '../src/record.mjs'
+import { encodeArgs, findFfmpeg, frameGeometry, keyName, parseRecordArgs, planEncodes, planTargets, QUALITY, Timeline, typingDelay } from '../src/record.mjs'
 
 test('record options are parsed and checked', () => {
-  assert.deepEqual(parseRecordArgs([]), { slides: [], seconds: 8, width: 1280, out: null, url: null })
+  assert.deepEqual(parseRecordArgs([]), { slides: [], seconds: 8, width: 2560, out: null, url: null })
   const o = parseRecordArgs(['--slide', '11', '19', '--seconds', '10', '--width', '1920', '--out', 'public/r', '--url', 'http://localhost:3030'])
   assert.deepEqual([o.slides, o.seconds, o.width, o.out, o.url], [[11, 19], 10, 1920, 'public/r', 'http://localhost:3030'])
   assert.deepEqual(parseRecordArgs(['--slide', '3', '--slide', '5']).slides, [3, 5])
@@ -39,19 +39,49 @@ test('the timeline plays irregular frames at a steady rate, holding the last one
   assert.equal(new Timeline().frames(1), null)
 })
 
-test('the video is the component box, scaled with the slide width', () => {
-  assert.deepEqual(frameGeometry({ x: 100.4, y: 50, width: 1000.2, height: 500 }, 1280), { crop: { x: 100, y: 50, w: 1001, h: 500 }, w: 500, h: 250 })
-  assert.deepEqual(frameGeometry({ x: 0, y: 0, width: 2560, height: 1440 }, 2560), { crop: { x: 0, y: 0, w: 2560, h: 1440 }, w: 2560, h: 1440 })
-  const g = frameGeometry({ x: 2000, y: 0, width: 900, height: 100 }, 1280)
+test('the video keeps every pixel of the component box, and records its logical size too', () => {
+  // The page is laid out at 2560 x 1440 (twice a 1280 x 720 slide), so the box is in device pixels.
+  assert.deepEqual(frameGeometry({ x: 140, y: 228, width: 2280, height: 1000 }), { crop: { x: 140, y: 228, w: 2280, h: 1000 }, w: 2280, h: 1000, logical: { w: 1140, h: 500 } })
+  const odd = frameGeometry({ x: 100.4, y: 50, width: 1000.2, height: 501 })
+  assert.deepEqual(odd.crop, { x: 100, y: 50, w: 1000, h: 500 }, 'a crop has even sides, which yuv420p needs')
+  assert.deepEqual([odd.w, odd.h], [1000, 500], 'no scaling by default')
+  const g = frameGeometry({ x: 2000, y: 0, width: 900, height: 100 })
   assert.equal(g.crop.w, 560, 'a box that leaves the capture is cut at its edge')
 })
 
-test('ffmpeg is told to write VP8 webm and faststart H.264 mp4, even sizes, 30 fps', () => {
-  const g = frameGeometry({ x: 0, y: 0, width: 1000, height: 500 }, 1280)
-  const webm = encodeArgs('webm', g, 'o.webm'), mp4 = encodeArgs('mp4', g, 'o.mp4')
-  assert.ok(webm.includes('libvpx') && webm.at(-1) === 'o.webm')
-  assert.ok(mp4.includes('libx264') && mp4.includes('+faststart') && mp4.includes('yuv420p') && mp4.at(-1) === 'o.mp4')
-  for (const a of [webm, mp4]) assert.ok(a.includes('30') && /scale=\d*[02468]:\d*[02468]:/.test(a.join(' ')))
+test('a smaller --width scales the video down, and only then', () => {
+  const g = frameGeometry({ x: 0, y: 0, width: 2000, height: 1000 }, 1280)
+  assert.deepEqual([g.w, g.h, g.crop.w, g.logical.w], [1000, 500, 2000, 1000])
+  assert.ok(encodeArgs('vp9', g, 'o.webm').join(' ').includes('scale=1000:500:flags=lanczos'))
+  assert.ok(!encodeArgs('vp9', frameGeometry({ x: 0, y: 0, width: 2000, height: 1000 }), 'o.webm').join(' ').includes('lanczos'))
+})
+
+test('ffmpeg writes VP9 webm in two passes, High profile H.264 mp4 and VP8 webm, 30 fps, tagged BT.709', () => {
+  const g = frameGeometry({ x: 0, y: 0, width: 2000, height: 1000 })
+  const p1 = encodeArgs('vp9', g, 'o.webm', { pass: 1, passlog: '/tmp/l' }), p2 = encodeArgs('vp9', g, 'o.webm', { pass: 2, passlog: '/tmp/l' })
+  const mp4 = encodeArgs('h264', g, 'o.mp4'), vp8 = encodeArgs('vp8', g, 'o.webm')
+  for (const a of [p1, p2]) for (const x of ['libvpx-vp9', '-row-mt', 'screen', 'yuv420p']) assert.ok(a.includes(x), x)
+  assert.equal(p1.at(-1), '-')
+  assert.ok(p1.includes('null') && !p1.includes('o.webm'))
+  assert.equal(p2.at(-1), 'o.webm')
+  assert.equal(p2[p2.indexOf('-crf') + 1], String(QUALITY.vp9Crf))
+  assert.equal(p2[p2.indexOf('-b:v') + 1], QUALITY.vp9MaxRate, 'constrained quality: the CRF decides, the rate only caps')
+  assert.equal(mp4[mp4.indexOf('-maxrate') + 1], QUALITY.h264MaxRate)
+  assert.ok(mp4.includes('libx264') && mp4.includes('high') && mp4.includes('+faststart') && mp4.includes('yuv420p') && mp4.at(-1) === 'o.mp4')
+  assert.ok(vp8.includes('libvpx') && vp8.at(-1) === 'o.webm')
+  for (const a of [p2, mp4, vp8]) {
+    assert.equal(a[a.indexOf('-g') + 1], '60', 'a keyframe every 2 seconds')
+    assert.equal(a[a.indexOf('-r') + 1], '30')
+    assert.ok(a.includes('bt709') && a.join(' ').includes('crop=2000:1000:0:0'))
+  }
+})
+
+test('with a system ffmpeg the recorder writes VP9 and H.264; without one, only VP8 from the Playwright ffmpeg', () => {
+  const sys = { system: '/usr/bin/ffmpeg', bundled: '/pw/ffmpeg' }
+  assert.deepEqual(planEncodes(sys, new Set(['libvpx-vp9', 'libx264'])), [{ ext: 'webm', kind: 'vp9', bin: '/usr/bin/ffmpeg' }, { ext: 'mp4', kind: 'h264', bin: '/usr/bin/ffmpeg' }])
+  assert.deepEqual(planEncodes(sys, new Set(['libx264'])), [{ ext: 'mp4', kind: 'h264', bin: '/usr/bin/ffmpeg' }, { ext: 'webm', kind: 'vp8', bin: '/pw/ffmpeg' }], 'a system ffmpeg without VP9 falls back for the webm')
+  assert.deepEqual(planEncodes({ system: null, bundled: '/pw/ffmpeg' }), [{ ext: 'webm', kind: 'vp8', bin: '/pw/ffmpeg' }])
+  assert.deepEqual(planEncodes({ system: null, bundled: null }), [])
 })
 
 test('ffmpeg is found on the PATH and in the Playwright cache, newest build first', () => {

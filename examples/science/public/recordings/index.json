@@ -7,8 +7,16 @@
       "seconds": 12,
       "width": 1074,
       "height": 604,
+      "pixelWidth": 2148,
+      "pixelHeight": 1208,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "demo-turing.webm"
+        "demo-turing.webm",
+        "demo-turing.mp4"
       ],
       "poster": "demo-turing.jpg"
     },
@@ -18,8 +26,16 @@
       "seconds": 10,
       "width": 1200,
       "height": 604,
+      "pixelWidth": 2400,
+      "pixelHeight": 1208,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "live-fft.webm"
+        "live-fft.webm",
+        "live-fft.mp4"
       ],
       "poster": "live-fft.jpg"
     },
@@ -29,8 +45,16 @@
       "seconds": 9,
       "width": 1200,
       "height": 604,
+      "pixelWidth": 2400,
+      "pixelHeight": 1208,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "live-fit.webm"
+        "live-fit.webm",
+        "live-fit.mp4"
       ],
       "poster": "live-fit.jpg"
     },
@@ -40,8 +64,16 @@
       "seconds": 9,
       "width": 1200,
       "height": 604,
+      "pixelWidth": 2400,
+      "pixelHeight": 1208,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "live-net.webm"
+        "live-net.webm",
+        "live-net.mp4"
       ],
       "poster": "live-net.jpg"
     },
@@ -51,8 +83,16 @@
       "seconds": 9,
       "width": 1280,
       "height": 720,
+      "pixelWidth": 2560,
+      "pixelHeight": 1440,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "stream-lorenz.webm"
+        "stream-lorenz.webm",
+        "stream-lorenz.mp4"
       ],
       "poster": "stream-lorenz.jpg"
     }

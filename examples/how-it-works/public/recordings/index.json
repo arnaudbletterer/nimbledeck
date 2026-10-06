@@ -7,8 +7,16 @@
       "seconds": 9,
       "width": 1140,
       "height": 460,
+      "pixelWidth": 2280,
+      "pixelHeight": 920,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "demo-compute.webm"
+        "demo-compute.webm",
+        "demo-compute.mp4"
       ],
       "poster": "demo-compute.jpg"
     },
@@ -18,8 +26,16 @@
       "seconds": 12,
       "width": 1140,
       "height": 460,
+      "pixelWidth": 2280,
+      "pixelHeight": 920,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "live-19.webm"
+        "live-19.webm",
+        "live-19.mp4"
       ],
       "poster": "live-19.jpg"
     },
@@ -29,8 +45,16 @@
       "seconds": 9,
       "width": 1140,
       "height": 460,
+      "pixelWidth": 2280,
+      "pixelHeight": 920,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "live-20.webm"
+        "live-20.webm",
+        "live-20.mp4"
       ],
       "poster": "live-20.jpg"
     },
@@ -40,8 +64,16 @@
       "seconds": 9,
       "width": 1100,
       "height": 500,
+      "pixelWidth": 2200,
+      "pixelHeight": 1000,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "stream-nbody.webm"
+        "stream-nbody.webm",
+        "stream-nbody.mp4"
       ],
       "poster": "stream-nbody.jpg"
     }

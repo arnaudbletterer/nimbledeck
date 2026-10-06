@@ -1,7 +1,7 @@
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { homedir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { basename, delimiter, dirname, join, relative, resolve } from 'node:path'
 import { findChrome } from './chrome.mjs'
 import { loadConfig, MAX_SECONDS, validateConfig } from './config.mjs'
@@ -13,10 +13,11 @@ import { splitSlides } from './slides.mjs'
 // into public/recordings/<id>.webm (+ .mp4 when ffmpeg is on the PATH) and a poster. See docs/RECORDING.md.
 
 const FPS = 30
-const CAPTURE = { w: 2560, h: 1440 }   // the slide is rendered at twice its 1280 x 720 logical size, then scaled down: crisp text
+const DENSITY = 2                                       // pixels per logical (CSS) pixel of a 1280 x 720 slide
+const CAPTURE = { w: 1280 * DENSITY, h: 720 * DENSITY }  // the browser draws the slide at 2560 x 1440: text and canvases at native 2x, kept as they are
 
 export function parseRecordArgs(args) {
-  const o = { slides: [], seconds: 8, width: 1280, out: null, url: null }
+  const o = { slides: [], seconds: 8, width: CAPTURE.w, out: null, url: null }
   const num = (flag, v) => { const n = Number(v); if (!Number.isFinite(n)) throw new Error(`${flag} needs a number (got ${JSON.stringify(v)})`); return n }
   for (let i = 0; i < args.length; i++) {
     const a = args[i]
@@ -79,23 +80,39 @@ export class Timeline {
 
 const even = (n) => Math.max(2, Math.round(n / 2) * 2)
 
-// The part of the capture to keep, and the size of the video. `box` is in capture pixels; `width` is the video width a whole
-// slide would have, so the video is box.w * width / CAPTURE.w wide.
-export function frameGeometry(box, width) {
+// The part of the capture to keep, and the size of the video. `box` is the component's box in capture pixels (the page is laid
+// out at the capture size); `width` is the video width a whole slide would have. At the default (the capture width) nothing is
+// scaled: the video holds every pixel of the box. `logical` is the box at the slide's own 1280 x 720 scale, in CSS pixels at
+// 1x: the size the page lays the video out at (so it is sharp on a 2x screen and fine on a 1x one).
+export function frameGeometry(box, width = CAPTURE.w) {
   const x = Math.max(0, Math.floor(box.x)), y = Math.max(0, Math.floor(box.y))
-  const w = Math.min(CAPTURE.w - x, Math.ceil(box.width)), h = Math.min(CAPTURE.h - y, Math.ceil(box.height))
+  const evenDown = (n) => Math.max(2, n - (n % 2))
+  const w = evenDown(Math.min(CAPTURE.w - x, Math.ceil(box.width))), h = evenDown(Math.min(CAPTURE.h - y, Math.ceil(box.height)))
   const f = width / CAPTURE.w
-  return { crop: { x, y, w, h }, w: even(w * f), h: even(h * f) }
+  return { crop: { x, y, w, h }, w: f === 1 ? w : even(w * f), h: f === 1 ? h : even(h * f), logical: { w: Math.round(w / DENSITY), h: Math.round(h / DENSITY) } }
 }
 
-// ffmpeg arguments: JPEG frames on stdin, a cropped and scaled video out. VP8 for webm (the ffmpeg that Playwright ships
-// has it), H.264 for mp4 (an ffmpeg on the PATH).
-export function encodeArgs(kind, g, out, fps = FPS) {
-  const vf = `crop=${g.crop.w}:${g.crop.h}:${g.crop.x}:${g.crop.y},scale=${g.w}:${g.h}:flags=lanczos,format=yuv420p`
-  const input = ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-framerate', String(fps), '-i', 'pipe:0', '-vf', vf, '-an', '-r', String(fps)]
-  return kind === 'webm'
-    ? [...input, '-c:v', 'libvpx', '-crf', '14', '-b:v', '1600k', '-deadline', 'good', '-cpu-used', '2', '-g', '60', '-auto-alt-ref', '0', out]
-    : [...input, '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out]
+// The quality ladder (docs/RECORDING.md): constant-quality CRF, lower is better and bigger.
+// The rates cap the clips that change on every frame (moving particles); a calm clip never reaches them.
+export const QUALITY = { vp9Crf: 29, vp9MaxRate: '2800k', h264Crf: 21, h264MaxRate: '3400k', vp8Crf: 10, vp8Rate: '6M' }
+
+// ffmpeg arguments: PNG frames on stdin, the cropped video out (scaled only when a smaller --width asks for it). `kind` is
+// 'vp9' (webm), 'h264' (mp4) or 'vp8' (webm, the fallback of the ffmpeg Playwright ships). VP9 runs in two passes: pass 1
+// writes only a log (`passlog`), pass 2 the file.
+export function encodeArgs(kind, g, out, { fps = FPS, pass = 0, passlog = null } = {}) {
+  const scale = g.w === g.crop.w && g.h === g.crop.h ? '' : `scale=${g.w}:${g.h}:flags=lanczos,`
+  // RGB to BT.709 limited range, and tagged so: browsers decode HD video as BT.709, and untagged video drifts in colour.
+  const vf = `crop=${g.crop.w}:${g.crop.h}:${g.crop.x}:${g.crop.y},${scale}scale=out_color_matrix=bt709:out_range=tv,format=yuv420p`
+  const tags = ['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv']
+  const input = ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'png', '-framerate', String(fps), '-i', 'pipe:0', '-vf', vf, '-an', '-r', String(fps), ...tags]
+  const keyframes = ['-g', String(fps * 2)]
+  if (kind === 'vp9') {
+    const v = ['-c:v', 'libvpx-vp9', '-b:v', QUALITY.vp9MaxRate, '-crf', String(QUALITY.vp9Crf), '-row-mt', '1', '-tile-columns', '2', '-deadline', 'good', '-cpu-used', '1', ...keyframes, '-lag-in-frames', '25', '-auto-alt-ref', '1', '-tune-content', 'screen', '-pix_fmt', 'yuv420p']
+    if (pass) v.push('-pass', String(pass), '-passlogfile', passlog)
+    return [...input, ...v, ...(pass === 1 ? ['-f', 'null', '-'] : [out])]
+  }
+  if (kind === 'h264') return [...input, '-c:v', 'libx264', '-preset', 'slow', '-crf', String(QUALITY.h264Crf), '-maxrate', QUALITY.h264MaxRate, '-bufsize', '7M', '-profile:v', 'high', '-pix_fmt', 'yuv420p', ...keyframes, '-movflags', '+faststart', out]
+  return [...input, '-c:v', 'libvpx', '-crf', String(QUALITY.vp8Crf), '-b:v', QUALITY.vp8Rate, '-deadline', 'good', '-cpu-used', '2', ...keyframes, '-auto-alt-ref', '0', out]
 }
 
 // ffmpeg binaries: the one Playwright downloaded (VP8 only, always the same build), and one on the PATH (H.264).
@@ -113,6 +130,22 @@ export function findFfmpeg({ platform = process.platform, env = process.env, hom
     bundled = dirs.map((d) => join(cache, d, file)).find((p) => exists(p)) ?? null
   } catch { /* no Playwright cache */ }
   return { bundled, system }
+}
+
+// The encoders an ffmpeg binary was built with (`ffmpeg -encoders`), as a Set; empty when it cannot be asked.
+export function ffmpegEncoders(bin) {
+  const r = spawnSync(bin, ['-hide_banner', '-encoders'], { encoding: 'utf8' })
+  return new Set(r.status === 0 ? [...r.stdout.matchAll(/^\s*V\S*\s+(\S+)/gm)].map((m) => m[1]) : [])
+}
+
+// Which formats to write, and with which ffmpeg: [{ ext, kind, bin }]. A system ffmpeg gives VP9 webm and H.264 mp4 (whatever
+// its build has); without one the ffmpeg of Playwright writes VP8 webm only, at a visibly lower quality.
+export function planEncodes(ff, encoders = ff.system ? ffmpegEncoders(ff.system) : new Set()) {
+  const plan = []
+  if (ff.system && encoders.has('libvpx-vp9')) plan.push({ ext: 'webm', kind: 'vp9', bin: ff.system })
+  if (ff.system && encoders.has('libx264')) plan.push({ ext: 'mp4', kind: 'h264', bin: ff.system })
+  if (!plan.some((p) => p.ext === 'webm') && ff.bundled) plan.push({ ext: 'webm', kind: 'vp8', bin: ff.bundled })
+  return plan
 }
 
 // Runs ffmpeg with the frames on its stdin. Resolves with the file size, rejects with ffmpeg's own words.
@@ -235,10 +268,14 @@ async function filmComponent({ page, cdp, base, slide, comp, cfgRec, o, log }) {
   const geo = frameGeometry(await root.boundingBox(), o.width)
 
   const timeline = new Timeline()
-  const onFrame = (f) => { timeline.add(f.metadata.timestamp, Buffer.from(f.data, 'base64')); cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {}) }
+  // The screencast of the DevTools protocol, as PNG: lossless, and 35 to 60 frames a second at this size (measured). It sends
+  // frames in CSS pixels, so the page is laid out at the capture size itself rather than at 1280 x 720 with a 2x density:
+  // the screencast of a 2x page is only 1280 x 720 (Page.captureScreenshot gives 2x but manages 16 to 25 frames a second).
+  let raw = 0
+  const onFrame = (f) => { raw++; timeline.add(f.metadata.timestamp, Buffer.from(f.data, 'base64')); cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {}) }
   cdp.on('Page.screencastFrame', onFrame)
+  await cdp.send('Page.startScreencast', { format: 'png', maxWidth: CAPTURE.w, maxHeight: CAPTURE.h, everyNthFrame: 1 })
   const started = Date.now()
-  await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: CAPTURE.w, maxHeight: CAPTURE.h, everyNthFrame: 1 })
   const rand = rng()
   let failure = null
   for (const step of cfgRec.steps ?? []) {
@@ -251,15 +288,16 @@ async function filmComponent({ page, cdp, base, slide, comp, cfgRec, o, log }) {
   if (failure) throw failure
   const frames = timeline.frames(Math.min(MAX_SECONDS, (Date.now() - started) / 1000))
   if (!frames) throw new Error(`${comp.id}: the browser sent no frames`)
-  return { frames, geo, seconds: frames.length / FPS }
+  return { frames, geo, seconds: frames.length / FPS, captured: raw / ((Date.now() - started) / 1000) }
 }
 
-// A poster from the last frame, cut and scaled by the browser itself (the ffmpeg Playwright ships cannot write JPEG).
+// A poster from the last frame at full pixel size, cut (and scaled when asked) by the browser itself: the ffmpeg Playwright
+// ships cannot write JPEG.
 const poster = (page, frame, g) => page.evaluate(async ({ b64, g }) => {
-  const bmp = await createImageBitmap(await (await fetch(`data:image/jpeg;base64,${b64}`)).blob())
+  const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob())
   const c = new OffscreenCanvas(g.w, g.h), x = c.getContext('2d')
   x.imageSmoothingQuality = 'high'; x.drawImage(bmp, g.crop.x, g.crop.y, g.crop.w, g.crop.h, 0, 0, g.w, g.h)
-  const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.86 })
+  const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.93 })
   const r = new FileReader()
   await new Promise((done) => { r.onload = done; r.readAsDataURL(blob) })
   return r.result.split(',')[1]
@@ -282,8 +320,9 @@ export async function recordDeck(deckPath, root, args) {
   let chromium
   try { ({ chromium } = createRequire(join(root, 'noop.js'))('playwright-chromium')) } catch { throw new Error('nimbledeck record needs playwright-chromium installed next to the deck') }
   const ff = findFfmpeg()
-  const webmBin = ff.bundled ?? ff.system
-  if (!webmBin) throw new Error('no ffmpeg found: run `npx playwright-chromium install ffmpeg`, or put ffmpeg on your PATH')
+  const plan = planEncodes(ff)
+  if (!plan.length) throw new Error('no ffmpeg found: install ffmpeg (with libvpx-vp9 and libx264) on your PATH, or run `npx playwright-chromium install ffmpeg`')
+  if (!plan.some((p) => p.kind === 'vp9')) console.warn('no system ffmpeg with VP9: using the ffmpeg of Playwright (VP8 only, no mp4). Quality is limited; install ffmpeg to get VP9 and H.264.')
 
   const log = (m) => console.log(m)
   let deck = null
@@ -314,17 +353,20 @@ export async function recordDeck(deckPath, root, args) {
       for (const comp of comps) {
         log(`slide ${slide}: ${comp.id}`)
         try {
-          const { frames, geo, seconds } = await filmComponent({ page, cdp, base, slide, comp, cfgRec: cfg.recordings[comp.id] ?? {}, o, log })
+          const { frames, geo, seconds, captured } = await filmComponent({ page, cdp, base, slide, comp, cfgRec: cfg.recordings[comp.id] ?? {}, o, log })
           const files = []
           const stem = join(out, comp.id)
-          await encode(webmBin, encodeArgs('webm', geo, `${stem}.webm`), frames); files.push(`${comp.id}.webm`)
-          if (ff.system) {
-            try { await encode(ff.system, encodeArgs('mp4', geo, `${stem}.mp4`), frames); files.push(`${comp.id}.mp4`) }
-            catch (e) { log(`  no mp4 (${e.message})`); rmSync(`${stem}.mp4`, { force: true }) }
-          } else rmSync(`${stem}.mp4`, { force: true })
+          for (const { ext, kind, bin } of plan) {
+            try {
+              if (kind === 'vp9') { const passlog = join(tmpdir(), `nd-pass-${process.pid}-${comp.id}`); try { await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { pass: 1, passlog }), frames); await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { pass: 2, passlog }), frames) } finally { rmSync(`${passlog}-0.log`, { force: true }) } }
+              else await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`), frames)
+              files.push(`${comp.id}.${ext}`)
+            } catch (e) { if (ext === 'webm') throw e; log(`  no ${ext} (${e.message})`); rmSync(`${stem}.${ext}`, { force: true }) }
+          }
+          if (!plan.some((p) => p.ext === 'mp4')) rmSync(`${stem}.mp4`, { force: true })
           writeFileSync(`${stem}.jpg`, Buffer.from(await poster(page, frames.at(-1), geo), 'base64'))
-          log(`  ${seconds.toFixed(1)} s, ${geo.w}x${geo.h}: ${files.map((f) => `${f} ${kb(join(out, f))}`).join(', ')}, ${comp.id}.jpg ${kb(`${stem}.jpg`)}`)
-          done.push({ id: comp.id, kind: comp.kind, seconds: Math.round(seconds * 10) / 10, width: geo.w, height: geo.h, files, poster: `${comp.id}.jpg` })
+          log(`  ${seconds.toFixed(1)} s, ${geo.w}x${geo.h} px (${geo.logical.w}x${geo.logical.h} css), browser sent ${captured.toFixed(0)} frames/s: ${files.map((f) => `${f} ${kb(join(out, f))}`).join(', ')}, ${comp.id}.jpg ${kb(`${stem}.jpg`)}`)
+          done.push({ id: comp.id, kind: comp.kind, seconds: Math.round(seconds * 10) / 10, width: geo.logical.w, height: geo.logical.h, pixelWidth: geo.w, pixelHeight: geo.h, fps: FPS, codecs: plan.filter((p) => files.includes(`${comp.id}.${p.ext}`)).map((p) => p.kind), files, poster: `${comp.id}.jpg` })
         } catch (e) { failed.push(comp.id); console.error(`  ERROR ${comp.id}: ${e.message}`) }
       }
     }
