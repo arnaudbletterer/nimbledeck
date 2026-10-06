@@ -7,6 +7,7 @@ changing a component.
 
 1. One message per slide. Cover first, closing last.
 2. Use only the layouts of the active theme. Never write `<div>`, `<style>` or `style=`.
+   Equations are LaTeX in the Markdown (`$...$`, `$$...$$`, `\term{1}{...}` to colour a part): never hand-style them (`docs/EQUATIONS.md`).
 3. Run `nimbledeck check <deck.md>`; fix every ERROR; split slides that trigger a warning.
 4. Preview with `nimbledeck run <deck.md>` when a live component or demo is involved.
 

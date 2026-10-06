@@ -5,6 +5,10 @@ has not had a tagged release yet, so everything below sits under Unreleased.
 
 ## Unreleased
 
+- Add equations: LaTeX in the Markdown is typeset by KaTeX with local fonts and styled by the theme in every look. `\term{n}{...}`
+  colours a part with a chart colour and names it, `\val{name}{...}` is a number that follows a slider. `<Equation>` points,
+  reveals and updates them, `highlight` on `PyStream`, `LiveCode`, `Demo`, `Chart` and `Scene3D` and `<Marker>` link them to a
+  picture, `PyStream` takes `extra` sliders, `Clip` takes `position`. The science deck gets equation slides. See docs/EQUATIONS.md.
 - Add `<LookWall />` (every look of the theme as a live card: hover previews a look on the whole slide, a click keeps it) and
   `<MotionWall />` (every motion preset playing on a real mini slide in a wave, with a row of animated backdrops). The showcase deck
   replaces its two benchmark slides with them and uses motion and background presets itself. See docs/components.md.

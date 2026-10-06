@@ -17,6 +17,7 @@ nav = [
     { "Layouts and playground" = "layouts.md" },
     { "Motion and backgrounds" = "MOTION.md" },
     { "Components gallery" = "components.md" },
+    { "Equations" = "EQUATIONS.md" },
     { "Themes and brands" = "THEMING.md" },
     { "Architecture" = "ARCHITECTURE.md" },
     { "Working offline" = "OFFLINE.md" },

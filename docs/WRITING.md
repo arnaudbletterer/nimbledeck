@@ -101,19 +101,27 @@ Canvases and 3D scenes render at the real on-screen resolution: slide size x sli
 at about 9 million pixels). Photos need enough pixels for their box, at least 1.5 times its width; use 2560 px wide
 images for a full-frame photo. Videos should be at least as wide as their box in slide units.
 
+## Equations
+
+Write maths as LaTeX: `$x^2$` in a sentence, `$$ ... $$` on its own line. `\term{1}{...}` colours part of an equation with a chart
+colour and names it, so `<Equation>` can link it to a picture next to it. Everything is typeset by KaTeX with fonts that ship
+with the deck. See [Equations](EQUATIONS.md); never style an equation by hand.
+
 ## Live components
 
 | Tag | What it shows |
 |---|---|
 | `<Orbit />` | Canvas animation. `controls` adds play, pause, scrub, speed; `hud` shows the frame rate; `frame` adds a border; `full` draws the scene for a whole 16:9 slide (use it in a 1280 x 720 `<At>`). A template for your own canvas scene. |
 | `<Scene3D />` | three.js scene, drag to rotate. A template for your own 3D scene. |
-| `<PyStream name="x" />` | A Python process streaming state to a canvas. `controls`, `hud`, `frame`, `color`. Plays its [recording](RECORDING.md) `stream-x` when the process is not running; `recording="/recordings/other"` names another file. |
+| `<PyStream name="x" />` | A Python process streaming state to a canvas. `controls`, `hud`, `frame`, `color`; `:extra` adds sliders that are sent to the process and published as parameters for an `<Equation>`; `highlight` answers to a term of one. Plays its [recording](RECORDING.md) `stream-x` when the process is not running; `recording="/recordings/other"` names another file. |
 | `<Demo name="x" />` | A local marimo app in an iframe. Plays its [recording](RECORDING.md) `demo-x` when the process is not running, else an offline panel. |
 | `<LiveCode>` with a fenced block | An editor and its result. `:auto="false"`, `:timeout`, `frame`; `id="plot"` names its [recording](RECORDING.md) `live-plot` (default `live-<slide number>`). |
 
-| `<Clip src="/a.mp4" webm="/a.webm" />` | A looping video. `fit`, `dim`, `controls`. `webm` is an optional second encoding for a browser built without H.264. A `/` address is a file of `public/` and follows the base path of the build. |
-| `<Chart type="bar" :labels="[...]" :data="[...]" />` | Chart.js chart (`bar`, `line`, `pie`, `doughnut`), coloured by `--nd-chart-1..4`, animated when its slide appears. `horizontal`, `stacked`, `values`, `legend`, `center="3,2K"` (donut). |
+| `<Clip src="/a.mp4" webm="/a.webm" />` | A looping video. `fit`, `position` (with `fit="cover"`, which part stays: `right`), `dim`, `controls`. `webm` is an optional second encoding for a browser built without H.264. A `/` address is a file of `public/` and follows the base path of the build. |
+| `<Chart type="bar" :labels="[...]" :data="[...]" />` | Chart.js chart (`bar`, `line`, `pie`, `doughnut`), coloured by `--nd-chart-1..4`, animated when its slide appears. `horizontal`, `stacked`, `values`, `legend`, `center="3,2K"` (donut). A line of more than 30 points is drawn without dots and keeps every label (`''` for a blank one). |
 | `<Quiz answer="B">` with `<Choice letter="A">` ... and `<Explain letter="B">` inside | Interactive quiz: the presenter clicks an answer (or presses 1 to 4); it turns good or bad, the right answer is revealed, the others fade, and the explanation appears. Leaving the slide resets it. Without `answer`, mark the right choice with `correct` for a static slide (use that for PDF handouts). |
+| `<Equation label="...">` around a `$$` block | LaTeX made linkable: pointing at a `\term{1}{...}` dims the others and lights what answers to it, `:reveal` shows terms one click at a time, `\val{name}{10}` is a number that follows a slider. `size`, `align`, `params`, `decimals`. See [Equations](EQUATIONS.md). |
+| `<Marker term="1">50 Hz</Marker>` in an `<At>` | A label that shows over a picture while term 1 of an `<Equation>` is pointed at. |
 | `<Countdown :seconds="20" />` | Circular timer that starts when its slide appears; click pauses. |
 | `<Flip>` with `<template #front>` and `<template #back>` | A card that flips on click. |
 | `<Compare before="/a.jpg" after="/b.jpg" />` | Before and after images with a draggable divider (arrow keys work too). `before-label` and `after-label` caption the corners, `sweep` glides the divider in once when the slide appears, `label` names the slider for screen readers. Give both images one layout so the divider reads as a restyle. |
@@ -160,7 +168,9 @@ A web page cannot run these. To make them play there too, record them once with 
    `:size` is the dot size in logical pixels (2.2), `:fade` how much of the previous frame is erased per frame (0.25;
    smaller gives longer trails); `:w` and `:h` set the logical canvas (1000 x 460), and the stream's x and y in
    [-2, 2] map to its width and height; `:sliders` is three `{label, min, max, step, value}` objects for the `n`, `dt` and
-   `g` sliders that `controls` shows.
+   `g` sliders that `controls` shows; `:extra` is more `{name, label, min, max, step, value}` sliders, each sent to the process under
+   its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows
+   ([Equations](EQUATIONS.md)).
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 
 ## Live code
@@ -229,7 +239,7 @@ are too low-resolution for the screen. Run it before presenting.
 ## Rules the checker enforces
 
 Known layout, a `# title` of at most `maxTitle` characters on content slides, at most `maxBullets` bullets (warning),
-no `<div>`, `<style>` or `style=`, every `/asset` exists in `public/`, every `<Demo>` and `<PyStream>` is registered
+no `<div>`, `<style>` or `style=` (LaTeX between `$` signs is not read as HTML), every `/asset` exists in `public/`, every `<Demo>` and `<PyStream>` is registered
 and its file exists, every `<At>` fits its `<Stage>` and every `<Stage>` fits the slide, and a warning when a slide holds
 more than `maxChars` (900) characters or a `<Photo>` has too few pixels for its box.
 

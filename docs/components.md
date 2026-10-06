@@ -137,7 +137,7 @@ Content that leans toward the pointer in 3D with a moving sheen.
 
 <div markdown>
 ### `<Clip src="/a.mp4" />`
-A looping video with `fit`, `dim` and `controls`.
+A looping video with `fit`, `position`, `dim` and `controls`.
 </div>
 
 <div markdown>
@@ -185,6 +185,23 @@ A Python process streaming state to a canvas over a WebSocket, at up to 60 frame
 <div markdown>
 ### `<Demo name="compute" />`
 A local [marimo](https://marimo.io) app in the slide, with an offline panel when its process is down.
+</div>
+
+</div>
+
+## Equations
+
+<div class="nd-cards" markdown>
+
+<div markdown>
+### `<Equation label="...">`
+A `$$` block of LaTeX made linkable. `\term{1}{...}` colours a part with a chart colour; pointing at it (or a tour hover)
+dims the rest and lights what answers to it. `reveal`, `params`, `size`, `align`. See [Equations](EQUATIONS.md).
+</div>
+
+<div markdown>
+### `<Marker term="1">`
+A label that appears over a picture, at the peak or axis its term stands for, while that term is pointed at.
 </div>
 
 </div>

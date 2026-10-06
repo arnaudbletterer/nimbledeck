@@ -7,6 +7,7 @@ no network request of its own when it runs. Only content that lives on the inter
 
 - Opening and walking a deck: slides, builds, animations, canvas, 3D, charts, quizzes, the command palette.
 - Fonts and the favicon: the theme uses system fonts and an inline icon, so nothing is fetched.
+- Equations: KaTeX typesets LaTeX when the deck is built, and its math fonts are files of the deck, never a CDN (see [Equations](EQUATIONS.md)).
 - Images and video that sit in the deck's `public/` folder.
 - Python demos, streams and live code, from uv's cache (see below).
 - `nimbledeck check`, `export` and `verify`: they only talk to your own machine.
