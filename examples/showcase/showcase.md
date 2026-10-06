@@ -11,8 +11,6 @@ transition: nd-zoom
 ndSound: /audio/origami-loop.mp3
 ndSlideSound: whoosh
 tour: 5
-sounds:
-  - { at: 0.3, src: swell, volume: 0.6 }
 ---
 
 ::bg::
@@ -37,8 +35,6 @@ class: nd-grid
 background: aurora
 motion: curtain
 tour: 5
-sounds:
-  - { at: 1.2, src: soft-boom, volume: 0.5 }
 ---
 
 #### The whole idea
@@ -90,13 +86,6 @@ Fourteen lines of Markdown, three slides. The preview on the right is a sketch o
 ---
 layout: stage
 tour: 6
-sounds:
-  - { at: 0.4, src: tick, volume: 0.4 }
-  - { at: 0.5, src: tick, volume: 0.4 }
-  - { at: 0.6, src: tick, volume: 0.4 }
-  - { at: 0.7, src: tick, volume: 0.4 }
-  - { at: 0.8, src: tick, volume: 0.4 }
-  - { at: 0.9, src: tick, volume: 0.4 }
 ---
 
 <Stage full>
@@ -219,7 +208,6 @@ Text that moves is a tag, not a keyframe editor. Words, letters or lines; from a
 ---
 layout: full
 tour: 5
-sound: swell
 ---
 
 <Stage full>
