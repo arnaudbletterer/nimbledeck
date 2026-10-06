@@ -92,6 +92,7 @@ What it does:
 - **Live numbers.** `\val{sigma}{10}` is a number that follows the parameter `sigma`; `10` is what shows until something
   sets it. Any component can set a parameter. A `<PyStream>` does it for its `extra` sliders.
 - **Revealing.** `reveal` lights terms one click at a time, so a long equation can be built while you talk.
+  Clicks of a `$$ {1|2|all}` block in the same slide come after those of `reveal`: terms first, then lines.
 
 It animates nothing of its own and costs nothing on a slide that is not on screen. With reduced motion the terms change at once.
 
