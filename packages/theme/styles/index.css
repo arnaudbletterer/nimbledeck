@@ -871,3 +871,31 @@ html.nd-touring .nd-zoom-enter-active, html.nd-touring .nd-zoom-leave-active { t
 [data-nd-variant="print"] .nd-bg { filter: grayscale(1); opacity: 0.45; }
 [data-nd-variant="print"] .nd-photo { filter: grayscale(1); }
 /* ==== end of the look catalogue ==== */
+
+/* ==== Equations: LaTeX in the Markdown, set by KaTeX with its own local fonts (docs/EQUATIONS.md). Tokens only, so every look
+   gets readable maths. A display equation is 46 px on the 1280 x 720 slide (--nd-eq-size, or the size prop of <Equation>), an
+   inline one follows the text. \term{n}{...} paints a part with chart colour n and underlines it, so it stays visible even in a
+   look whose first chart colour is the ink. ==== */
+.slidev-layout .katex { font-size: 1.12em; letter-spacing: normal; text-indent: 0; text-transform: none; }
+.slidev-layout .katex-display { margin: 0.45em 0; }
+.slidev-layout .katex-display > .katex { font-size: var(--nd-eq-size, 46px); }
+.nd-eq-left .katex-display > .katex { text-align: left; }
+.slidev-layout .katex .nd-tm { --nd-tc: var(--nd-accent); color: var(--nd-tc); border-radius: 0.14em; padding: 0 0.05em;
+  background: color-mix(in srgb, var(--nd-tc) 14%, transparent); box-shadow: 0 0.07em 0 0 color-mix(in srgb, var(--nd-tc) 70%, transparent);
+  transition: opacity 0.25s, background-color 0.25s, box-shadow 0.25s; }
+.slidev-layout .katex .nd-t1 { --nd-tc: var(--nd-chart-1); }
+.slidev-layout .katex .nd-t2 { --nd-tc: var(--nd-chart-2); }
+.slidev-layout .katex .nd-t3 { --nd-tc: var(--nd-chart-3); }
+.slidev-layout .katex .nd-t4 { --nd-tc: var(--nd-chart-4); }
+.slidev-layout .katex .nd-t5 { --nd-tc: var(--nd-accent); }
+.slidev-layout .katex .nd-t6 { --nd-tc: var(--nd-accent-2); }
+.slidev-layout .katex .nd-val { font-variant-numeric: tabular-nums; }
+.slidev-layout .katex .nd-tm.nd-on { background: color-mix(in srgb, var(--nd-tc) 32%, transparent); box-shadow: 0 0.09em 0 0 var(--nd-tc); }
+.nd-eq[data-linked] .katex .nd-tm:not(.nd-on) { opacity: 0.35; }
+.nd-eq .katex .nd-tm.nd-hid { opacity: 0.1; }
+.nd-eq .katex .nd-tm[data-term] { cursor: default; }
+/* A derivation ($$ {1|2|all}): the lines that are not the current step recede. */
+.slidev-katex-wrapper .mord { transition: opacity 0.3s; }
+.slidev-katex-wrapper .mord.dishonored { opacity: 0.22; }
+[data-nd-variant="print"] .katex .nd-tm { background: none; }
+@media (prefers-reduced-motion: reduce) { .slidev-layout .katex .nd-tm, .slidev-katex-wrapper .mord { transition: none; } }
