@@ -6,7 +6,7 @@ titleTemplate: "%s"
 layout: hero
 class: nd-grid
 transition: nd-zoom
-ndSound: pad
+ndSound: uplift
 ndSlideSound: whoosh
 tour: 5
 sounds:
@@ -417,16 +417,16 @@ sounds:
 </At>
 <At :x="140" :y="200" :w="1000" :h="230" :z="1" enter="fade" :delay="500"><Equalizer :bars="32" /></At>
 <At :x="140" :y="460" :w="1000" :z="1" enter="fade" :delay="900">
-<Kinetic text="Eleven sounds, made in the browser. No files." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
+<Kinetic text="Twelve sounds, made in the browser. No files." mode="words" from="up" :stagger="30" size="s" tone="muted" :delay="900" />
 </At>
 </Stage>
 
 ::caption::
 
-Sound is optional. The speaker in the bar switches it off.
+Sound is optional. The speaker in the bar switches it off. The music bed is one line, `ndSound: uplift`, and the deck can change it.
 
 <!--
-Click, tick, pop, chime, success, whoosh: each is synthesised with the Web Audio API, zero bytes, nothing fetched. Sound is off until the viewer asks, and the equalizer is drawn from the real output.
+Click, tick, pop, chime, success, whoosh: each is synthesised with the Web Audio API, zero bytes, nothing fetched. The music under them is a generated bed called uplift, set by one line of headmatter; a deck can pick another (pad) or point it at its own file. Sound is off until the viewer asks, and the equalizer is drawn from the real output.
 -->
 
 ---

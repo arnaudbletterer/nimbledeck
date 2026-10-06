@@ -6,7 +6,7 @@ import { sound, soundOn } from '../composables/useSound'
 import { parseSounds } from '../composables/tourScript.mjs'
 
 // Plays the sounds a deck asks for in its frontmatter (see docs/TOUR.md). Nothing is drawn.
-//   headmatter   ndSound: pad            a bed that loops while sound is on, and ducks under cues
+//   headmatter   ndSound: uplift         a bed that plays while sound is on, and ducks under cues
 //                ndSlideSound: whoosh    a cue on every slide change
 //   per slide    sound: pop              one cue on entry
 //                sounds: [{ at, src, volume }]   cues at offsets from the slide's entry

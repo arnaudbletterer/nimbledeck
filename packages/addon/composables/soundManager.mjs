@@ -8,11 +8,15 @@ import { SYNTH } from './soundSynth.mjs'
 import { soundKind } from './tourScript.mjs'
 
 export const STORE_KEY = 'nimbledeck:sound'
-const MASTER = 0.8, BED_LEVEL = 0.5, DUCKED = 0.22
+const MASTER = 0.8
+// Bed gain and its ducked gain under cues, per built-in bed (a file bed uses `pad`'s). `uplift` is written quiet: its level is
+// measured (docs/TOUR.md) to sit well under the cues, and it ducks 5 dB under them.
+export const BEDS = { pad: { level: 0.5, ducked: 0.22 }, uplift: { level: 0.22, ducked: 0.12 } }
+const FADE_IN = 2, FADE_OUT = 1
 
 export function createSoundManager({ AudioContextCtor = globalThis.AudioContext ?? globalThis.webkitAudioContext, storage = globalThis.localStorage, loadFile } = {}) {
   let ctx = null, bus = null, master = null, analyser = null, bedGain = null
-  let bed = null                       // { src, voice }
+  let bed = null                       // { src, voice, gain, level, ducked }
   let enabled = false
   const voices = new Set()             // { scope, gain, sources, end }
   const buffers = new Map()            // file address -> Promise<AudioBuffer>
@@ -58,9 +62,11 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
     if (!bedGain) return
     const t = ctx.currentTime
     duckUntil = Math.max(duckUntil, t + seconds)
+    const now = bedGain.gain.value
     bedGain.gain.cancelScheduledValues(t)
-    bedGain.gain.setTargetAtTime(DUCKED, t, 0.08)
-    bedGain.gain.setTargetAtTime(BED_LEVEL, duckUntil, 0.5)
+    bedGain.gain.setValueAtTime(now, t)   // keep where a fade-in or an earlier duck has got to
+    bedGain.gain.setTargetAtTime(bed.ducked, t, 0.08)
+    bedGain.gain.setTargetAtTime(bed.level, duckUntil, 0.5)
   }
 
   async function buffer(src) {
@@ -99,11 +105,12 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
     const kind = soundKind(src).kind
     if (kind === 'invalid') return
     bedGain = ctx.createGain(); bedGain.gain.value = 0.0001; bedGain.connect(bus)
-    bedGain.gain.linearRampToValueAtTime(BED_LEVEL, ctx.currentTime + 2)
+    const { level, ducked } = BEDS[src] ?? BEDS.pad
+    bedGain.gain.linearRampToValueAtTime(level, ctx.currentTime + FADE_IN)
     const v = { scope: 'bed', gain: ctx.createGain(), sources: [], end: Infinity }
     v.gain.gain.value = 1; v.gain.connect(bedGain); voices.add(v)
-    bed = { src, voice: v, gain: bedGain }
-    log.push({ src, scope: 'bed', at: ctx.currentTime, volume: BED_LEVEL })
+    bed = { src, voice: v, gain: bedGain, level, ducked }
+    log.push({ src, scope: 'bed', at: ctx.currentTime, volume: level })
     if (kind === 'builtin') v.sources = SYNTH[src](ctx, v.gain, ctx.currentTime).sources
     else buffer(src).then((buf) => { if (bed?.voice !== v) return; const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(v.gain); s.start(); v.sources = [s] }).catch(() => {})
   }
@@ -111,9 +118,9 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
     if (!bed) return
     const { voice: v, gain } = bed
     bed = null; bedGain = null
-    release(v, 0.6)
-    try { const t = ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + 0.6) } catch { /* gone */ }
-    setTimeout(() => { try { gain.disconnect() } catch { /* gone */ } }, 900)
+    release(v, FADE_OUT)
+    try { const t = ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + FADE_OUT) } catch { /* gone */ }
+    setTimeout(() => { try { gain.disconnect() } catch { /* gone */ } }, (FADE_OUT + 0.3) * 1000)
   }
   function stopScope(scope) { for (const v of [...voices]) if (v.scope === scope) release(v) }
   function stopAll() { stopBed(); for (const v of [...voices]) release(v) }

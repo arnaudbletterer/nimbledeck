@@ -69,6 +69,7 @@ test('the deck-level bed and slide sound are checked', () => {
   assert.match(r.errors.join('\n'), /headmatter: ndSound 'nope'/)
   assert.doesNotMatch(r.errors.join('\n'), /ndSlideSound/)
   assert.deepEqual(run(slide('', 'ndSound: pad\nndSlideSound: whoosh\n')).errors, [])
+  assert.deepEqual(run(slide('', 'ndSound: uplift\nndSlideSound: whoosh\n')).errors, [])
 })
 
 test('a bad tour value is an error', () => {

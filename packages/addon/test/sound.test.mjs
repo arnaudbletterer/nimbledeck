@@ -1,7 +1,7 @@
 // The sound manager and the built-in synth recipes, against a fake AudioContext that records what is built.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createSoundManager, STORE_KEY } from '../composables/soundManager.mjs'
+import { createSoundManager, STORE_KEY, BEDS } from '../composables/soundManager.mjs'
 import { SYNTH } from '../composables/soundSynth.mjs'
 import { BUILTIN_SOUNDS } from '../composables/tourScript.mjs'
 
@@ -20,6 +20,7 @@ class FakeContext {
   createBiquadFilter() { return this.make('filter') }
   createBufferSource() { return this.make('source') }
   createDynamicsCompressor() { return this.make('limiter') }
+  createConvolver() { return this.make('convolver') }
   createAnalyser() { const n = this.make('analyser'); n.frequencyBinCount = 8; n.getByteFrequencyData = (a) => a.fill(128); return n }
   createBuffer(c, len) { return { getChannelData: () => new Float32Array(len) } }
   decodeAudioData() { return Promise.resolve({ duration: 1 }) }
@@ -36,9 +37,30 @@ test('each recipe builds started sources and reports a length', () => {
     const ctx = new FakeContext(), out = ctx.createGain()
     const r = SYNTH[name](ctx, out, 0)
     assert.ok(r.dur > 0, name)
-    assert.ok(r.sources.length > 0 && r.sources.every((s) => s.started), `${name} starts its sources`)
+    assert.ok(r.sources.length > 0 && r.sources.every((s) => s.started || typeof s.stop === 'function'), `${name} starts its sources`)
+    r.sources.forEach((s) => s.stop())   // also stops the uplift scheduler's timer
   }
-  assert.equal(SYNTH.pad(new FakeContext(), node('g'), 0).dur, Infinity)
+  for (const bed of ['pad', 'uplift']) {
+    const r = SYNTH[bed](new FakeContext(), node('g'), 0)
+    assert.equal(r.dur, Infinity)
+    r.sources.forEach((s) => s.stop())
+  }
+})
+
+test('uplift schedules its first notes at once, keeps scheduling ahead on the context clock, and stops when told', async () => {
+  const ctx = new FakeContext(), out = ctx.createGain()
+  const r = SYNTH.uplift(ctx, out, 0)
+  const oscs = () => ctx.nodes.filter((n) => n.kind === 'osc').length
+  const first = oscs()
+  assert.ok(first > 10, 'the first 1.6 s of the score is scheduled on the first tick')
+  ctx.currentTime = 3
+  await new Promise((res) => setTimeout(res, 260))
+  assert.ok(oscs() > first, 'moving the clock makes the next notes appear')
+  r.sources.forEach((s) => s.stop())
+  const n = ctx.nodes.length
+  ctx.currentTime = 10
+  await new Promise((res) => setTimeout(res, 260))
+  assert.equal(ctx.nodes.length, n, 'a stopped bed schedules nothing more')
 })
 
 test('sound is off until the viewer opts in, and nothing plays then', () => {
@@ -115,6 +137,21 @@ test('the bed starts once, replaces a different bed, and a cue ducks it', () => 
   assert.equal(m.log.filter((l) => l.scope === 'bed').length, 1)
   m.play('chime')
   m.stopBed()
+})
+
+test('uplift is a quiet bed that ducks about 5 dB under a cue, and a slide change does not restart it', () => {
+  assert.ok(BEDS.uplift.level < BEDS.pad.level)
+  const duck = 20 * Math.log10(BEDS.uplift.ducked / BEDS.uplift.level)
+  assert.ok(duck <= -4 && duck >= -6, `ducks ${duck.toFixed(1)} dB`)
+  FakeContext.made.length = 0
+  const m = make()
+  m.setEnabled(true)
+  m.startBed('uplift')
+  const ctx = FakeContext.made.at(-1), made = ctx.nodes.length
+  for (let page = 0; page < 5; page++) m.startBed('uplift')   // what the sound director does on every slide change
+  assert.equal(ctx.nodes.length, made, 'no node was built again')
+  assert.equal(m.log.filter((l) => l.scope === 'bed').length, 1)
+  m.stopAll()
 })
 
 test('levels are zeros without a context and values between 0 and 1 with one', () => {

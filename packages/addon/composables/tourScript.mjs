@@ -1,7 +1,7 @@
 // The vocabulary of a scripted tour and of slide sounds, shared by the browser engine and by `nimbledeck check`.
 // Pure functions, no DOM: they take what Slidev parsed from the frontmatter and return normalised steps plus messages.
 
-export const BUILTIN_SOUNDS = ['click', 'tick', 'pop', 'whoosh', 'riser', 'chime', 'success', 'soft-boom', 'typing', 'swell', 'pad']
+export const BUILTIN_SOUNDS = ['click', 'tick', 'pop', 'whoosh', 'riser', 'chime', 'success', 'soft-boom', 'typing', 'swell', 'pad', 'uplift']
 export const AUDIO_EXT = /\.(mp3|ogg|wav|m4a|aac|webm)$/i
 export const ACTIONS = ['click', 'hover', 'drag', 'key', 'type', 'wait']
 const KEYS = { common: ['at', 'caption'], click: [], hover: [], drag: ['from', 'to', 'over'], key: [], type: ['into', 'speed'], wait: [] }

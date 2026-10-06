@@ -3,6 +3,8 @@
 // seconds (Infinity for a loop) and the sources the manager must stop. Peaks are low on purpose; the manager adds a
 // master gain and a limiter on top.
 
+import { createScheduler, midiHz } from './upliftScore.mjs'
+
 const FLOOR = 0.0001
 
 function tone(ctx, out, list, { type = 'sine', f, f2, t, dur, peak = 0.2, attack = 0.005, detune = 0 }) {
@@ -26,7 +28,8 @@ function noiseBuffer(ctx) {
   if (!b) {
     b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate)
     const d = b.getChannelData(0)
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+    let seed = 20240607   // seeded: every render of a cue is the same
+    for (let i = 0; i < d.length; i++) { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; d[i] = (seed / 4294967296) * 2 - 1 }
     noises.set(ctx, b)
   }
   return b
@@ -47,6 +50,22 @@ function hiss(ctx, out, list, { type = 'bandpass', f, f2, q = 1, t, dur, peak = 
   list.push(s)
 }
 
+// A generated room: stereo noise with an exponential decay and a darkening lowpass, the same on every run.
+function impulse(ctx, seconds) {
+  const n = Math.floor(ctx.sampleRate * seconds), buf = ctx.createBuffer(2, n, ctx.sampleRate)
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c)
+    let seed = 12345 + c * 977, lo = 0
+    for (let i = 0; i < n; i++) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0
+      const w = (seed / 4294967296) * 2 - 1, k = 0.55 - 0.45 * (i / n)
+      lo += k * (w - lo)
+      d[i] = lo * Math.exp(-4.2 * i / n) * (i < 600 ? i / 600 : 1)
+    }
+  }
+  return buf
+}
+
 export const SYNTH = {
   click(ctx, out, t) {
     const sources = []
@@ -56,7 +75,7 @@ export const SYNTH = {
   },
   tick(ctx, out, t) {
     const sources = []
-    tone(ctx, out, sources, { f: 2400, t, dur: 0.04, peak: 0.12 })
+    tone(ctx, out, sources, { f: 2200, t, dur: 0.05, peak: 0.2, attack: 0.003 })
     return { dur: 0.1, sources }
   },
   pop(ctx, out, t) {
@@ -67,7 +86,7 @@ export const SYNTH = {
   },
   whoosh(ctx, out, t) {
     const sources = []
-    hiss(ctx, out, sources, { f: 260, f2: 2600, q: 1.1, t, dur: 0.55, peak: 0.3, attack: 0.22 })
+    hiss(ctx, out, sources, { f: 260, f2: 2600, q: 1.1, t, dur: 0.55, peak: 0.42, attack: 0.22 })
     hiss(ctx, out, sources, { f: 1800, f2: 500, q: 0.8, t: t + 0.18, dur: 0.45, peak: 0.12, attack: 0.1 })
     return { dur: 0.8, sources }
   },
@@ -103,8 +122,8 @@ export const SYNTH = {
     const sources = []
     let at = 0
     for (let i = 0; i < 22; i++) {
-      hiss(ctx, out, sources, { f: 1500 + rnd() * 1800, q: 3, t: t + at, dur: 0.022, peak: 0.1 + rnd() * 0.08 })
-      tone(ctx, out, sources, { f: 180 + rnd() * 60, t: t + at, dur: 0.03, peak: 0.05 })
+      hiss(ctx, out, sources, { f: 1500 + rnd() * 1800, q: 3, t: t + at, dur: 0.022, peak: 0.16 + rnd() * 0.1 })
+      tone(ctx, out, sources, { f: 180 + rnd() * 60, t: t + at, dur: 0.03, peak: 0.08 })
       at += 0.05 + rnd() * 0.07
     }
     return { dur: at + 0.1, sources }
@@ -116,7 +135,8 @@ export const SYNTH = {
     hiss(ctx, out, sources, { type: 'lowpass', f: 300, f2: 2400, q: 0.6, t, dur, peak: 0.1, attack: dur * 0.6 })
     return { dur: dur + 0.1, sources }
   },
-  // An ambient drone for a bed: a loop that never ends by itself. Slow beating between detuned voices.
+  // A calm, dark drone for a bed: a loop that never ends by itself, slow beating between detuned voices. Moody on
+  // purpose, and not for the showcase, which uses `uplift`.
   pad(ctx, out, t) {
     const sources = []
     const lp = ctx.createBiquadFilter()
@@ -131,6 +151,61 @@ export const SYNTH = {
       o.type = type; o.frequency.value = f; o.detune.value = d
       g.gain.value = type === 'sawtooth' ? 0.05 : 0.07
       o.connect(g); g.connect(lp); o.start(t); sources.push(o)
+    }
+    return { dur: Infinity, sources }
+  },
+  // A warm, optimistic bed: a marimba-like arpeggio, a soft pad, bass on the roots, a light kick and shaker, in G major at
+  // 104 bpm (the score is in upliftScore.mjs). Notes are scheduled ahead on the AudioContext clock; a timer only wakes the
+  // scheduler, so a late timer never moves a note. An OfflineAudioContext knows its length, so its whole render is scheduled at once.
+  uplift(ctx, out, t) {
+    const sources = []
+    const lp = ctx.createBiquadFilter()
+    lp.type = 'lowpass'; lp.frequency.value = 4200; lp.Q.value = 0.4
+    const send = ctx.createGain(), room = ctx.createConvolver()
+    send.gain.value = 0.34
+    room.buffer = impulse(ctx, 1.7)
+    lp.connect(out); lp.connect(send); send.connect(room); room.connect(out)
+    const padLp = ctx.createBiquadFilter()
+    padLp.type = 'lowpass'; padLp.frequency.value = 1100; padLp.Q.value = 0.3
+    padLp.connect(lp)
+    const sink = []   // the notes end by themselves; only the scheduler's timer has to be stopped
+    const play = (e) => {
+      const at = e.t
+      if (e.kind === 'pluck') {
+        const f = midiHz(e.midi), v = e.vel
+        tone(ctx, lp, sink, { f, t: at, dur: 1.0, peak: 0.1 * v, attack: 0.008 })
+        tone(ctx, lp, sink, { f: f * 4, t: at, dur: 0.22, peak: 0.022 * v, attack: 0.006 })
+        tone(ctx, lp, sink, { type: 'triangle', f, t: at, dur: 0.45, peak: 0.04 * v, attack: 0.01 })
+      } else if (e.kind === 'bass') {
+        const f = midiHz(e.midi)
+        tone(ctx, lp, sink, { f, t: at, dur: e.dur, peak: 0.2 * e.vel, attack: 0.02 })
+        tone(ctx, lp, sink, { type: 'triangle', f: f * 2, t: at, dur: e.dur * 0.6, peak: 0.03 * e.vel, attack: 0.03 })
+      } else if (e.kind === 'kick') {
+        tone(ctx, lp, sink, { f: 118, f2: 46, t: at, dur: e.dur, peak: 0.22 * e.vel, attack: 0.006 })
+      } else if (e.kind === 'hat') {
+        hiss(ctx, lp, sink, { type: 'highpass', f: 6500, q: 0.5, t: at, dur: e.dur, peak: 0.018 * e.vel, attack: 0.012 })
+      } else if (e.kind === 'pad') {
+        const f = midiHz(e.midi)
+        for (const d of [-7, 7]) {
+          const o = ctx.createOscillator(), g = ctx.createGain()
+          o.type = 'triangle'; o.frequency.value = f; o.detune.value = d
+          g.gain.setValueAtTime(FLOOR, at)
+          g.gain.linearRampToValueAtTime(0.034, at + 1.1)
+          g.gain.setValueAtTime(0.034, at + e.dur - 0.6)
+          g.gain.exponentialRampToValueAtTime(FLOOR, at + e.dur + 1.4)
+          o.connect(g); g.connect(padLp); o.start(at); o.stop(at + e.dur + 1.5)
+        }
+      }
+    }
+    const horizon = ctx.length ? ctx.length / ctx.sampleRate : null
+    if (horizon != null) {
+      for (const e of createScheduler({ start: t + 0.05, lookahead: horizon + 1, late: Infinity }).advance(0)) if (e.t < horizon) play(e)
+    } else {
+      const sch = createScheduler({ start: t + 0.05 })
+      let timer = 0
+      const tick = () => { for (const e of sch.advance(ctx.currentTime)) play(e); timer = setTimeout(tick, 200) }
+      tick()
+      sources.push({ stop() { clearTimeout(timer) } })
     }
     return { dur: Infinity, sources }
   },
