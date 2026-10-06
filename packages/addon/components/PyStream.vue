@@ -4,6 +4,8 @@ import { useActive } from '../composables/useActive'
 import { useCrisp } from '../composables/useCrisp'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
+import { links } from '../composables/links.mjs'
+import { useLinked } from '../composables/useLinked'
 
 // Live Python animation: a Python process computes state and streams it over a WebSocket; this component
 // draws it on a canvas. Controls are sent back as JSON. See docs/WRITING.md for the wire format.
@@ -15,8 +17,11 @@ import { useRecording } from '../composables/useRecording'
 //           (default 0.25; smaller gives longer trails)
 //   w, h    logical canvas size (default 1000 x 460); the stream's x and y in [-2, 2] map to the width and the height
 //   sliders three objects {label, min, max, step, value} for the n, dt and g sliders, in that order
+//   extra   more sliders {name, label, min, max, step, value}: each is sent to the process under its name (like n, dt and g) and
+//           published as the parameter `name`, which a \val{name}{...} of an <Equation> shows (composables/links.mjs)
+//   highlight  { "1": "note" }: the terms of an <Equation> this stream answers to (a ring in the term's colour and the note)
 interface Slider { label: string; min: number; max: number; step: number; value: number }
-const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; sliders?: Slider[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
+const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; sliders?: Slider[]; extra?: (Slider & { name: string })[]; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
 const LW = props.w, LH = props.h
 const SL: Slider[] = props.sliders ?? [
   { label: 'particles', min: 100, max: 2000, step: 100, value: 400 },
@@ -29,10 +34,12 @@ const cv = ref<HTMLCanvasElement>()
 const { k } = useCrisp(root, { w: LW, h: LH })
 const state = ref<'offline' | 'live'>('offline')
 const n = ref(SL[0].value), dt = ref(SL[1].value), g = ref(SL[2].value)
+const ex = reactive<Record<string, number>>(Object.fromEntries((props.extra ?? []).map((e) => [e.name, e.value])))
+const { linked, linkAttrs } = useLinked(() => props.highlight)
 const fps = ref(0), stepMs = ref(0)
 let ws: WebSocket | null = null, timer = 0, frames = 0, last = performance.now(), closed = true
 
-function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value })) }
+function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...ex })) }
 async function connect() {
   if (closed) return
   const port = (await useNimbleConfig()).streams[props.name]?.port
@@ -65,20 +72,24 @@ async function connect() {
 function stop() { closed = true; clearTimeout(timer); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
 const active = useActive()
 const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
-watch(active, (a) => { stop(); if (a) { closed = false; connect() } }, { immediate: true })
+watch(active, (a) => { stop(); if (a) { closed = false; connect(); publish() } }, { immediate: true })
+function publish() { for (const [name, v] of Object.entries(ex)) links.setParam(name, v) }
+watch(ex, () => { if (active.value) publish() })
 onUnmounted(stop)
 </script>
 
 <template>
-  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream" :data-rec-id="`stream-${name}`">
+  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream" :data-rec-id="`stream-${name}`" v-bind="linkAttrs">
     <canvas v-show="!rec.shown" ref="cv" :width="LW" :height="LH" />
     <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
     <div v-else-if="state === 'offline' && !rec.pending" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
+    <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
     <div v-if="controls && !rec.shown" class="nd-ctl">
       <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
       <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"></label>
       <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"></label>
+      <label v-for="e in extra" :key="e.name">{{ e.label }} <input v-model.number="ex[e.name]" type="range" :min="e.min" :max="e.max" :step="e.step" @change="send"> {{ ex[e.name] }}</label>
     </div>
   </div>
 </template>

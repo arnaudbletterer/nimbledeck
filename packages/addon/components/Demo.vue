@@ -4,12 +4,14 @@ import { useSlideContext } from '@slidev/client'
 import { useNimbleConfig } from '../composables/useConfig'
 import { useActive } from '../composables/useActive'
 import { useRecording } from '../composables/useRecording'
+import { useLinked } from '../composables/useLinked'
 
 // <Demo name="compute" /> embeds a local marimo app. The port comes from nimbledeck.config.json,
 // the optional poster from public/posters/<name>.png. If the process is down, the recording demo-<name> made by
 // `nimbledeck record` plays when there is one, else an offline panel shows.
 // Neighbouring slides stay mounted, so it probes and embeds the app only while its own slide is the one on screen.
-const props = withDefaults(defineProps<{ name: string; frame?: boolean; recording?: string }>(), { frame: false })
+const props = withDefaults(defineProps<{ name: string; frame?: boolean; recording?: string; highlight?: Record<string, string> | string[] }>(), { frame: false })
+const { linked, linkAttrs } = useLinked(() => props.highlight)
 const { $renderContext } = useSlideContext()
 const thumb = computed(() => $renderContext?.value === 'overview')   // a thumbnail must not probe or embed the demo
 const port = ref<number | null>(null)
@@ -40,7 +42,8 @@ onUnmounted(stop)
 </script>
 
 <template>
-  <div class="nd-demo" :class="{ 'nd-framed': frame }" data-kind="demo" :data-rec-id="`demo-${name}`" :data-state="live ? 'live' : 'offline'">
+  <div class="nd-demo" :class="{ 'nd-framed': frame }" data-kind="demo" :data-rec-id="`demo-${name}`" :data-state="live ? 'live' : 'offline'" v-bind="linkAttrs">
+    <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <FrameGuard v-if="live"><iframe :src="src" allowtransparency="true" /></FrameGuard>
     <Recorded v-else-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
     <div v-else class="nd-down">

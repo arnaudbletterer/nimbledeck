@@ -4,6 +4,7 @@ import { useSlideContext } from '@slidev/client'
 import { Chart, registerables, type ChartConfiguration } from 'chart.js'
 import { useActive } from '../composables/useActive'
 import { cssVar } from '../composables/useConfig'
+import { useLinked } from '../composables/useLinked'
 
 Chart.register(...registerables)
 
@@ -22,7 +23,9 @@ const props = withDefaults(defineProps<{
   values?: boolean
   center?: string
   frame?: boolean
+  highlight?: Record<string, string> | string[]
 }>(), { type: 'bar', horizontal: false, stacked: false, values: false, frame: false })
+const { linked, linkAttrs } = useLinked(() => props.highlight)
 
 const { $scale } = useSlideContext()
 const cv = ref<HTMLCanvasElement>()
@@ -96,7 +99,8 @@ onUnmounted(stop)
 </script>
 
 <template>
-  <div class="nd-chart" :class="{ 'nd-framed': frame }" data-kind="chart" :data-state="ready ? 'ready' : 'idle'">
+  <div class="nd-chart" :class="{ 'nd-framed': frame }" data-kind="chart" :data-state="ready ? 'ready' : 'idle'" v-bind="linkAttrs">
+    <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <canvas ref="cv" />
     <div v-if="center" class="nd-chart-center">{{ center }}</div>
   </div>

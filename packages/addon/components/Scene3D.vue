@@ -4,10 +4,12 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { useActive } from '../composables/useActive'
 import { useCrisp } from '../composables/useCrisp'
+import { useLinked } from '../composables/useLinked'
 
 // WebGL scene (three.js): a torus knot you can drag to rotate, scroll to zoom.
 // A template for "my own 3D scene": copy this file and replace the mesh.
-const props = withDefaults(defineProps<{ controls?: boolean; hud?: boolean; frame?: boolean; ratio?: number }>(), { controls: false, hud: false, frame: false, ratio: 2.2 })
+const props = withDefaults(defineProps<{ controls?: boolean; hud?: boolean; frame?: boolean; ratio?: number; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, ratio: 2.2 })
+const { linked, linkAttrs } = useLinked(() => props.highlight)
 const host = ref<HTMLDivElement>()
 const root = ref<HTMLElement>()
 const { k } = useCrisp(root, { w: Math.round(460 * props.ratio), h: 460 })
@@ -82,7 +84,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :style="{ '--nd-ratio': ratio }" :data-fps="fps" data-kind="webgl">
+  <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :style="{ '--nd-ratio': ratio }" :data-fps="fps" data-kind="webgl" v-bind="linkAttrs">
+    <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <div ref="host" class="nd-gl" />
     <span v-if="hud" class="nd-hud" :title="renderer_name">{{ fps }} fps</span>
     <div v-if="controls" class="nd-ctl"><span>drag to rotate, scroll to zoom</span></div>

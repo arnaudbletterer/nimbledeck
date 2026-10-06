@@ -11,6 +11,7 @@ import { useActive } from '../composables/useActive'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
 import { sfx } from '../composables/useSound'
+import { useLinked } from '../composables/useLinked'
 
 // Live code: edit Python on the slide and the result (printed output and matplotlib figures) updates as you type.
 // The code runs in a local Python process started by `nimbledeck run` (config key `runner`), never in the browser.
@@ -25,8 +26,9 @@ import { sfx } from '../composables/useSound'
 //   </LiveCode>
 // `auto` re-runs while you type (default); set `:auto="false"` for heavy code: run with the button or Cmd/Ctrl+Enter.
 // Without the runner it plays the recording live-<id> made by `nimbledeck record` (id defaults to the slide number).
-const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean; id?: string; recording?: string; quiet?: boolean }>(), { auto: true, timeout: 10, frame: false })
+const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean; id?: string; recording?: string; quiet?: boolean; highlight?: Record<string, string> | string[] }>(), { auto: true, timeout: 10, frame: false })
 const { $scale, $page } = useSlideContext()
+const { linked, linkAttrs } = useLinked(() => props.highlight)
 const source = ref<HTMLElement>()
 const editorHost = ref<HTMLElement>()
 const result = ref<HTMLElement>()
@@ -121,7 +123,8 @@ onUnmounted(() => { stop(); view?.destroy() })
 </script>
 
 <template>
-  <div class="nd-live" :class="{ 'nd-framed': frame }" data-kind="livecode" :data-rec-id="recId" :data-state="state" @click.stop @keydown.stop @keyup.stop>
+  <div class="nd-live" :class="{ 'nd-framed': frame }" data-kind="livecode" :data-rec-id="recId" :data-state="state" @click.stop @keydown.stop @keyup.stop v-bind="linkAttrs">
+    <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <div ref="source" class="nd-live-source"><slot /></div>
     <div class="nd-live-code" :inert="rec.shown || undefined">
       <div ref="editorHost" class="nd-live-editor" />

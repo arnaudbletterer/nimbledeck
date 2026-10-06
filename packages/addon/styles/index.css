@@ -222,6 +222,16 @@
 .nd-site-off button:hover, .nd-site-off button:focus-visible { background: var(--nd-accent-2); outline: none; }
 .nd-media > .nd-site-off, .nd-compare > .nd-site-off { position: absolute; inset: 0; }
 
+/* ==== Linked equations: <Equation> and the `highlight` prop of PyStream, LiveCode, Demo, Chart and Scene3D ====
+   A visualization answering to the term the viewer points at gets a ring in that term's colour and, when the prop has a note for
+   it, a label in the corner. Both are drawn by the page, so they show over a live component and over its recording. */
+.nd-eq { position: relative; color: var(--nd-ink); }
+[data-linked] { outline: 3px solid var(--nd-tc); outline-offset: 6px; border-radius: 4px; transition: outline-color 0.25s; }
+.nd-linkchip { position: absolute; left: 12px; top: 10px; z-index: 5; max-width: 80%; padding: 4px 14px; border-radius: 999px; pointer-events: none;
+  font: 600 20px var(--nd-font-body); color: var(--nd-bg); background: var(--nd-tc); animation: nd-linkchip 0.25s ease-out; }
+@keyframes nd-linkchip { from { opacity: 0; translate: 0 6px; } }
+@media (prefers-reduced-motion: reduce) { .nd-linkchip { animation: none; } }
+
 /* ==== Motion toolkit: Kinetic ==== */
 /* Fills its box, display font, tight and balanced. Every unit starts hidden and is animated by CSS; the component only
    remounts the units (a new key) to replay, so the browser does the work off the main thread. */

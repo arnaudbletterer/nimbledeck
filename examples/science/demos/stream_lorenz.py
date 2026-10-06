@@ -7,6 +7,7 @@ The page colours the points by their position in the list, so a trajectory keeps
 
 The client sends JSON {"n", "dt", "g"}, which this demo reads as: n = trajectories, dt = Lorenz time per frame, and
 g = the number of decimal digits the first and the last trajectory share at the start (difference = 10 ** -g).
+It also reads sigma, rho and beta, the three parameters of the equations (the slide shows them next to the stream).
 Each connection owns its simulation, and the numpy step runs in a worker thread. The ensemble restarts when it has
 spread over the whole attractor.
 """
@@ -33,16 +34,18 @@ RESTART_AT = 42.0     # Lorenz time units after which the ensemble starts over
 MAX_MESSAGE = 1024
 
 
-def rhs(s):
+def rhs(s, p):
+    """dx/dt = sigma (y - x), dy/dt = x (rho - z) - y, dz/dt = x y - beta z (Lorenz 1963)."""
+    sigma, rho, beta = p
     x, y, z = s[:, 0], s[:, 1], s[:, 2]
-    return np.stack([SIGMA * (y - x), x * (RHO - z) - y, x * y - BETA * z], 1)
+    return np.stack([sigma * (y - x), x * (rho - z) - y, x * y - beta * z], 1)
 
 
-def rk4(s, h):
-    k1 = rhs(s)
-    k2 = rhs(s + 0.5 * h * k1)
-    k3 = rhs(s + 0.5 * h * k2)
-    k4 = rhs(s + h * k3)
+def rk4(s, h, p=(SIGMA, RHO, BETA)):
+    k1 = rhs(s, p)
+    k2 = rhs(s + 0.5 * h * k1, p)
+    k3 = rhs(s + 0.5 * h * k2, p)
+    k4 = rhs(s + h * k3, p)
     return s + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
 
 
@@ -60,6 +63,7 @@ START = on_attractor()
 class Lorenz:
     def __init__(self, n=200, dt=0.04, g=5.0):
         self.dt, self.g = dt, g
+        self.p = (SIGMA, RHO, BETA)
         self.reset(n)
 
     def reset(self, n):
@@ -71,7 +75,7 @@ class Lorenz:
         h = self.dt / SUB
         pts = np.empty((len(self.s), SUB, 2), np.float32)
         for k in range(SUB):
-            self.s = rk4(self.s, h)
+            self.s = rk4(self.s, h, self.p)
             pts[:, k, 0] = OFFSET_X + self.s[:, 0] * PX / (0.25 * W)             # x in about [-20, 20]
             pts[:, k, 1] = -(self.s[:, 2] - 25.0) * PX / (0.25 * H)              # z in about [0, 50], up on the page
         self.t += self.dt
@@ -99,6 +103,10 @@ def parse_params(raw):
         out["dt"] = min(max(out["dt"], 0.005), 0.06)
     if "g" in out:
         out["g"] = min(max(out["g"], 1.0), 9.0)
+    for key, lo, hi in (("sigma", 0.0, 30.0), ("rho", 0.0, 60.0), ("beta", 0.1, 8.0)):
+        v = msg.get(key)
+        if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
+            out[key] = min(max(float(v), lo), hi)
     return out
 
 
@@ -117,6 +125,7 @@ async def handler(ws):
             if pending:
                 m = dict(pending); pending.clear()
                 sim.dt = float(m.get("dt", sim.dt))
+                sim.p = tuple(float(m.get(k, v)) for k, v in zip(("sigma", "rho", "beta"), sim.p))
                 if "g" in m: sim.g = float(m["g"])
                 if "n" in m or "g" in m: sim.reset(int(m.get("n", len(sim.s))))
             pts = await asyncio.to_thread(sim.step)
