@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 import { dirname, join, resolve } from 'node:path'
 
 const BUILTIN = ['default', 'cover', 'center', 'end', 'full', 'iframe', 'iframe-left', 'iframe-right', 'image', 'image-left', 'image-right', 'intro', 'none', 'quote', 'section', 'statement', 'fact', 'two-cols', 'two-cols-header']
@@ -41,7 +42,9 @@ export function knownLayouts(root, head) {
 export function knownLooks(root, head) {
   const req = createRequire(join(root, 'noop.js'))
   const theme = head.theme && head.theme !== 'none' ? resolvePackage(req, root, head.theme, 'slidev-theme-') : null
-  const file = theme && join(theme, 'looks.json')
+  // The base theme named but not installed next to the deck (a deck in a temp folder, a CLI run from the checkout): use its own list.
+  const own = fileURLToPath(new URL('../../theme/looks.json', import.meta.url))
+  const file = theme ? join(theme, 'looks.json') : (head.theme === 'nimbledeck' ? own : null)
   if (!file || !existsSync(file)) return null
   try { return new Set(JSON.parse(readFileSync(file, 'utf8')).map((l) => l.id)) } catch { return null }
 }

@@ -35,7 +35,7 @@ function checkStages(body, layout, where, errors) {
 function checkVariant(head, root, name, errors) {
   const id = String(head.ndVariant ?? '').replace(/^["']|["']$/g, '').trim()
   const known = id ? knownLooks(root, head) : null
-  if (known && !known.has(id)) errors.push(`${name}:1: unknown look ndVariant '${id}' (known: ${[...known].join(', ')})`)
+  if (known) checkChoice('ndVariant', id, [...known], { allowNone: false }).forEach((m) => errors.push(`${name}:1 (headmatter): ${m}`))
 }
 
 // Lint a deck. Returns { errors, warnings, slides }. Rules mirror docs/WRITING.md.

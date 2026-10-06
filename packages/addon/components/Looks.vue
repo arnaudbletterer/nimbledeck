@@ -11,7 +11,7 @@ import { useActive } from '../composables/useActive'
 // the tour starts, `auto="false"` turns the tour off. Reduced motion keeps the deck's look.
 const TOUR = ['plain', 'paper', 'night', 'studio-light', 'studio', 'editorial', 'swiss', 'neon']
 const props = withDefaults(defineProps<{ looks?: string[] | string; interval?: number; delay?: number; auto?: boolean }>(), {
-  looks: () => TOUR, interval: 1600, delay: 1500, auto: true,
+  looks: () => ['plain', 'paper', 'night', 'studio-light', 'studio', 'editorial', 'swiss', 'neon'], interval: 1600, delay: 1500, auto: true,
 })
 // The theme lists its looks on the root element (setup/main.ts); a theme without the list has no "all".
 const list = computed<string[]>(() => {

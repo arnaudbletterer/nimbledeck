@@ -23,7 +23,7 @@ test('ndVariant must be a look listed in the looks.json of the theme', () => {
   assert.deepEqual(run(undefined), [])
   const errors = run('neonn')
   assert.equal(errors.length, 1)
-  assert.match(errors[0], /unknown look ndVariant 'neonn' \(known: calm, loud\)/)
+  assert.match(errors[0], /ndVariant: unknown 'neonn'/)
 })
 
 test('a theme without a looks.json (a brand theme) is not checked', () => {
