@@ -44,9 +44,10 @@ export function formatValue(value, decimals = 2) {
   return text.replace('-', '−')
 }
 
-// The CSS colour of a term: ids 1 to 4 are the chart colours, 5 the accent, 6 the second accent, any other id the accent.
+// The CSS colour of a term: the leading digit of its id picks it, 1 to 4 the chart colours, 5 the accent, 6 the second accent,
+// anything else the accent. "1" and "1b" share colour 1 and are still two terms, so one colour can point at two things.
 export function termColor(id) {
-  const n = Number(id)
+  const n = Number(/^\d/.exec(String(id))?.[0])
   if (n >= 1 && n <= 4) return `var(--nd-chart-${n})`
   return n === 6 ? 'var(--nd-accent-2)' : 'var(--nd-accent)'
 }

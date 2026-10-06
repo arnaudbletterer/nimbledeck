@@ -53,6 +53,7 @@ test('term ids 1 to 4 take the chart colours, the rest an accent', () => {
   assert.equal(termColor(4), 'var(--nd-chart-4)')
   assert.equal(termColor('6'), 'var(--nd-accent-2)')
   assert.equal(termColor('x'), 'var(--nd-accent)')
+  assert.equal(termColor('2band'), 'var(--nd-chart-2)')
 })
 
 test('highlight is an object of notes or a list of ids', () => {

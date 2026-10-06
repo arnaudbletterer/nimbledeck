@@ -883,12 +883,12 @@ html.nd-touring .nd-zoom-enter-active, html.nd-touring .nd-zoom-leave-active { t
 .slidev-layout .katex .nd-tm { --nd-tc: var(--nd-accent); color: var(--nd-tc); border-radius: 0.14em; padding: 0 0.05em;
   background: color-mix(in srgb, var(--nd-tc) 14%, transparent); box-shadow: 0 0.07em 0 0 color-mix(in srgb, var(--nd-tc) 70%, transparent);
   transition: opacity 0.25s, background-color 0.25s, box-shadow 0.25s; }
-.slidev-layout .katex .nd-t1 { --nd-tc: var(--nd-chart-1); }
-.slidev-layout .katex .nd-t2 { --nd-tc: var(--nd-chart-2); }
-.slidev-layout .katex .nd-t3 { --nd-tc: var(--nd-chart-3); }
-.slidev-layout .katex .nd-t4 { --nd-tc: var(--nd-chart-4); }
-.slidev-layout .katex .nd-t5 { --nd-tc: var(--nd-accent); }
-.slidev-layout .katex .nd-t6 { --nd-tc: var(--nd-accent-2); }
+.slidev-layout .katex [class*="nd-t1"] { --nd-tc: var(--nd-chart-1); }
+.slidev-layout .katex [class*="nd-t2"] { --nd-tc: var(--nd-chart-2); }
+.slidev-layout .katex [class*="nd-t3"] { --nd-tc: var(--nd-chart-3); }
+.slidev-layout .katex [class*="nd-t4"] { --nd-tc: var(--nd-chart-4); }
+.slidev-layout .katex [class*="nd-t5"] { --nd-tc: var(--nd-accent); }
+.slidev-layout .katex [class*="nd-t6"] { --nd-tc: var(--nd-accent-2); }
 .slidev-layout .katex .nd-val { font-variant-numeric: tabular-nums; }
 .slidev-layout .katex .nd-tm.nd-on { background: color-mix(in srgb, var(--nd-tc) 32%, transparent); box-shadow: 0 0.09em 0 0 var(--nd-tc); }
 .nd-eq[data-linked] .katex .nd-tm:not(.nd-on) { opacity: 0.35; }
