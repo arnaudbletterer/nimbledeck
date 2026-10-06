@@ -85,7 +85,7 @@ $\sigma = \val{sigma}{10}\quad \rho = \val{rho}{28}\quad \beta = \val{beta}{2.67
 </Equation>
 </At>
 <At :x="700" :y="572" :z="2"><Marker term="1">x: left to right</Marker></At>
-<At :x="470" :y="330" :z="2"><Marker term="3">z: height</Marker></At>
+<At :x="495" :y="262" :z="2"><Marker term="3">z: height</Marker></At>
 <At :x="640" :y="90" :z="2"><Marker term="2">y: not drawn, it steers x and z</Marker></At>
 </Stage>
 
@@ -231,7 +231,7 @@ A sine of frequency f is one spike at f; the noise is the floor. On the right, t
 <At :x="640" :y="58" :w="600" :h="604" :z="1" frame enter="left" :delay="300"><Clip src="/recordings/live-fft.webm" fit="cover" position="right" /></At>
 <At :x="800" :y="300" :z="2"><Marker term="1">50 Hz</Marker></At>
 <At :x="944" :y="300" :z="2"><Marker term="2">120 Hz</Marker></At>
-<At :x="780" :y="470" :z="2"><Marker term="3">noise floor</Marker></At>
+<At :x="968" :y="392" :z="2"><Marker term="3">noise floor</Marker></At>
 </Stage>
 
 <!--
@@ -410,7 +410,7 @@ $$
 <At :x="640" :y="58" :w="600" :h="604" :z="1" frame enter="left" :delay="300"><Clip src="/recordings/live-net.webm" fit="cover" position="right" /></At>
 <At :x="870" :y="235" :z="2"><Marker term="1">inner ring, y = 0</Marker></At>
 <At :x="900" :y="125" :z="2"><Marker term="2">outer ring, y = 1</Marker></At>
-<At :x="720" :y="470" :z="2"><Marker term="3">decision boundary</Marker></At>
+<At :x="990" :y="84" :z="2"><Marker term="3">decision boundary</Marker></At>
 </Stage>
 
 <!--
