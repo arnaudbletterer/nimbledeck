@@ -77,7 +77,7 @@ test('sounds: built-in names, files of public/ and everything else', () => {
 test('sound and sounds become one sorted list of cues', () => {
   const r = parseSounds({ sound: 'whoosh', sounds: [{ at: 4, src: 'chime', volume: 0.5 }, { at: 2.5, src: '/audio/x.mp3' }] })
   assert.deepEqual(r.errors, [])
-  assert.deepEqual(r.cues, [{ at: 0, src: 'whoosh', volume: 1 }, { at: 2.5, src: '/audio/x.mp3', volume: 1 }, { at: 4, src: 'chime', volume: 0.5 }])
+  assert.deepEqual(r.cues, [{ at: 0, src: 'whoosh', volume: 1, when: 'tour' }, { at: 2.5, src: '/audio/x.mp3', volume: 1, when: 'tour' }, { at: 4, src: 'chime', volume: 0.5, when: 'tour' }])
 })
 
 test('sound mistakes: unknown name, bad volume, bad keys, cue after the slide', () => {
@@ -122,4 +122,10 @@ test('cancelling stops the script before the next step', async () => {
   let stop = false
   await runScript(parseScript([{ at: 1, click: 'A' }, { at: 2, click: 'B' }]).steps, { ...c, cancelled: () => stop, act: async (s) => { seen.push(s.target); stop = true } })
   assert.deepEqual(seen, ['A'])
+})
+
+test('a cue is tour-only unless it says when: always', () => {
+  const r = parseSounds({ sounds: [{ at: 1, src: 'pop' }, { at: 2, src: 'pop', when: 'always' }] })
+  assert.deepEqual(r.cues.map((c) => c.when), ['tour', 'always'])
+  assert.match(parseSounds({ sounds: [{ at: 1, src: 'pop', when: 'never' }] }).errors[0], /'when' is tour/)
 })

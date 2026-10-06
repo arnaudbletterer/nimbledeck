@@ -4,6 +4,7 @@ import { useActive } from '../composables/useActive'
 import { useEntered } from '../composables/useEntered'
 import { applyBackground, applyMotion, replayPreset, wall } from '../composables/wallState'
 import BgLayer from './BgLayer.vue'
+import { sfx } from '../composables/useSound'
 
 // Every motion preset and every background preset of the theme, playing at once. Each motion card is a real mini slide
 // (a `.slidev-layout` root carrying `data-nd-motion="<id>"`, 1280 x 720 scaled down), so the real preset CSS plays, not a
@@ -14,7 +15,7 @@ import BgLayer from './BgLayer.vue'
 // first. `backgrounds="false"` leaves the backdrop row out. The slide that holds it should have no motion of its own: a
 // preset moves every title and list item below its root, and the cards bring their own. Reduced motion shows every card
 // finished and plays nothing.
-const props = withDefaults(defineProps<{ width?: number; cols?: number; period?: number; delay?: number; backgrounds?: boolean; looks?: string[] }>(), { width: 1160, cols: 7, period: 6500, delay: 900, backgrounds: true, looks: () => ['neon', 'sunset', 'studio', 'candy', 'blueprint', 'forest', 'ocean'] })
+const props = withDefaults(defineProps<{ width?: number; cols?: number; period?: number; delay?: number; backgrounds?: boolean; looks?: string[]; quiet?: boolean }>(), { width: 1160, cols: 7, period: 6500, delay: 900, backgrounds: true, looks: () => ['neon', 'sunset', 'studio', 'candy', 'blueprint', 'forest', 'ocean'] })
 const FALLBACK_M = 'fade-up,cascade,slide-left,slide-right,drop,zoom,zoom-out,blur-in,focus,wipe,curtain,flip,pop,rise,typewriter,glitch,spotlight,swing,rubber,parallax,count'
 const FALLBACK_B = 'aurora,shader,grid,mesh,noise,dots,waves,spotlight,stars,gradient'
 const GAP = 12, GAP_B = 10
@@ -48,6 +49,7 @@ function play(i: number) {
 }
 function click(i: number, e: MouseEvent) {
   if (e.detail) (e.currentTarget as HTMLElement | null)?.blur()          // a mouse click must not keep the arrow keys from turning the page
+  if (!props.quiet) sfx('pop', { volume: 0.5, pitch: i * 90 - 300, gap: 120 })
   play(i)
   applyMotion(motions.value[i])          // and the slide itself plays it too (see <WallDemo>)
 }

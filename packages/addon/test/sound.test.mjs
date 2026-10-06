@@ -26,7 +26,8 @@ class FakeContext {
   decodeAudioData() { return Promise.resolve({ duration: 1 }) }
 }
 const memory = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) } }
-const make = (o = {}) => createSoundManager({ AudioContextCtor: FakeContext, storage: memory(), loadFile: async () => new ArrayBuffer(8), ...o })
+let T = 0
+const make = (o = {}) => createSoundManager({ clock: () => T, AudioContextCtor: FakeContext, storage: memory(), loadFile: async () => new ArrayBuffer(8), ...o })
 
 test('every built-in name has a recipe and every recipe a name', () => {
   assert.deepEqual(Object.keys(SYNTH).sort(), [...BUILTIN_SOUNDS].sort())
@@ -168,4 +169,52 @@ test('a listener hears the switch', () => {
   m.subscribe((v) => seen.push(v))
   m.setEnabled(true); m.setEnabled(false)
   assert.deepEqual(seen, [true, false])
+})
+
+test('sfx is free and silent when sound is off or the context is not there yet', () => {
+  FakeContext.made.length = 0
+  const m = make()
+  assert.equal(m.sfx('pop'), null)
+  assert.equal(FakeContext.made.length, 0)
+})
+
+test('sfx is rate limited per name and overall, then plays again after the gap', () => {
+  const m = make(); m.setEnabled(true)
+  T = 1000
+  assert.ok(m.sfx('pop', { gap: 100 }))
+  T = 1010
+  assert.equal(m.sfx('pop', { gap: 100 }), null)       // same name, too soon
+  assert.equal(m.sfx('tick'), null)                     // any name within 25 ms
+  T = 1040
+  assert.ok(m.sfx('tick'))
+  T = 1200
+  assert.ok(m.sfx('pop', { gap: 100 }))
+  assert.equal(m.log.filter((l) => l.scope === 'sfx').length, 3)
+})
+
+test('sfx pitch detunes the oscillators', () => {
+  const m = make(); m.setEnabled(true)
+  T = 5000
+  m.sfx('pop', { pitch: 300 })
+  const ctx = FakeContext.made.at(-1)
+  assert.ok(ctx.nodes.filter((n) => n.kind === 'osc').some((o) => o.detune.value === 300))
+})
+
+test('soundtrack cues sound only while a tour plays, unless they say always', () => {
+  const m = make(); m.setEnabled(true)
+  assert.equal(m.cue('whoosh', {}), null)
+  assert.ok(m.cue('chime', { when: 'always' }))
+  m.setTour(true)
+  assert.ok(m.cue('whoosh', {}))
+  m.setTour(false)
+  assert.equal(m.cue('whoosh', {}), null)
+})
+
+test('the page sounds are not stopped when the tour ends, only the soundtrack is', () => {
+  const m = make(); m.setEnabled(true); T = 9000
+  m.setTour(true)
+  const c = m.cue('riser', {}), s = m.sfx('pop')
+  assert.ok(c && s)
+  m.setTour(false)
+  assert.ok(m.log.some((l) => l.scope === 'sfx'))
 })

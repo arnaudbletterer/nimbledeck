@@ -5,6 +5,7 @@ import { useActive } from '../composables/useActive'
 import { useEntered } from '../composables/useEntered'
 import { applyLook } from '../composables/wallState'
 import { lookIds, lookLabel, useLookSwitch } from '../composables/lookSwitch'
+import { sfx } from '../composables/useSound'
 
 // Every look of the theme at once: a grid of small cards, each a mock slide (title, a bullet, a callout, chips) that
 // takes its colours from its own look, because the look tokens are defined on any element that carries `data-nd-variant`.
@@ -13,7 +14,7 @@ import { lookIds, lookLabel, useLookSwitch } from '../composables/lookSwitch'
 // of the theme), `cols` is the column count (default: the one that fills a wide slide, 5 for 20 cards), `tour` is the ms the
 // ring stays on a card (0 turns it off), `delay` the ms before the tour starts. Cheap on purpose: the cards are plain CSS,
 // only the ring's pointer is script. Reduced motion shows the grid at once, with no ring tour.
-const props = withDefaults(defineProps<{ looks?: string[] | string; cols?: number; tour?: number; delay?: number }>(), { tour: 1300, delay: 1400 })
+const props = withDefaults(defineProps<{ looks?: string[] | string; cols?: number; tour?: number; delay?: number; quiet?: boolean }>(), { tour: 1300, delay: 1400 })
 const GAP = 14
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 const list = computed<string[]>(() => {
@@ -51,6 +52,7 @@ watch(here, (h) => { if (!h) { stop(); pinned.value = ''; restore() } })
 function preview(i: number, e?: Event) { real = !!e?.isTrusted; paused = true; hot.value = i; clearTimeout(hover); hover = window.setTimeout(() => swap(list.value[i]), 90) }
 function choose(i: number, e?: MouseEvent) {
   if (e?.detail) (e.currentTarget as HTMLElement | null)?.blur()          // a mouse click must not keep the arrow keys from turning the page
+  if (!props.quiet) sfx('pop', { volume: 0.5, pitch: i * 90 - 300, gap: 120 })   // the pitch follows the card
   clearTimeout(hover); pinned.value = list.value[i]; hot.value = i; swap(list.value[i])
 }
 // A pointerleave during a cross-fade is the browser handing the pointer to the transition, not the viewer leaving.

@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import { sound } from './useSound'
 import { GLIDE_MS, TYPE_MS, parseScript, runScript, scriptEnd, targetKind } from './tourScript.mjs'
 
 // The scripted tour: a virtual cursor that glides to real elements of the active slide and then sends them the same
@@ -11,6 +12,8 @@ import { GLIDE_MS, TYPE_MS, parseScript, runScript, scriptEnd, targetKind } from
 export interface Step { at: number; action: 'click' | 'hover' | 'drag' | 'key' | 'type' | 'wait'; target?: string; from?: number; to?: number; over?: number; key?: string; text?: string; into?: string; speed?: number; seconds?: number; caption?: string }
 
 // What the cursor component draws.
+/** True while a tour plays: the soundtrack cues of the slides sound only then. */
+export const tourState = reactive({ playing: false })
 export const cursor = reactive({ shown: false, x: 0, y: 0, down: false, caption: '', ripple: 0, gliding: false })
 
 const POINTER = 4242   // a pointer id no real device has
@@ -39,6 +42,7 @@ export function begin() {
   live = true
   restore = patchCapture()
   document.documentElement.classList.add('nd-touring')
+  tourState.playing = true; sound.setTour(true)
 }
 export function end() {
   cancel()
@@ -46,6 +50,7 @@ export function end() {
   live = false
   restore(); restore = () => {}
   document.documentElement.classList.remove('nd-touring')
+  tourState.playing = false; sound.setTour(false)
   cursor.shown = false; cursor.down = false; cursor.caption = ''
 }
 export function cancel() { run++ }

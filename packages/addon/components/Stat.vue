@@ -8,7 +8,7 @@ import CountUp from './CountUp.vue'
 // <Stat value="60" suffix=" fps" label="smooth on a laptop" :decimals="0" />. The number is right-aligned in a box as wide
 // as its final value, so the suffix and the label never move while it counts.
 // `delay` (ms) staggers several stats: 0, 150, 300 and so on. When the count lands the number gives a short glow.
-const props = withDefaults(defineProps<{ value: number | string; suffix?: string; prefix?: string; label?: string; decimals?: number; duration?: number; delay?: number }>(), { decimals: 0, duration: 1400, delay: 0, suffix: '', prefix: '' })
+const props = withDefaults(defineProps<{ value: number | string; suffix?: string; prefix?: string; label?: string; decimals?: number; duration?: number; delay?: number; quiet?: boolean }>(), { decimals: 0, duration: 1400, delay: 0, suffix: '', prefix: '' })
 const to = computed(() => Number(props.value))
 const final = computed(() => to.value.toFixed(props.decimals))
 const on = useEntered(useActive())
@@ -18,7 +18,7 @@ const on = useEntered(useActive())
   <div class="nd-stat" :class="{ 'nd-on': on }" :style="{ '--nd-stat-wait': Math.round(delay + duration * 0.8) + 'ms' }" data-kind="stat" :aria-label="`${prefix}${final}${suffix} ${label ?? ''}`">
     <div class="nd-stat-num" aria-hidden="true">
       <span v-if="prefix" class="nd-stat-fix">{{ prefix }}</span>
-      <span class="nd-stat-val"><span class="nd-stat-ghost">{{ final }}</span><CountUp class="nd-stat-live" :to="to" :decimals="decimals" :duration="duration" :delay="delay" /></span>
+      <span class="nd-stat-val"><span class="nd-stat-ghost">{{ final }}</span><CountUp class="nd-stat-live" :quiet="quiet" :to="to" :decimals="decimals" :duration="duration" :delay="delay" /></span>
       <span v-if="suffix" class="nd-stat-fix">{{ suffix }}</span>
     </div>
     <div v-if="label" class="nd-stat-label" aria-hidden="true">{{ label }}</div>

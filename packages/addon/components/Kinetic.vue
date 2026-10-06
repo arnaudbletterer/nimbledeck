@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useActive } from '../composables/useActive'
+import { sfx } from '../composables/useSound'
 
 // Kinetic typography: <Kinetic text="Slides that move." mode="words" from="up" :stagger="70" size="xl" accent="move" />
 // Plays when its slide becomes active and again on every re-entry. `mode` splits into words, letters or lines (lines
@@ -18,6 +19,7 @@ const props = withDefaults(defineProps<{
   hold?: boolean
   trigger?: number
   delay?: number
+  quiet?: boolean
 }>(), { mode: 'words', from: 'up', size: 'xl', tone: 'auto', trigger: 0, delay: 0 })
 
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -48,7 +50,7 @@ const index = computed(() => {
 const released = computed(() => !props.hold || shown.value || props.trigger > 0)
 const go = computed(() => active.value && released.value)
 
-function start() { playing.value = false; run.value++; nextTick(() => { playing.value = true }) }
+function start() { if (!props.quiet) sfx('pluck', { volume: 0.4, gap: 700, key: 'title' }); playing.value = false; run.value++; nextTick(() => { playing.value = true }) }
 watch(go, (g) => { if (g) start(); else playing.value = false }, { immediate: true })
 watch(() => props.trigger, (t, o) => { if (go.value && t !== o && t > 0) start() })
 

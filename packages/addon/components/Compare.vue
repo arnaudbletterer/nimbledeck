@@ -2,12 +2,13 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { asset } from '../composables/asset.mjs'
 import { useActive } from '../composables/useActive'
+import { sfx } from '../composables/useSound'
 
 // Before and after images with a draggable divider. Drag anywhere on it, or focus it and use the arrow keys.
 // `beforeLabel` and `afterLabel` put a small caption in the top corners. `sweep` glides the divider in from the right
 // when the slide appears (a hint that it moves), and stops at the first touch; reduced motion skips it.
 // Both images should share one layout (same margins, same lines) so that the divider reads as a restyle.
-const props = withDefaults(defineProps<{ before: string; after: string; start?: number; beforeLabel?: string; afterLabel?: string; sweep?: boolean; label?: string }>(), { start: 50, label: 'Before and after' })
+const props = withDefaults(defineProps<{ before: string; after: string; start?: number; beforeLabel?: string; afterLabel?: string; sweep?: boolean; label?: string; quiet?: boolean }>(), { start: 50, label: 'Before and after' })
 const beforeUrl = computed(() => asset(props.before)), afterUrl = computed(() => asset(props.after))   // "/a.jpg" follows the base path
 const failed = ref(false)   // a remote image that cannot load (offline) gets a quiet note
 const pos = ref(props.start)
@@ -21,7 +22,11 @@ const active = useActive()
 function stopSweep() { cancelAnimationFrame(raf); clearTimeout(timer) }
 function move(e: PointerEvent) {
   const r = box.value!.getBoundingClientRect()
-  if (r.width > 0) pos.value = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100))
+  if (r.width > 0) {
+    const was = Math.floor(pos.value / 10)
+    pos.value = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100))
+    if (!props.quiet && Math.floor(pos.value / 10) !== was) sfx('tick', { volume: 0.22, pitch: pos.value * 6, gap: 60 })   // a soft tick on each tenth the divider crosses
+  }
 }
 function down(e: PointerEvent) { stopSweep(); dragging = true; grabbed.value = true; try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) } catch { /* a pointer the browser does not track, such as a scripted tour's */ }
   move(e) }

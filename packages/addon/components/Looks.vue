@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useNav, useSlideContext } from '@slidev/client'
 import { useActive } from '../composables/useActive'
+import { sfx } from '../composables/useSound'
 import { lookIds, lookLabel, useLookSwitch } from '../composables/lookSwitch'
 
 // A look switcher: the same slide in several looks of the theme, live. <Looks /> shows a row of chips; when its slide
@@ -11,7 +12,7 @@ import { lookIds, lookLabel, useLookSwitch } from '../composables/lookSwitch'
 // "all" for every look of the theme, which makes a tall row: give it room), `interval` is ms per look, `delay` ms before
 // the tour starts, `auto="false"` turns the tour off. Reduced motion keeps the deck's look.
 const TOUR = ['plain', 'paper', 'night', 'studio-light', 'studio', 'editorial', 'swiss', 'neon']
-const props = withDefaults(defineProps<{ looks?: string[] | string; interval?: number; delay?: number; auto?: boolean }>(), {
+const props = withDefaults(defineProps<{ looks?: string[] | string; interval?: number; delay?: number; auto?: boolean; quiet?: boolean }>(), {
   looks: () => ['plain', 'paper', 'night', 'studio-light', 'studio', 'editorial', 'swiss', 'neon'], interval: 1600, delay: 1500, auto: true,
 })
 // The theme lists its looks on the root element (setup/main.ts); a theme without the list has no "all".
@@ -35,7 +36,7 @@ function tour(i: number) {
   swap(list.value[i])
   timer = window.setTimeout(() => tour(i + 1), props.interval)
 }
-function choose(i: number) { stop(); swap(list.value[i]) }
+function choose(i: number) { stop(); if (!props.quiet) sfx('pop', { volume: 0.5, pitch: i * 160 - 200, gap: 120 }); swap(list.value[i]) }
 function restore() { stop(); putBack() }
 
 watch(here, (h) => { if (!h) restore() })

@@ -73,6 +73,13 @@ export const SYNTH = {
     tone(ctx, out, sources, { f: 1800, f2: 900, t, dur: 0.05, peak: 0.12 })
     return { dur: 0.1, sources }
   },
+  // A soft plucked note, for a title that starts to move.
+  pluck(ctx, out, t) {
+    const sources = []
+    tone(ctx, out, sources, { type: 'triangle', f: 392, f2: 370, t, dur: 0.5, peak: 0.16, attack: 0.004 })
+    tone(ctx, out, sources, { f: 784, t, dur: 0.22, peak: 0.05 })
+    return { dur: 0.6, sources }
+  },
   tick(ctx, out, t) {
     const sources = []
     tone(ctx, out, sources, { f: 2200, t, dur: 0.05, peak: 0.2, attack: 0.003 })

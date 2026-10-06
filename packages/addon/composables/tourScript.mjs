@@ -1,7 +1,7 @@
 // The vocabulary of a scripted tour and of slide sounds, shared by the browser engine and by `nimbledeck check`.
 // Pure functions, no DOM: they take what Slidev parsed from the frontmatter and return normalised steps plus messages.
 
-export const BUILTIN_SOUNDS = ['click', 'tick', 'pop', 'whoosh', 'riser', 'chime', 'success', 'soft-boom', 'typing', 'swell', 'finale', 'pad', 'uplift']
+export const BUILTIN_SOUNDS = ['click', 'tick', 'pop', 'whoosh', 'riser', 'chime', 'success', 'soft-boom', 'pluck', 'typing', 'swell', 'finale', 'pad', 'uplift']
 export const AUDIO_EXT = /\.(mp3|ogg|wav|m4a|aac|webm)$/i
 export const ACTIONS = ['click', 'hover', 'drag', 'key', 'type', 'wait']
 const KEYS = { common: ['at', 'caption'], click: [], hover: [], drag: ['from', 'to', 'over'], key: [], type: ['into', 'speed'], wait: [] }
@@ -95,20 +95,21 @@ export function parseSounds({ sound, sounds, bed } = {}, { seconds } = {}) {
     if (k.kind === 'invalid') errors.push(`${w}: '${v}' is neither a built-in sound (${BUILTIN_SOUNDS.join(', ')}) nor a file of public/ such as /audio/theme.mp3`)
     return k.kind !== 'invalid'
   }
-  if (sound !== undefined && src(sound, 'sound')) cues.push({ at: 0, src: sound, volume: 1 })
+  if (sound !== undefined && src(sound, 'sound')) cues.push({ at: 0, src: sound, volume: 1, when: 'tour' })
   if (bed !== undefined) src(bed, 'ndSound')
   if (sounds !== undefined) {
     if (!Array.isArray(sounds)) errors.push('sounds must be a list, each like { at: 2.5, src: "pop", volume: 0.6 }')
     else sounds.forEach((c, i) => {
       const w = `sounds cue ${i + 1}`
       if (!c || typeof c !== 'object') return errors.push(`${w}: expected { at: <seconds>, src: <sound> }`)
-      const bad = Object.keys(c).filter((k) => !['at', 'src', 'volume'].includes(k))
-      if (bad.length) return errors.push(`${w}: unknown key '${bad[0]}' (known: at, src, volume)`)
+      const bad = Object.keys(c).filter((k) => !['at', 'src', 'volume', 'when'].includes(k))
+      if (bad.length) return errors.push(`${w}: unknown key '${bad[0]}' (known: at, src, volume, when)`)
       if (!isNum(c.at) || c.at < 0 || c.at > 600) return errors.push(`${w}: 'at' must be a number of seconds from 0 to 600`)
       if (c.volume !== undefined && (!isNum(c.volume) || c.volume <= 0 || c.volume > 1)) return errors.push(`${w}: 'volume' must be above 0 and at most 1`)
+      if (c.when !== undefined && c.when !== 'tour' && c.when !== 'always') return errors.push(`${w}: 'when' is tour (the default) or always`)
       if (!src(c.src, w)) return
       if (seconds !== undefined && c.at > seconds) warnings.push(`${w}: starts at ${c.at} s, after the slide's ${seconds} s`)
-      cues.push({ at: c.at, src: c.src, volume: c.volume ?? 1 })
+      cues.push({ at: c.at, src: c.src, volume: c.volume ?? 1, when: c.when ?? 'tour' })
     })
   }
   return { cues: cues.sort((a, b) => a.at - b.at), errors, warnings }

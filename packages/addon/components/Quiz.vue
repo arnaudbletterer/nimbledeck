@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { useActive } from '../composables/useActive'
+import { sfx } from '../composables/useSound'
 
 // An answer grid. Static: mark the right <Choice> with `correct`. Interactive: give the quiz an `answer` letter and the
 // presenter clicks an answer (or presses its number key) to get feedback: the picked answer turns good or bad, the right
 // one is revealed, the others fade, and an <Explain> placed inside the quiz appears. Leaving the slide resets it.
-const props = defineProps<{ answer?: string }>()
+const props = defineProps<{ answer?: string; quiet?: boolean }>()
 const picked = ref<string | null>(null)
 const letters = ref<string[]>([])
 const interactive = computed(() => !!props.answer)
@@ -17,9 +18,11 @@ provide('ndQuiz', {
   answer: computed(() => props.answer),
   picked, interactive, revealed,
   register: (l: string) => { letters.value.push(l); return () => { letters.value = letters.value.filter((x) => x !== l) } },
-  pick: (l: string) => { if (interactive.value && picked.value === null) picked.value = l },
+  pick: (l: string) => { if (interactive.value && picked.value === null) { picked.value = l; ping(l) } },
 })
 
+// The answer sounds: a chime for the right one, a soft tick for a wrong one. Clicks, keys and the tour all come through here.
+const ping = (l: string) => { if (!props.quiet) sfx(l === props.answer ? 'success' : 'tick', { volume: l === props.answer ? 0.8 : 0.4, gap: 300 }) }
 const active = useActive()
 watch(active, (a) => { if (!a) picked.value = null })
 const onKey = (e: KeyboardEvent) => {
@@ -27,7 +30,7 @@ const onKey = (e: KeyboardEvent) => {
   const t = e.target as HTMLElement | null
   if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return   // typing a number in a field is not an answer
   const l = letters.value[Number(e.key) - 1]
-  if (l && picked.value === null) { picked.value = l; e.preventDefault() }
+  if (l && picked.value === null) { picked.value = l; ping(l); e.preventDefault() }
 }
 onMounted(() => window.addEventListener('keydown', onKey))
 onUnmounted(() => window.removeEventListener('keydown', onKey))

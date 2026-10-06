@@ -10,6 +10,7 @@ import { tags as t } from '@lezer/highlight'
 import { useActive } from '../composables/useActive'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
+import { sfx } from '../composables/useSound'
 
 // Live code: edit Python on the slide and the result (printed output and matplotlib figures) updates as you type.
 // The code runs in a local Python process started by `nimbledeck run` (config key `runner`), never in the browser.
@@ -24,7 +25,7 @@ import { useRecording } from '../composables/useRecording'
 //   </LiveCode>
 // `auto` re-runs while you type (default); set `:auto="false"` for heavy code: run with the button or Cmd/Ctrl+Enter.
 // Without the runner it plays the recording live-<id> made by `nimbledeck record` (id defaults to the slide number).
-const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean; id?: string; recording?: string }>(), { auto: true, timeout: 10, frame: false })
+const props = withDefaults(defineProps<{ auto?: boolean; timeout?: number; frame?: boolean; id?: string; recording?: string; quiet?: boolean }>(), { auto: true, timeout: 10, frame: false })
 const { $scale, $page } = useSlideContext()
 const source = ref<HTMLElement>()
 const editorHost = ref<HTMLElement>()
@@ -56,6 +57,7 @@ async function connect() {
       ms.value = m.ms; stdout.value = m.stdout; stderr.value = m.stderr
       if (m.ok || m.images.length) images.value = m.images   // keep the last good picture while the code is broken
       state.value = m.ok ? 'ok' : 'error'; stale.value = false
+      if (!props.quiet && m.ok) sfx('tick', { volume: 0.3, pitch: 500, gap: 400 })   // a run finished
     }
   }
 }

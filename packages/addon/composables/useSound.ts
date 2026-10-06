@@ -9,3 +9,6 @@ export const setSound = (on: boolean) => sound.setEnabled(on)
 export const toggleSound = () => sound.setEnabled(!sound.enabled)
 // For tests and the console: window.__ndSound.log lists the cues that were started, .state is the AudioContext state.
 ;(globalThis as any).__ndSound = sound
+// What happened on the page, as a sound: `sfx('pop', { pitch: 200 })`. Silent and free when sound is off, rate limited, and
+// every component that calls it has a `quiet` prop. The tour's synthetic events reach it too, so the video is aligned for free.
+export const sfx = (name: string, o?: { volume?: number; pitch?: number; gap?: number; key?: string }) => { if (sound.enabled) sound.sfx(name, o) }

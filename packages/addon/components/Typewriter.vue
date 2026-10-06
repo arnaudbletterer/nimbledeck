@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useActive } from '../composables/useActive'
 import { highlight } from '../composables/highlight'
+import { sfx } from '../composables/useSound'
 
 // Types its content character by character with a blinking caret: <Typewriter lang="md" :speed="38"> and a fenced
 // block (or plain text) as the slot. `lang` is md, sh, py, json or html. With lang="sh" a line starting with "$ " is
@@ -9,7 +10,7 @@ import { highlight } from '../composables/highlight'
 // it out after a moment). The root gets the class `nd-done` when the typing has finished, so a deck can chain on it; the events
 // `progress` (characters shown, total) and `source` (the full text) let a component such as <Livedeck> follow the typing.
 // `size` is the font size: a number in slide pixels (default 22) or any CSS length. `text` is an alternative to the slot (used by <Terminal>). Leaving the slide stops it and resets it.
-const props = withDefaults(defineProps<{ speed?: number; delay?: number; lang?: string; caret?: boolean; keep?: boolean; text?: string; size?: number | string }>(), { speed: 38, delay: 400, lang: 'md', caret: true, keep: true })
+const props = withDefaults(defineProps<{ speed?: number; delay?: number; lang?: string; caret?: boolean; keep?: boolean; text?: string; size?: number | string; quiet?: boolean }>(), { speed: 38, delay: 400, lang: 'md', caret: true, keep: true })
 const emit = defineEmits<{ (e: 'done', v: boolean): void; (e: 'progress', typed: number, total: number): void; (e: 'source', text: string): void }>()
 
 const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -84,7 +85,10 @@ function begin() {
 }
 watch([active, source], ([a]) => { if (a) begin(); else reset() }, { immediate: true })
 watch(done, (d) => emit('done', d))
-watch(n, (v) => emit('progress', v, plan.value.times.length))   // characters shown so far, for a neighbour that follows the typing
+watch(n, (v, o) => {
+  emit('progress', v, plan.value.times.length)
+  if (!props.quiet && v > o && v > 0) sfx('tick', { volume: 0.16, pitch: -300 + ((v * 7919) % 600), gap: 52, key: 'key' })   // a key sound for the characters actually typed
+})   // characters shown so far, for a neighbour that follows the typing
 watch(source, (t) => emit('source', t), { immediate: true })
 onBeforeUnmount(stop)
 
