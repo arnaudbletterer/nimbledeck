@@ -53,56 +53,40 @@ Reduced motion: the cursor jumps without gliding.
 
 Off until the viewer opts in; the browser needs a gesture, so the `AudioContext` is created by a click on a sound control
 (the speaker button, or starting the tour from the big button marked "with sound"). The choice is kept in `localStorage`.
+The speaker says what it does: "Sound: music, plus effects when you click or when the tour plays".
+
+There are three kinds of sound.
+
+1. **Music**: `ndSound: uplift` in the headmatter is a bed that plays while sound is on, in both modes, and ducks under cues.
+2. **Effects**, driven by what happens on the page, so they are aligned by construction and sound for a real viewer too:
+   the quiz answer (success, or a soft tick when wrong), a click on a look or motion card or a Looks chip (a pop whose pitch
+   follows the card), typing in Typewriter, Terminal and Livedeck (a key sound per character typed), a Stat landing (a soft
+   pop), the Compare divider crossing each tenth (a tick), a Kinetic title starting (a pluck), a Livedeck slide appearing and
+   a LiveCode run finishing. The tour's synthetic events trigger the same sounds, so the video is aligned too. Every one
+   goes through `sfx(name, { volume, pitch })` of `useSound`, costs nothing when sound is off, is rate limited, and every
+   component has a `quiet` prop to turn its effects off.
+3. **Soundtrack of the tour**: frontmatter cues for the video only. They play while the tour plays and stop when the viewer
+   takes over.
 
 | Key | Where | Meaning |
 |---|---|---|
-| `sound: whoosh` | slide | one cue on entry; a name or a file of `public/` such as `/audio/theme.mp3` |
-| `sounds: [{ at, src, volume }]` | slide | cues at offsets, `volume` above 0 and at most 1 |
-| `ndSound: uplift` | headmatter | a music bed that plays while sound is on and ducks under cues; `uplift` or `pad`, or a file of `public/` |
-| `ndSlideSound: whoosh` | headmatter | a cue on every slide change |
+| `sound: whoosh` | slide | one soundtrack cue on entry; a name or a file of `public/` such as `/audio/theme.mp3` |
+| `sounds: [{ at, src, volume, when }]` | slide | soundtrack cues at offsets; `volume` above 0 and at most 1; `when: always` plays the cue outside the tour too (default `tour`) |
+| `ndSound: uplift` | headmatter | the music bed |
+| `ndSlideSound: whoosh` | headmatter | a soundtrack cue on every slide change in the tour |
 
-Built-in sounds, synthesised with the Web Audio API (no files, offline): the cues `click`, `tick`, `pop`, `whoosh`, `riser`,
-`chime`, `success`, `soft-boom`, `typing`, `swell`, `finale` (a soft G major chord for the last slide), and the beds `uplift` and `pad`. Everything passes through a limiter and a
-master gain, so stacked cues stay quiet. `<SoundToggle />` is the speaker button and `<Equalizer />` draws the real output.
-`nimbledeck check` rejects a name that is neither built in nor a file.
+Write a soundtrack cue only for something no component makes a sound for (a whoosh between slides, a swell, the finale). A
+cue that repeats a click or a typed character drifts out of step; let the component's own sound do it.
 
-### The beds
+Built-in sounds, synthesised with the Web Audio API (no files, offline): `click`, `tick`, `pop`, `whoosh`, `riser`, `chime`,
+`success`, `soft-boom`, `pluck`, `typing`, `swell`, `finale`, `pad`, `uplift`. Everything passes through a limiter and a master
+gain, so stacked cues stay quiet. `<SoundToggle />` is the speaker button and `<Equalizer />` draws the real output.
 
-A bed starts with the sound switch and with the tour, fades in over 2 s, fades out over 1 s, and is not restarted by a slide
-change (only a different `ndSound` replaces it). A cue ducks it by about 5 dB while it plays.
+## Ending a deck
 
-- `uplift` is the one the showcase uses: warm, optimistic and light. G major, I-V-vi-IV (G D Em C), two bars a chord, 104 bpm.
-  A marimba-like arpeggio, a soft low-passed pad, a bass note on each chord root, a soft kick on beats 1 and 3 and a quiet
-  shaker off the beat, in a small generated room. The score is 16 bars (about 37 s); the second 8 bars add a melody on the
-  chord changes and a run into the loop point, and every bar has its own arpeggio shape, so it does not feel mechanical.
-  Notes are scheduled 1.6 s ahead on the `AudioContext` clock (a timer only wakes the scheduler), so a late timer never moves a note.
-- `pad` is the dark, slowly beating drone the first showcase used. It is moody on purpose; keep it for a calm, serious deck.
-
-Your own file works too: `ndSound: /audio/theme.mp3` loops and ducks the same way.
-
-### Measurements
-
-`node examples/showcase/measure-sound.mjs` renders the real engine (bed, cues, ducking, limiter, master) in Chrome with an
-`OfflineAudioContext`, asserts the rules below and writes two WAV files to listen to (default `/private/tmp/claude-501/uplift/`).
-Last run, mono mix of the output, dBFS:
-
-| What | Result | Rule |
-|---|---|---|
-| bed RMS, steady state | -31.5 dBFS | at least 9 dB under every cue peak (cues play 6 dB lower than their written level: `CUE_GAIN`) |
-| bed peak | -14.2 dBFS | no clipping |
-| bed DC offset | -3.2e-5 | under 1e-3 |
-| weakest cue peak (`typing`, at volume 0.8) | -14.6 dBFS | margin to the bed: 16.8 dB |
-| bed under a cue | -5.3 dB | between -4 and -6 |
-| bed with 9 cues, peak | -6.2 dBFS | no clipping |
-| fade in | -50 dBFS in the first 0.5 s, -31 dBFS at 3 to 4 s | |
-| loop, second against third pass | -141 dB difference | repeats exactly |
-| loop point, largest sample step within 20 ms | 5.2e-3 against 1.4e-2 elsewhere | no click |
-
-Cue peaks at volume 0.8, alone: `click` -13.7, `tick` -12.6, `pop` -7.6, `whoosh` -12.7, `riser` -7.0, `chime` -8.3, `success` -9.0,
-`soft-boom` -6.2, `typing` -14.6, `swell` -14.5 (before the later softening: the effects were then made rounder and more musical, with no noise sweeps except a soft page-turn whoosh, and play 6 dB lower; run `examples/showcase/measure-sound.mjs` for today's numbers). The quiet cues (`tick`, `typing`, `whoosh`) were raised for this, and the noise
-the cues use is now seeded, so a cue sounds and measures the same every time. The loop test renders at 52 kHz, where one eighth
-note is exactly 15000 samples, so the passes compare sample for sample. The scheduler itself (tempo, chord changes on bar lines,
-no repeated or past notes, a stalled clock) is unit tested with a fake clock in `packages/addon/test/upliftscore.test.mjs`.
+`<NextSteps />` on a closing slide shows link cards read from `window.__ND_SITE__`: docs, playground, the science deck when
+the site has one, GitHub, and "Replay the tour" (it sends `nd-tour-replay`, which the site bar answers by going to slide 1 and
+playing). Without `__ND_SITE__` only the GitHub card shows. A tour script may `hover` a card but never clicks a link.
 
 ## Tips for agents
 
