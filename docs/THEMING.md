@@ -6,7 +6,7 @@ company content.
 ## Looks in the base theme
 
 `ndVariant` picks the look of a whole deck, and the `Looks` component shows the same slide in several of them. There are
-twenty looks, listed with their colours in [`packages/theme/looks.json`](../packages/theme/looks.json); the checker rejects an
+twenty looks, listed with their colours in `packages/theme/looks.json`; the checker rejects an
 `ndVariant` that is not in that file. Every look is a complete set of `--nd-*` tokens plus a few rules of its own (title weight
 and rule, callout shape, table style, list marker, code block, cover), so a look is a character, not only a palette. Fonts are
 system stacks, never downloaded, so every look works offline. A look that needs a face a machine does not have falls back
