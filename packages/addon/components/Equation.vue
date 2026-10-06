@@ -85,6 +85,7 @@ const termOf = (t: EventTarget | null) => {
 function pick(e: PointerEvent) {
   const direct = termOf(e.target)
   if (direct) return direct
+  if (!(e.target as HTMLElement | null)?.closest?.('.katex')) return null   // the pointer is on the frame of the equation, not on its maths
   for (const t of termEls()) for (const r of t.getClientRects()) if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return t
   return null
 }
