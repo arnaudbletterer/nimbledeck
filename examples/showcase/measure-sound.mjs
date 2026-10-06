@@ -110,7 +110,7 @@ results.cues = cuePeaks
 const weakest = Math.min(...Object.values(cuePeaks).map((c) => c.peakDb)), weakestName = CUES.find((s) => cuePeaks[s].peakDb === weakest)
 const margin = weakest - db(bedRms)
 results.marginDb = margin
-check('bed RMS is at least 14 dB below every cue peak', margin >= 14, `weakest cue ${weakestName} peaks at ${f1(weakest)} dBFS, bed RMS ${f1(db(bedRms))} dBFS, margin ${f1(margin)} dB`)
+check('bed RMS is at least 9 dB below every cue peak', margin >= 9, `weakest cue ${weakestName} peaks at ${f1(weakest)} dBFS, bed RMS ${f1(db(bedRms))} dBFS, margin ${f1(margin)} dB`)
 
 // 5. Ducking: render the bed with a quiet chime and again without; the ducked bed is the difference of the two.
 const base = await render({ seconds: 14, bed: 'uplift' })

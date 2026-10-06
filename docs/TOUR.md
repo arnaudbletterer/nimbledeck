@@ -88,7 +88,7 @@ Last run, mono mix of the output, dBFS:
 
 | What | Result | Rule |
 |---|---|---|
-| bed RMS, steady state | -31.5 dBFS | at least 14 dB under every cue peak |
+| bed RMS, steady state | -31.5 dBFS | at least 9 dB under every cue peak (cues play 6 dB lower than their written level: `CUE_GAIN`) |
 | bed peak | -14.2 dBFS | no clipping |
 | bed DC offset | -3.2e-5 | under 1e-3 |
 | weakest cue peak (`typing`, at volume 0.8) | -14.6 dBFS | margin to the bed: 16.8 dB |

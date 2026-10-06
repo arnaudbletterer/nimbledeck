@@ -86,14 +86,14 @@ export const SYNTH = {
   },
   whoosh(ctx, out, t) {
     const sources = []
-    hiss(ctx, out, sources, { f: 260, f2: 2600, q: 1.1, t, dur: 0.55, peak: 0.42, attack: 0.22 })
-    hiss(ctx, out, sources, { f: 1800, f2: 500, q: 0.8, t: t + 0.18, dur: 0.45, peak: 0.12, attack: 0.1 })
+    hiss(ctx, out, sources, { f: 260, f2: 2000, q: 0.8, t, dur: 0.6, peak: 0.3, attack: 0.28 })
+    hiss(ctx, out, sources, { f: 1400, f2: 500, q: 0.6, t: t + 0.18, dur: 0.45, peak: 0.07, attack: 0.12 })
     return { dur: 0.8, sources }
   },
   riser(ctx, out, t) {
     const sources = [], dur = 2.4
-    hiss(ctx, out, sources, { f: 300, f2: 6000, q: 1.6, t, dur, peak: 0.28, attack: dur * 0.9 })
-    tone(ctx, out, sources, { type: 'sawtooth', f: 110, f2: 880, t, dur, peak: 0.07, attack: dur * 0.9 })
+    hiss(ctx, out, sources, { f: 300, f2: 4200, q: 1.0, t, dur, peak: 0.2, attack: dur * 0.9 })
+    tone(ctx, out, sources, { type: 'sawtooth', f: 110, f2: 880, t, dur, peak: 0.03, attack: dur * 0.9 })
     tone(ctx, out, sources, { f: 220, f2: 1760, t, dur, peak: 0.1, attack: dur * 0.9 })
     return { dur: dur + 0.1, sources }
   },
@@ -114,7 +114,7 @@ export const SYNTH = {
   },
   'soft-boom'(ctx, out, t) {
     const sources = []
-    tone(ctx, out, sources, { f: 90, f2: 34, t, dur: 1.1, peak: 0.55, attack: 0.012 })
+    tone(ctx, out, sources, { f: 90, f2: 34, t, dur: 1.1, peak: 0.38, attack: 0.03 })
     hiss(ctx, out, sources, { type: 'lowpass', f: 400, f2: 80, q: 0.7, t, dur: 0.7, peak: 0.25 })
     return { dur: 1.2, sources }
   },

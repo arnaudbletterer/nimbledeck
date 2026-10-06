@@ -11,6 +11,8 @@ export const STORE_KEY = 'nimbledeck:sound'
 const MASTER = 0.8
 // Bed gain and its ducked gain under cues, per built-in bed (a file bed uses `pad`'s). `uplift` is written quiet: its level is
 // measured (docs/TOUR.md) to sit well under the cues, and it ducks 5 dB under them.
+// Effects are written at full scale and played about 6 dB lower: the owner found them too aggressive next to the bed.
+export const CUE_GAIN = 0.5
 export const BEDS = { pad: { level: 0.5, ducked: 0.22 }, uplift: { level: 0.22, ducked: 0.12 } }
 const FADE_IN = 2, FADE_OUT = 1
 
@@ -43,7 +45,7 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
 
   function voice(scope, volume) {
     const gain = ctx.createGain()
-    gain.gain.value = Math.min(1, Math.max(0, volume))
+    gain.gain.value = Math.min(1, Math.max(0, volume)) * (scope === 'cue' ? CUE_GAIN : 1)
     gain.connect(bus)
     const v = { scope, gain, sources: [], end: 0 }
     voices.add(v)
