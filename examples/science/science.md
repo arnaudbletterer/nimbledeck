@@ -57,8 +57,13 @@ layout: full
 <At :x="70" :y="60" :w="520" :z="1">
 <Kinetic text="Same start.|Almost.|Another future." mode="lines" from="up" :stagger="260" size="m" accent="future." />
 </At>
-<At :x="70" :y="300" :w="560" :z="1">
-<Equation label="The Lorenz system: x dot is sigma times y minus x, y dot is x times rho minus z, minus y, z dot is x y minus beta z" align="left" :size="38" :params="{ sigma: 10, rho: 28, beta: 2.6667 }">
+<At :x="70" :y="330" :w="400" :z="1">
+
+200 copies of the Lorenz system, each nudged by one part in 100,000. NumPy integrates them and streams the result.
+
+</At>
+<At :x="70" :y="448" :w="560" :z="1">
+<Equation label="The Lorenz system: x dot is sigma times y minus x, y dot is x times rho minus z, minus y, z dot is x y minus beta z" align="left" :size="32" :params="{ sigma: 10, rho: 28, beta: 2.6667 }">
 
 $$
 \begin{aligned}
