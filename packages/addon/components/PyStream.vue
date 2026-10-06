@@ -4,7 +4,7 @@ import { useActive } from '../composables/useActive'
 import { useCrisp } from '../composables/useCrisp'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
-import { links } from '../composables/links.mjs'
+import { links, formatValue } from '../composables/links.mjs'
 import { useLinked } from '../composables/useLinked'
 
 // Live Python animation: a Python process computes state and streams it over a WebSocket; this component
@@ -35,11 +35,12 @@ const { k } = useCrisp(root, { w: LW, h: LH })
 const state = ref<'offline' | 'live'>('offline')
 const n = ref(SL[0].value), dt = ref(SL[1].value), g = ref(SL[2].value)
 const ex = reactive<Record<string, number>>(Object.fromEntries((props.extra ?? []).map((e) => [e.name, e.value])))
+const touched = new Set<string>()   // an extra slider is sent only once the viewer has moved it, so the process keeps its own default until then
 const { linked, linkAttrs } = useLinked(() => props.highlight)
 const fps = ref(0), stepMs = ref(0)
 let ws: WebSocket | null = null, timer = 0, frames = 0, last = performance.now(), closed = true
 
-function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...ex })) }
+function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
 async function connect() {
   if (closed) return
   const port = (await useNimbleConfig()).streams[props.name]?.port
@@ -73,6 +74,7 @@ function stop() { closed = true; clearTimeout(timer); const w = ws; ws = null; w
 const active = useActive()
 const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
 watch(active, (a) => { stop(); if (a) { closed = false; connect(); publish() } }, { immediate: true })
+const shown = (e: Slider) => formatValue(ex[e.name], (String(e.step).split('.')[1] ?? '').length)
 function publish() { for (const [name, v] of Object.entries(ex)) links.setParam(name, v) }
 watch(ex, () => { if (active.value) publish() })
 onUnmounted(stop)
@@ -85,11 +87,11 @@ onUnmounted(stop)
     <div v-else-if="state === 'offline' && !rec.pending" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
     <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
-    <div v-if="controls && !rec.shown" class="nd-ctl">
+    <div v-if="controls && !rec.shown" class="nd-ctl" :class="{ 'nd-ctl-many': extra?.length }">
       <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
       <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"></label>
       <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"></label>
-      <label v-for="e in extra" :key="e.name">{{ e.label }} <input v-model.number="ex[e.name]" type="range" :min="e.min" :max="e.max" :step="e.step" @change="send"> {{ ex[e.name] }}</label>
+      <label v-for="e in extra" :key="e.name">{{ e.label }} <input v-model.number="ex[e.name]" type="range" :min="e.min" :max="e.max" :step="e.step" @input="touched.add(e.name)" @change="send"> {{ shown(e) }}</label>
     </div>
   </div>
 </template>
