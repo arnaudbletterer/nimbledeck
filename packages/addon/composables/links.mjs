@@ -37,10 +37,10 @@ export function createLinks(target) {
 
 export const links = createLinks(typeof window !== 'undefined' ? window : undefined)
 
-// A number as it is typeset: whole numbers as they are, others with `decimals` places (2 by default), a true minus sign.
+// A number as it is typeset: rounded to `decimals` places (2 by default) without trailing zeros, with a true minus sign.
 export function formatValue(value, decimals = 2) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return String(value)
-  const text = Number.isInteger(value) ? String(value) : value.toFixed(decimals)
+  const text = String(Number(value.toFixed(decimals)))
   return text.replace('-', '−')
 }
 

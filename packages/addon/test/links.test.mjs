@@ -42,6 +42,9 @@ test('the store follows and announces the nd-term and nd-param DOM events', () =
 
 test('numbers are typeset as whole numbers, fixed decimals and a true minus', () => {
   assert.equal(formatValue(10), '10')
+  assert.equal(formatValue(29.5), '29.5')
+  assert.equal(formatValue(0.0456, 3), '0.046')
+  assert.equal(formatValue(-0.001, 2), '0')
   assert.equal(formatValue(8 / 3), '2.67')
   assert.equal(formatValue(8 / 3, 3), '2.667')
   assert.equal(formatValue(-0.5, 1), '−0.5')
