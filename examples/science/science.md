@@ -135,8 +135,8 @@ Two numbers, F and k, decide between spots, stripes and worms.
 
 </At>
 <At :x="540" :y="140" :w="700" :h="394" :z="1" frame enter="left" :delay="300"><Clip src="/recordings/demo-turing.webm" /></At>
-<At :x="828" :y="270" :z="2"><Marker term="1">&larr; F, feed rate</Marker></At>
-<At :x="828" :y="324" :z="2"><Marker term="2">&larr; k, kill rate</Marker></At>
+<At :x="828" :y="315" :z="2"><Marker term="1">&larr; F, feed rate</Marker></At>
+<At :x="828" :y="358" :z="2"><Marker term="2">&larr; k, kill rate</Marker></At>
 <At :x="900" :y="165" :z="2"><Marker term="3">u v squared grows the pattern</Marker></At>
 <At :x="900" :y="490" :z="2"><Marker term="4">diffusion spreads it</Marker></At>
 </Stage>
