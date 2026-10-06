@@ -462,3 +462,36 @@
 .nd-lw-on .nd-lw-card { animation: nd-lw-in 1s cubic-bezier(.16, 1, .3, 1) calc(var(--i, 0) * 60ms) backwards; }
 @keyframes nd-lw-in { from { opacity: 0; transform: translateY(44px) rotateX(-24deg) scale(.86); filter: blur(8px); } }
 @media (prefers-reduced-motion: reduce) { .nd-lw-card, .nd-lw-ring { transition: none; animation: none !important; } .nd-lw:not(.nd-lw-on) .nd-lw-card { opacity: 1; } }
+
+/* ==== Motion toolkit: MotionWall ==== */
+.nd-mw { display: flex; flex-direction: column; gap: 10px; }
+.nd-mw-tag { margin: 0; font: 600 17px/1 var(--nd-font-body); letter-spacing: .02em; color: var(--nd-muted); text-transform: none; }
+.nd-mw-tag b { color: var(--nd-accent); font-weight: 800; font-size: 20px; margin-right: .25em; }
+.nd-mw-tag-b { margin-top: 12px; }
+.nd-mw-grid, .nd-mw-bgs { display: grid; }
+.nd-mw-card, .nd-mw-bg { position: relative; overflow: hidden; margin: 0; padding: 0; border-radius: 10px; border: 1px solid var(--nd-line); background: var(--nd-bg); color: var(--nd-ink); text-align: left; appearance: none; }
+.nd-mw-card { cursor: pointer; box-shadow: 0 14px 24px -18px color-mix(in srgb, black 70%, transparent); transition: border-color .3s ease, transform .35s cubic-bezier(.16, 1, .3, 1); }
+.nd-mw-card:hover { border-color: var(--nd-accent); transform: translateY(-3px); }
+.nd-mw-card:focus-visible { outline: 3px solid var(--nd-accent); outline-offset: 3px; }
+/* A card is a real slide at 1280 x 720, scaled down from its top left corner. */
+.nd-mw-slide.slidev-layout { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform: scale(var(--k, .12)); transform-origin: 0 0; overflow: hidden; pointer-events: none; }
+.nd-mw-slide.slidev-layout { background-image: radial-gradient(ellipse 70% 80% at 92% 8%, color-mix(in srgb, var(--nd-accent) 26%, transparent), transparent 70%), radial-gradient(ellipse 60% 70% at 0% 110%, color-mix(in srgb, var(--nd-accent-2) 22%, transparent), transparent 70%); }
+.nd-mw-slide .nd-body { padding-top: 64px; }
+.nd-mw-slide.slidev-layout h1 { font-size: 150px; line-height: 1.12; padding-top: .1em; padding-bottom: .12em; border-bottom-width: 6px; }
+.nd-mw-slide.slidev-layout ul { margin: 30px 70px 0; font-size: 72px; }
+.nd-mw-slide.slidev-layout li { margin: .2em 0; }
+.nd-mw-slide.slidev-layout blockquote { margin-top: 36px; margin-left: 70px; font-size: 62px; padding: .4em .9em; }
+.nd-mw-slide .nd-nums { top: 250px; bottom: 60px; }
+.nd-mw-slide .nd-num h2 { font-size: 120px; }
+.nd-mw-slide .nd-num p { font-size: 44px; }
+/* A card appears as its own preset starts, so the wave is also the entrance. */
+.nd-mw-card:not(.nd-mw-seen) { opacity: 0; }
+.nd-mw-seen { animation: nd-mw-in .7s cubic-bezier(.16, 1, .3, 1) backwards; }
+.nd-mw:not(.nd-mw-on) .nd-mw-bg { opacity: 0; }
+.nd-mw-on .nd-mw-bg { animation: nd-mw-in .8s cubic-bezier(.16, 1, .3, 1) calc(1200ms + var(--i, 0) * 50ms) backwards; }
+@keyframes nd-mw-in { from { opacity: 0; transform: scale(.82) translateY(18px); } }
+.nd-mw-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; box-shadow: inset 0 0 0 2px var(--nd-accent), inset 0 0 22px color-mix(in srgb, var(--nd-accent) 55%, transparent); }
+.nd-mw-ping::after { animation: nd-mw-ping 1.1s ease-out; }
+@keyframes nd-mw-ping { 0% { opacity: 1; } 100% { opacity: 0; } }
+.nd-mw-bgslide .nd-mw-bgname { position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%; z-index: 1; text-align: center; font: 700 112px/1 var(--nd-font-display); letter-spacing: -.02em; color: var(--nd-ink); }
+@media (prefers-reduced-motion: reduce) { .nd-mw-card { transition: none; animation: none !important; } .nd-mw-bg { animation: none !important; } .nd-mw-ping::after { animation: none; } .nd-mw:not(.nd-mw-on) .nd-mw-bg { opacity: 1; } .nd-mw-seen { animation: none; } }
