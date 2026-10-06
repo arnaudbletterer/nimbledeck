@@ -147,7 +147,7 @@ onUnmounted(() => {
 })
 
 const progress = computed(() => (playing.value || elapsed.value > 0 ? `${Math.min(100, (elapsed.value / length.value) * 100)}%` : `${(currentPage.value / total.value) * 100}%`))
-const showHint = computed(() => !moved.value && !playing.value)
+const showHint = computed(() => !moved.value && !playing.value && currentPage.value === 1)   // a deep link to another slide shows no big button
 const links = computed(() => [
   { label: 'Docs', href: site!.docs },
   { label: 'Playground', href: site!.playground },
