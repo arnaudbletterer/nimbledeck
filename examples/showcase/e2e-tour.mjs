@@ -141,6 +141,8 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: jo
   await page.waitForTimeout(9000)
   const replays = await page.evaluate(() => window.__mw)
   check('the motion wall plays its cards, in waves and on the tour\'s clicks', replays >= 21, `${replays} plays`)
+  const own = await page.evaluate(() => ({ id: document.querySelector('.nd-wd-root')?.dataset.ndMotion, label: document.querySelector('.nd-wd-pill')?.textContent, ids: document.documentElement.dataset.ndMotions.split(',') }))
+  check('the tour\'s clicks apply a preset to the slide\'s own title, and the label names it', own.id !== 'pop' && own.ids.includes(own.id) && /^(motion|background): /.test(own.label), JSON.stringify(own))
   await context.close()
 }
 

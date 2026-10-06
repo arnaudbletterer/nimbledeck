@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useNav, useSlideContext } from '@slidev/client'
 import { useActive } from '../composables/useActive'
 import { useEntered } from '../composables/useEntered'
+import { applyLook } from '../composables/wallState'
 import { lookIds, lookLabel, useLookSwitch } from '../composables/lookSwitch'
 
 // Every look of the theme at once: a grid of small cards, each a mock slide (title, a bullet, a callout, chips) that
@@ -27,6 +28,7 @@ const { currentPage } = useNav()
 const { $page } = useSlideContext()
 const here = computed(() => $page.value === currentPage.value)
 const { shown, busy, swap, restore, sync } = useLookSwitch()
+watch(shown, (v) => { if (v) applyLook(v) })
 const hot = ref(0)                 // the card the ring is on
 const pinned = ref('')             // the look a click chose
 const wall = ref<HTMLElement>()
