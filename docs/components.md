@@ -102,6 +102,19 @@ deck's own look returns when you leave. `looks` takes any ids (`:looks="['termin
 </div>
 
 <div markdown>
+### `<LookWall />`
+Every look of the theme at once: a grid of small cards, each a mock slide in its own colours. They fall into place in a
+cascade and a ring tours them by itself. Hover a card and the whole slide takes that look, click it to keep it; leaving the
+slide puts the deck's look back. 20 looks make 5 columns by 4 rows at 1200 x 560.
+</div>
+
+<div markdown>
+### `<MotionWall />`
+Every motion preset as a real mini slide, replaying one after another in a wave, with a row of animated backdrops under
+them. Hover or click a card to replay it. It is the picture of what `motion:` and `background:` do.
+</div>
+
+<div markdown>
 ### `<Marquee>`
 Content that scrolls sideways for ever, repeated to fill the slide.
 </div>

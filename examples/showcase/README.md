@@ -1,8 +1,10 @@
 # Showcase deck
 
 A 20 slide deck for a three minute demo: a shader opening, Markdown typed while its slides build themselves, five looks
-of one slide, motion text, a canvas, 3D, measured numbers, a quiz, a Markdown and slide comparison, video, live Python,
-an agent loop and a finale. It is plain Markdown in `showcase.md`.
+of one slide, motion text, a canvas, 3D, a wall of all twenty looks (`<LookWall />`), a wall of every motion and background
+preset (`<MotionWall />`), a quiz, a Markdown and slide comparison, video, live Python, an agent loop and a finale. It is
+plain Markdown in `showcase.md`. The deck uses its own presets: `ndMotion: fade-up` for the deck, and a bolder `motion:`
+and `background:` on the slides that suit it (a spotlight cover, a curtain statement, a typed code title, a focus finale).
 
 ## Run it
 
@@ -18,10 +20,10 @@ npm --workspace examples/showcase run check    # lint the deck
 
 | Edition | How | Slides |
 |---|---|---|
-| Full | `npm run dev` | all 19 |
-| Web | `npm run build:web` (static files in `dist/`) | 17: the slides that need `nimbledeck run` are left out |
+| Full | `npm run dev` | all 20 |
+| Web | `npm run build:web` (static files in `dist/`) | all 20: the live code and the stream play a recording; a live slide with no recording is left out |
 
-The slides that need `nimbledeck run` are 14 (live code) and 15 (the Python particle stream). `build:web` marks them
+The slides that need `nimbledeck run` are 15 (live code) and 16 (the Python particle stream). `build:web` marks those that have no recording
 `disabled: true` in a temporary copy, uses hash routes, and removes `nimbledeck.json` from the output. `WEB_BASE` sets the
 base path (default `/nimbledeck/demos/showcase/`) and `WEB_OUT` the output folder. Files of `public/` are written as
 `/loop.mp4` in the Markdown; the components put the base path in front, so the same Markdown works at any base.
@@ -38,8 +40,10 @@ Made by the scripts in `demos/`, nothing is fetched at run time:
 
 ## Pacing
 
-About three minutes at a steady pace. Slides 1, 2, 5, 6 and 17 move by themselves; 3 types and builds by itself; the quiz
-(11) and the compare slider (12) are the places to pause. Slide 5 steps through the looks on its own, keys 1 to 5 pick one.
+About three minutes at a steady pace. Slides 1, 2, 5, 6 and 18 move by themselves; 3 types and builds by itself; the two walls
+(9 and 10) run on their own and answer the pointer; the quiz (11) and the compare slider (12) are the places to pause. Slide 5
+steps through the looks on its own, keys 1 to 5 pick one. On slide 9 a hover previews a look and a click keeps it; on slide 10
+a click replays a motion card.
 
 ## Testing the web edition
 
@@ -66,4 +70,4 @@ into the page, and without it (dev server, PDF export, any other build) the bar 
 
 ## Tour script and sound
 
-Slides carry `tourScript` and `sounds` in their frontmatter (quiz, compare, looks, 3D, live code, stream); slide 14 is the sound slide. Pacing is adaptive. See `docs/TOUR.md`. `node e2e-tour.mjs --dist dist --full` checks it in Chrome and prints the time per slide. The live code keeps `id="14"` so its recording still matches.
+Slides carry `tourScript` and `sounds` in their frontmatter (quiz, compare, looks, 3D, live code, stream, and the two walls, where the cursor hovers and clicks cards); slide 14 is the sound slide. The tour is about two and a half minutes. Pacing is adaptive. See `docs/TOUR.md`. `node e2e-tour.mjs --dist dist --full` checks it in Chrome and prints the time per slide. The live code keeps `id="14"` so its recording still matches.
