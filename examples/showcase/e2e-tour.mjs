@@ -148,7 +148,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: jo
 
 // 1b. Sound semantics: effects follow what the viewer does, the soundtrack belongs to the tour.
 {
-  const { context, page } = await open(`${origin}/#/1`)
+  const { context, page } = await open(`${origin}/#/12`)   // the quiz (11) is mounted as a neighbour
   await page.locator('.nd-sound-btn').click()                       // sound on, no tour
   await page.waitForFunction(() => window.__ndSound.state === 'running')
   const qNo = await page.evaluate(() => Number(document.querySelector('[data-kind="quiz"]').closest('[data-slidev-no]').dataset.slidevNo))
@@ -163,9 +163,8 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: jo
   check('a real click on the right answer schedules success', (await names()).includes('success'), (await names()).join(','))
   check('the music bed plays without a tour', await page.evaluate(() => window.__ndSound.log.some((l) => l.scope === 'bed')))
   await page.locator('.ndb-tour').click()
-  await page.waitForTimeout(500)
-  await page.keyboard.press('ArrowRight')
-  await page.waitForTimeout(900)
+  await page.waitForFunction(() => location.hash !== '#/11', null, { timeout: 12000 }).catch(() => {})   // the tour moves on by itself
+  await page.waitForTimeout(600)
   check('during the tour a slide change schedules the whoosh', (await names()).includes('whoosh'), (await names()).join(','))
   await page.keyboard.press('Shift')                                 // a trusted key: the viewer takes over
   await page.waitForTimeout(300)
