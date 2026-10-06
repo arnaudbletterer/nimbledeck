@@ -98,5 +98,5 @@ playing). Without `__ND_SITE__` only the GitHub card shows. A tour script may `h
 ## Music from a file
 
 `ndSound: /audio/some-track.mp3` plays a file of `public/` as the bed, looped, much lower than the built-in beds and ducked under
-effects (`FILE_BED` in `soundManager.mjs`). The showcase uses "Born Of The Sky" by Scott Buckley (CC-BY 4.0, credit required: see
-`THIRD_PARTY.md`). Only use music whose licence lets you ship it with the deck, and keep the credit on a slide.
+effects (`FILE_BED` in `soundManager.mjs`). The showcase uses "Origami" by Scott Buckley (CC-BY 4.0, credit required: see
+`THIRD_PARTY.md`). Only use music whose licence lets you ship it with the deck, and keep the credit on a slide. A bed is looped, so cut it to loop cleanly: a whole number of phrases on the beat, with the end cross-faded into the music that precedes the start (the showcase's loop was made this way, see `public/audio/CREDITS.md`), and avoid a track's slow ending.

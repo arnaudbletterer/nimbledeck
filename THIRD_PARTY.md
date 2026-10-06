@@ -16,7 +16,7 @@ endorsed by them.
 | numpy | Example demos | BSD-3-Clause |
 | matplotlib | Example demos | matplotlib license (permissive) |
 | Playwright | Optional PDF/PNG export | Apache-2.0 |
-| "Born Of The Sky" by Scott Buckley (www.scottbuckley.com.au) | Music of the showcase deck, `examples/showcase/public/audio/born-of-the-sky.mp3`, an excerpt (starts at 0:28, fades out) re-encoded to 128 kbps | CC-BY 4.0, credit required |
+| "Origami" by Scott Buckley (www.scottbuckley.com.au) | Music of the showcase deck, `examples/showcase/public/audio/origami-loop.mp3`, a seamless 2:34 loop cut from the track (8 phrases at 100 bpm, the end cross-faded into the music before the start), re-encoded to 160 kbps | CC-BY 4.0, credit required |
 
 Licenses above were read from each package's metadata on 2026-10-03 and should be rechecked before a release.
 This file is not legal advice.

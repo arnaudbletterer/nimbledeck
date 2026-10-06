@@ -8,7 +8,7 @@ layout: hero
 class: nd-grid
 motion: spotlight
 transition: nd-zoom
-ndSound: /audio/born-of-the-sky.mp3
+ndSound: /audio/origami-loop.mp3
 ndSlideSound: whoosh
 tour: 5
 sounds:
@@ -414,7 +414,7 @@ sounds:
 
 ::caption::
 
-Sound is optional, and the speaker in the bar switches it off. Music plays throughout, effects follow what you click, and the tour adds a soundtrack. Music: "Born Of The Sky" by Scott Buckley, CC-BY 4.0, www.scottbuckley.com.au.
+Sound is optional, and the speaker in the bar switches it off. Music plays throughout, effects follow what you click, and the tour adds a soundtrack. Music: "Origami" by Scott Buckley, CC-BY 4.0, www.scottbuckley.com.au.
 
 <!--
 Click, tick, pop, chime, success, whoosh: each is synthesised with the Web Audio API, zero bytes, nothing fetched. The music under them is a generated bed called uplift, set by one line of headmatter; a deck can pick another (pad) or point it at its own file. Sound is off until the viewer asks, and the equalizer is drawn from the real output.
