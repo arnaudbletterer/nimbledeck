@@ -7,8 +7,16 @@
       "seconds": 9,
       "width": 1140,
       "height": 500,
+      "pixelWidth": 2280,
+      "pixelHeight": 1000,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "live-14.webm"
+        "live-14.webm",
+        "live-14.mp4"
       ],
       "poster": "live-14.jpg"
     },
@@ -18,8 +26,16 @@
       "seconds": 9,
       "width": 1020,
       "height": 560,
+      "pixelWidth": 2040,
+      "pixelHeight": 1120,
+      "fps": 30,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
       "files": [
-        "stream-swarm.webm"
+        "stream-swarm.webm",
+        "stream-swarm.mp4"
       ],
       "poster": "stream-swarm.jpg"
     }
