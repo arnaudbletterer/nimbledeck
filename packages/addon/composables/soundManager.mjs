@@ -13,6 +13,8 @@ const MASTER = 0.8
 // measured (docs/TOUR.md) to sit well under the cues, and it ducks 5 dB under them.
 // Effects are written at full scale and played about 6 dB lower: the owner found them too aggressive next to the bed.
 export const CUE_GAIN = 0.5
+// A music file used as a bed is mastered loud: it plays much lower than the built-in beds, and ducks under cues.
+export const FILE_BED = { level: 0.16, ducked: 0.09 }
 export const BEDS = { pad: { level: 0.5, ducked: 0.22 }, uplift: { level: 0.22, ducked: 0.12 } }
 const FADE_IN = 2, FADE_OUT = 1
 
@@ -123,7 +125,7 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
     const kind = soundKind(src).kind
     if (kind === 'invalid') return
     bedGain = ctx.createGain(); bedGain.gain.value = 0.0001; bedGain.connect(bus)
-    const { level, ducked } = BEDS[src] ?? BEDS.pad
+    const { level, ducked } = BEDS[src] ?? (kind === 'file' ? FILE_BED : BEDS.pad)
     bedGain.gain.linearRampToValueAtTime(level, ctx.currentTime + FADE_IN)
     const v = { scope: 'bed', gain: ctx.createGain(), sources: [], end: Infinity }
     v.gain.gain.value = 1; v.gain.connect(bedGain); voices.add(v)

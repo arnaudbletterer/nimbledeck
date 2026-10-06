@@ -93,3 +93,10 @@ playing). Without `__ND_SITE__` only the GitHub card shows. A tour script may `h
 - Start steps at 1 second or later: the glide takes up to 0.8 s before `at`.
 - Put one cue per `sounds` entry; chain `typing` cues for long typing.
 - Test with `examples/showcase/e2e-tour.mjs` (add `--full` for the per-slide timing table), and with `measure-sound.mjs` after touching a sound.
+
+
+## Music from a file
+
+`ndSound: /audio/some-track.mp3` plays a file of `public/` as the bed, looped, much lower than the built-in beds and ducked under
+effects (`FILE_BED` in `soundManager.mjs`). The showcase uses "Born Of The Sky" by Scott Buckley (CC-BY 4.0, credit required: see
+`THIRD_PARTY.md`). Only use music whose licence lets you ship it with the deck, and keep the credit on a slide.

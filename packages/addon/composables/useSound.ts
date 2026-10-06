@@ -1,8 +1,10 @@
 import { ref } from 'vue'
+import { asset } from './asset.mjs'
 import { createSoundManager } from './soundManager.mjs'
 
 // The one sound engine of the page, and a reactive flag for controls. Off until the viewer opts in (see soundManager.mjs).
-export const sound = createSoundManager()
+// A file sound is written as "/audio/x.mp3" (a file of public/): it follows the base path of the build like every other asset.
+export const sound = createSoundManager({ loadFile: (src: string) => fetch(asset(src)).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.arrayBuffer() }) })
 export const soundOn = ref(sound.enabled)
 sound.subscribe((v: boolean) => { soundOn.value = v })
 export const setSound = (on: boolean) => sound.setEnabled(on)
