@@ -4,7 +4,7 @@ import { loadConfig, validateConfig, validateRecordings } from '../src/config.mj
 import { encodeArgs, findFfmpeg, frameGeometry, keyName, parseRecordArgs, planEncodes, planTargets, QUALITY, Timeline, typingDelay } from '../src/record.mjs'
 
 test('record options are parsed and checked', () => {
-  assert.deepEqual(parseRecordArgs([]), { slides: [], seconds: 8, width: 2560, out: null, url: null })
+  assert.deepEqual(parseRecordArgs([]), { slides: [], seconds: 8, width: 2560, out: null, url: null, fps: 60, realtime: false, timeout: 900 })
   const o = parseRecordArgs(['--slide', '11', '19', '--seconds', '10', '--width', '1920', '--out', 'public/r', '--url', 'http://localhost:3030'])
   assert.deepEqual([o.slides, o.seconds, o.width, o.out, o.url], [[11, 19], 10, 1920, 'public/r', 'http://localhost:3030'])
   assert.deepEqual(parseRecordArgs(['--slide', '3', '--slide', '5']).slides, [3, 5])
@@ -70,8 +70,8 @@ test('ffmpeg writes VP9 webm in two passes, High profile H.264 mp4 and VP8 webm,
   assert.ok(mp4.includes('libx264') && mp4.includes('high') && mp4.includes('+faststart') && mp4.includes('yuv420p') && mp4.at(-1) === 'o.mp4')
   assert.ok(vp8.includes('libvpx') && vp8.at(-1) === 'o.webm')
   for (const a of [p2, mp4, vp8]) {
-    assert.equal(a[a.indexOf('-g') + 1], '60', 'a keyframe every 2 seconds')
-    assert.equal(a[a.indexOf('-r') + 1], '30')
+    assert.equal(a[a.indexOf('-g') + 1], '120', 'a keyframe every 2 seconds')
+    assert.equal(a[a.indexOf('-r') + 1], '60')
     assert.ok(a.includes('bt709') && a.join(' ').includes('crop=2000:1000:0:0'))
   }
 })

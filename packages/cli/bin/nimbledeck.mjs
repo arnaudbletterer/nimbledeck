@@ -10,7 +10,7 @@ import { runDeck } from '../src/run.mjs'
 import { verifyDeck } from '../src/verify.mjs'
 
 const [cmd, deck, ...rest] = process.argv.slice(2)
-const usage = () => { console.error('usage: nimbledeck new <dir> | run <deck.md> | record <deck.md> [--slide N ...] [--seconds 8] [--width 2560] [--out dir] [--url http://localhost:3030] | check <deck.md> | verify <deck.md> [--url http://localhost:3030] | prepare <deck.md> | export <deck.md> [slidev export options]'); process.exit(2) }
+const usage = () => { console.error('usage: nimbledeck new <dir> | run <deck.md> | record <deck.md> [--slide N ...] [--seconds 8] [--width 2560] [--out dir] [--url http://localhost:3030] [--fps 60] [--realtime] [--timeout 900] | check <deck.md> | verify <deck.md> [--url http://localhost:3030] | prepare <deck.md> | export <deck.md> [slidev export options]'); process.exit(2) }
 
 try {
   // Slidev takes public/, layouts/ and components/ from the folder that contains the deck file, so the

@@ -21,6 +21,3 @@ export interface Lockstep {
 declare global { interface Window { __ndLockstep?: Lockstep } }
 
 export const useLockstep = (): Lockstep | null => (typeof window === 'undefined' ? null : window.__ndLockstep ?? null)
-
-/** Virtual milliseconds a run of the runner takes to answer in a recording (a fixed budget, so a re-recording gives the same clip). */
-export const RUN_LATENCY_MS = 120

@@ -24,6 +24,9 @@ everything. Options:
 | `--width 2560` | 2560 | width a whole slide would have in the video (480 to 2560). 2560 keeps every pixel; a smaller value scales down, only for a smaller file |
 | `--out public/recordings` | `<publicDir>/recordings` | where the files go |
 | `--url http://localhost:3030` | none | film a deck that is already running (with its processes) instead of starting one |
+| `--fps 60` | 60 | frames per second of the clip (24 to 120) |
+| `--realtime` | off | do not drive time: film every clip as it plays on the screen (see "Lockstep") |
+| `--timeout 900` | 900 | wall-clock limit of one clip, in seconds (30 to 7200). A clip that goes past it stops with an error |
 
 On a machine where another deck uses the default ports, set `NIMBLEDECK_PORT_OFFSET` as for `run`.
 
@@ -98,6 +101,52 @@ The clip lasts `seconds`, or the length of the steps plus a short tail when they
 the config before it starts and says which step is wrong. The editor indents by itself after a line break and closes
 brackets, so type code that does not depend on the indentation you would get by hand, or keep it flat.
 
+## Lockstep: exactly 60 frames a second, whatever the machine
+
+Filming a screen as it plays gives the frames the machine managed: 4 to 50 a second at 2x pixels, so clips repeat frames and
+moving particles look choppy. For a `<PyStream>` the recorder therefore does not wait for time, it drives it. Each tick is 1/60
+second of virtual time followed by one lossless screenshot of the component box, so a 9 second clip is exactly 540 frames
+however slow the machine is (it takes longer to film, not to play). Streams are filmed this way by default; the options and
+config key `realtime` turn it off.
+
+What is lockstepped, and what is not:
+
+| Clip | Mode |
+|---|---|
+| `stream-*` (`<PyStream>`) | lockstep, 60 fps exactly, the same frames on every recording |
+| `live-*` (`<LiveCode>`) | real time: it waits for a Python runner that answers at its own speed. Frames are held to 60 fps. The manifest says `lockstep: false` and why |
+| `demo-*` (marimo) | real time: the demo runs in a cross-origin frame in its own process, where the recorder cannot hold time. Output that changes in steps is filmed after each step settles. `lockstep: false` in the manifest |
+
+How a stream is filmed:
+
+- Chrome's `Emulation.setVirtualTimePolicy` gives each tick a budget of 1/60 s. `setTimeout`, `setInterval`, `performance.now` and
+  `Date.now` follow it exactly. `requestAnimationFrame` and CSS animations do not (Chrome drives them from real frames), so a small
+  page script (`PAGE_SHIM` in `packages/cli/src/lockstep.mjs`) runs queued rAF callbacks once per tick and sets every CSS animation,
+  transition and Web Animation to the virtual time. Verified on a test page: 60 ticks give 60 rAF calls, 1000.0 ms of
+  `performance.now` and exactly one second of animation.
+- The stream protocol: the page sends `{"lockstep": true, ...parameters}`, the server answers with the text `lockstep` and from
+  then on computes exactly one frame per `{"tick": n}` message (see `docs/WRITING.md`). The page holds the recorder's barrier
+  (`window.__ndLockstep.hold()`) until the frame has arrived and been drawn, so no screenshot is taken half-way. The servers
+  seed their random numbers, so a re-recording is the same clip. Slider steps are applied between ticks.
+- The frames go to ffmpeg as they come, into a lossless intermediate file; VP9 (two passes) and H.264 are then encoded from it.
+- Chrome is started with `--disable-new-content-rendering-timeout` and a few compositor flags. Without them a screenshot taken
+  while virtual time is paused can wait for a timeout that only virtual time could end, and never answers (it happened as soon as
+  the deck mounted its other slides). Every wait of the recorder has a time limit and names what it was waiting for.
+
+Not covered, and why: Web Audio and `<video>` elements follow the real clock, not virtual time (the clips have no sound anyway);
+anything that talks to a process in real time is a stream (covered, by the tick protocol) or not covered. A stream server that
+does not know the tick protocol makes the recorder stop with "the process did not answer {lockstep: true}". Deterministic
+frames need deterministic servers: the three example streams are seeded.
+
+`Emulation` virtual time was chosen over `HeadlessExperimental.beginFrame`, which would drive the compositor itself: on macOS
+Chrome answers "BeginFrameControl is not supported on MacOS yet" (measured on Chrome 154 and the headless shell 153).
+
+Timing on a laptop: 540 frames of a 2200 x 1000 box took about 40 s to film and a few minutes to encode. The manifest has `fps`,
+`frames` and `lockstep` for every clip.
+
+`isolate`: a stream whose slide has a paragraph or equations laid over it would film them too. `"isolate": true` in the clip's
+config hides everything on the slide except the component and what it sits in, so the clip holds only the stream.
+
 ## How playback works
 
 `<LiveCode>`, `<PyStream>` and `<Demo>` look for `recordings/<name>.webm` or `.mp4` when their process cannot be reached. The
@@ -127,7 +176,7 @@ stay, and play the recordings. A slide with one live component and no recording 
 
 ## Sizes
 
-The clips of the example decks, 9 to 12 seconds, 30 frames per second, pixels as written in the file:
+The clips of the example decks, 9 to 12 seconds (the sizes below are from before the stream clips went to 60 fps; see the manifest for the current ones), pixels as written in the file:
 
 | Clip | Pixels | WebM (VP9) | MP4 (H.264) | Still |
 |---|---|---|---|---|

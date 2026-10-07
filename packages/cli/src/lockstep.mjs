@@ -24,6 +24,7 @@ export function chooseClock({ realtime = false, kind, cfgRealtime = false }) {
   if (realtime) return { lockstep: false, reason: 'asked for with --realtime' }
   if (cfgRealtime) return { lockstep: false, reason: 'the config of this clip says "realtime": true' }
   if (kind === 'demo') return { lockstep: false, reason: 'a marimo demo runs in its own process (a cross-origin frame), where the recorder cannot hold time. Its output changes in steps: the clip waits for each step to settle and holds frames' }
+  if (kind === 'live') return { lockstep: false, reason: 'live code waits for a Python runner that answers in real time, and lockstep does not cover it yet: the clip is filmed as it plays and holds frames' }
   return { lockstep: true, reason: null }
 }
 

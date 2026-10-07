@@ -17,6 +17,11 @@ import { splitSlides } from './slides.mjs'
 
 const FPS = DEFAULT_FPS
 const DENSITY = 2                                       // pixels per logical (CSS) pixel of a 1280 x 720 slide
+// Chrome flags for lockstep. Without the first one, a screenshot taken while virtual time is paused can wait for a "new content
+// rendering" timeout that only virtual time could end: it never answers (measured: after the deck mounts its other slides, on
+// Chrome 154 and the headless shell; advancing virtual time by a few seconds unsticks it, the flag avoids it). The others make
+// the compositor draw every stage before a screenshot and keep animations on the main thread, where the shim sets them.
+const LOCKSTEP_FLAGS = ['--disable-new-content-rendering-timeout', '--run-all-compositor-stages-before-draw', '--disable-threaded-animation', '--disable-threaded-scrolling', '--disable-checker-imaging']
 const CAPTURE = { w: 1280 * DENSITY, h: 720 * DENSITY }  // the browser draws the slide at 2560 x 1440: text and canvases at native 2x, kept as they are
 
 export function parseRecordArgs(args) {
@@ -308,7 +313,7 @@ const isolate = (sel) => {
 }
 
 // Opens the slide, waits until the component is live and still, and measures its box.
-async function openComponent({ page, base, slide, comp, cfgRec, o, log, lockstep }) {
+async function openComponent({ page, base, slide, comp, cfgRec, o, log }) {
   const sel = `[data-rec-id="${comp.id}"]`
   const root = page.locator(sel).first()
   await page.goto(`${base}/${slide}?clicks=99`, { waitUntil: 'domcontentloaded', timeout: 30000 })
@@ -323,27 +328,9 @@ async function openComponent({ page, base, slide, comp, cfgRec, o, log, lockstep
   await page.addStyleTag({ content: CLEAN })
   if (cfgRec.isolate) await page.evaluate(isolate, sel)
   await page.waitForTimeout(1500)
-  if (lockstep && !(await quietPage(page, sel))) log(`  ${comp.id}: the page never went quiet, starting anyway`)
   await page.evaluate(() => document.activeElement?.blur?.())
   return { root, scope, geo: frameGeometry(await root.boundingBox(), o.width) }
 }
-
-// Waits until the deck has finished mounting itself: no change of the page outside the component for `quiet` ms. Measured: Slidev
-// mounts the other slides (WebGL scenes included) a few seconds after load, and Chrome then never answers a screenshot while its
-// virtual time is paused. So lockstep starts only once the page is quiet; the component's own changes (a HUD, a blinking cursor)
-// do not count. Resolves false when the page never calmed down.
-const quietPage = (page, sel, quiet = 2500, limit = 30000) => page.evaluate(({ sel, quiet, limit }) => new Promise((resolve) => {
-  const box = document.querySelector(sel)
-  let last = performance.now()
-  const watch = new MutationObserver((records) => { if (records.some((r) => !box?.contains(r.target))) last = performance.now() })
-  watch.observe(document.documentElement, { subtree: true, childList: true, attributes: true, characterData: true })
-  const t0 = performance.now()
-  const check = setInterval(() => {
-    const now = performance.now()
-    if (now - last >= quiet) { clearInterval(check); watch.disconnect(); resolve(true) }
-    else if (now - t0 > limit) { clearInterval(check); watch.disconnect(); resolve(false) }
-  }, 100)
-}), { sel, quiet, limit })
 
 // After a step, the screen of a demo that computes elsewhere changes once the answer is back, then stays still: wait for that.
 async function settle(lastFrame, since) {
@@ -470,7 +457,7 @@ export async function recordDeck(deckPath, root, args) {
   process.once('SIGINT', () => cleanup().then(() => process.exit(130)))
 
   const done = [], failed = []
-  let browser
+  let browser, lockBrowser = null   // lockstep needs its own flags (LOCKSTEP_FLAGS): a second browser, started on first use
   try {
     // The deck needs a moment before it answers.
     for (let i = 0; ; i++) {
@@ -479,20 +466,21 @@ export async function recordDeck(deckPath, root, args) {
       await sleep(500)
     }
     const chrome = findChrome()
-    browser = await chromium.launch(chrome ? { executablePath: chrome } : {})
+    const launch = (args = []) => chromium.launch({ ...(chrome ? { executablePath: chrome } : {}), args })
+    browser = await launch()
     mkdirSync(out, { recursive: true })
     for (const { slide, comps } of targets) {
       for (const comp of comps) {
         const cfgRec = cfg.recordings[comp.id] ?? {}
         const mode = chooseClock({ realtime: o.realtime, kind: comp.kind, cfgRealtime: cfgRec.realtime })
         log(`slide ${slide}: ${comp.id} (${mode.lockstep ? `lockstep, ${o.fps} fps` : `real time, ${o.fps} fps${mode.reason ? `; ${mode.reason}` : ''}`})`)
-        const page = await browser.newPage({ viewport: { width: CAPTURE.w, height: CAPTURE.h }, deviceScaleFactor: 1 })
+        const page = await (mode.lockstep ? (lockBrowser ??= await launch(LOCKSTEP_FLAGS)) : browser).newPage({ viewport: { width: CAPTURE.w, height: CAPTURE.h }, deviceScaleFactor: 1 })
         let film = null
         try {
           page.on('dialog', (d) => d.dismiss())
           if (mode.lockstep) await page.addInitScript(PAGE_SHIM)
+          const ready = await openComponent({ page, base, slide, comp, cfgRec, o, log })
           const cdp = await page.context().newCDPSession(page)
-          const ready = await openComponent({ page, base, slide, comp, cfgRec, o, log, lockstep: mode.lockstep })
           const geo = ready.geo
           film = await (mode.lockstep ? filmLockstep : filmRealtime)({ page, cdp, ready, comp, cfgRec, o, plan, tmp: tmpdir(), log })
           const files = []
@@ -507,7 +495,9 @@ export async function recordDeck(deckPath, root, args) {
             } catch (e) { if (ext === 'webm') throw e; log(`  no ${ext} (${e.message})`); rmSync(`${stem}.${ext}`, { force: true }) }
           }
           if (!plan.some((p) => p.ext === 'mp4')) rmSync(`${stem}.mp4`, { force: true })
-          writeFileSync(`${stem}.jpg`, Buffer.from(await poster(page, film.posterFrame, film.posterGeo), 'base64'))
+          // The poster is cut by a page of its own: the clip's page may have its virtual time paused, which stalls the file reader.
+          const pp = await browser.newPage()
+          try { writeFileSync(`${stem}.jpg`, Buffer.from(await poster(pp, film.posterFrame, film.posterGeo), 'base64')) } finally { await pp.close().catch(() => {}) }
           log(`  ${mode.lockstep ? 'lockstep' : 'real time'}: ${film.count} frames, ${film.seconds.toFixed(2)} s at ${o.fps} fps, ${geo.w}x${geo.h} px (${geo.logical.w}x${geo.logical.h} css); filmed in ${film.wall.toFixed(0)} s (${film.detail}), encoded in ${((Date.now() - t0) / 1000).toFixed(0)} s`)
           log(`  ${files.map((f) => `${f} ${kb(join(out, f))}`).join(', ')}, ${comp.id}.jpg ${kb(`${stem}.jpg`)}`)
           done.push({ id: comp.id, kind: comp.kind, seconds: Math.round(film.seconds * 100) / 100, width: geo.logical.w, height: geo.logical.h, pixelWidth: geo.w, pixelHeight: geo.h, fps: o.fps, frames: film.count, lockstep: mode.lockstep, ...(mode.reason ? { reason: mode.reason } : {}), codecs: plan.filter((p) => files.includes(`${comp.id}.${p.ext}`)).map((p) => p.kind), files, poster: `${comp.id}.jpg` })
@@ -519,6 +509,7 @@ export async function recordDeck(deckPath, root, args) {
       }
     }
   } finally {
+    await lockBrowser?.close()
     await browser?.close()
     await cleanup()
   }

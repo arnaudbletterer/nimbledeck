@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useSlideContext } from '@slidev/client'
 import { EditorView, keymap } from '@codemirror/view'
 import { EditorState, Prec } from '@codemirror/state'
@@ -12,7 +12,6 @@ import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
 import { sfx } from '../composables/useSound'
 import { useLinked } from '../composables/useLinked'
-import { RUN_LATENCY_MS, useLockstep } from '../composables/lockstep'
 
 // Live code: edit Python on the slide and the result (printed output and matplotlib figures) updates as you type.
 // The code runs in a local Python process started by `nimbledeck run` (config key `runner`), never in the browser.
@@ -40,12 +39,6 @@ const stdout = ref(''), stderr = ref('')
 const images = ref<string[]>([])
 const stale = ref(false)   // the shown result is from older code than the editor holds
 let view: EditorView | null = null, ws: WebSocket | null = null, debounce = 0, runId = 0, closed = true, reconnect = 0
-// While `nimbledeck record` films this editor in lockstep (composables/lockstep.ts), a run holds the recorder's clock until the
-// runner has answered, and the answer then appears RUN_LATENCY_MS of virtual time after the run began: the same instant in every
-// re-recording, however long the runner really took.
-const ls = useLockstep()
-let holdRun: (() => void) | null = null, answer: { m: any; due: number } | null = null, launched = 0
-const releaseRun = () => { holdRun?.(); holdRun = null }
 
 const text = () => view?.state.doc.toString() ?? initial.value
 
@@ -56,28 +49,19 @@ async function connect() {
   const sock = new WebSocket(`ws://127.0.0.1:${cfg.runner.port}/?t=${cfg.runner.token}`)
   ws = sock
   sock.onopen = () => { if (state.value === 'offline') state.value = 'idle'; run() }
-  sock.onclose = () => { releaseRun(); if (ws !== sock) return; state.value = 'offline'; reconnect = window.setTimeout(connect, 2000) }
+  sock.onclose = () => { if (ws !== sock) return; state.value = 'offline'; reconnect = window.setTimeout(connect, 2000) }
   sock.onerror = () => sock.close()
   sock.onmessage = (e) => {
     const m = JSON.parse(e.data)
     if (m.id !== runId) return                        // an answer to code that has since been edited
     if (m.type === 'status') { state.value = 'running'; return }
     if (m.type === 'result') {
-      if (ls?.started) { answer = { m, due: launched + RUN_LATENCY_MS }; releaseRun(); return }   // shown by onTick, at its virtual time
-      releaseRun(); show(m)
+      ms.value = m.ms; stdout.value = m.stdout; stderr.value = m.stderr
+      if (m.ok || m.images.length) images.value = m.images   // keep the last good picture while the code is broken
+      state.value = m.ok ? 'ok' : 'error'; stale.value = false
+      if (!props.quiet && m.ok) sfx('tick', { volume: 0.3, pitch: 500, gap: 400 })   // a run finished
     }
   }
-}
-function show(m: any) {
-  ms.value = m.ms; stdout.value = m.stdout; stderr.value = m.stderr
-  if (m.ok || m.images.length) images.value = m.images   // keep the last good picture while the code is broken
-  state.value = m.ok ? 'ok' : 'error'; stale.value = false
-  if (!ls && !props.quiet && m.ok) sfx('tick', { volume: 0.3, pitch: 500, gap: 400 })   // a run finished
-}
-function onTick() {
-  if (!ls || !answer || ls.t < answer.due) return
-  const done = ls.hold(`${recId.value} (drawing the result)`), m = answer.m
-  answer = null; show(m); nextTick(done)
 }
 
 function run() {
@@ -86,7 +70,6 @@ function run() {
   const dpi = Math.min(300, Math.max(72, 96 * ($scale?.value ?? 1) * (window.devicePixelRatio || 1)))   // sharp at the real on-screen size
   const colors = [1, 2, 3, 4].map((i) => cssVar(`--nd-chart-${i}`, '#888'))
   ws.send(JSON.stringify({ type: 'run', id: runId, code: text(), dpi, timeout: props.timeout, theme: { ink: cssVar('--nd-ink'), line: cssVar('--nd-line'), colors } }))
-  if (ls) { releaseRun(); answer = null; launched = ls.t; holdRun = ls.hold(`${recId.value} (run ${runId}: waiting for the runner)`) }
 }
 function schedule() { stale.value = true; clearTimeout(debounce); if (props.auto) debounce = window.setTimeout(run, 300) }
 function reset() { view?.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: initial.value } }) }
@@ -127,8 +110,8 @@ function mount() {
     }),
   })
 }
-function start() { closed = false; if (ls) window.addEventListener('nd-tick', onTick); if (!view) mount(); connect() }
-function stop() { closed = true; releaseRun(); window.removeEventListener('nd-tick', onTick); clearTimeout(debounce); clearTimeout(reconnect); const w = ws; ws = null; w?.close() }
+function start() { closed = false; if (!view) mount(); connect() }
+function stop() { closed = true; clearTimeout(debounce); clearTimeout(reconnect); const w = ws; ws = null; w?.close() }
 
 const active = useActive()
 const recId = computed(() => `live-${props.id ?? $page.value}`)

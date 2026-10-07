@@ -172,6 +172,11 @@ A web page cannot run these. To make them play there too, record them once with 
    its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows
    ([Equations](EQUATIONS.md)).
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
+4. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
+   protocol, opt-in and without changing the free-running loop: when a client message holds `"lockstep": true`, the server
+   restarts from its seeded state, sends one text message `lockstep`, then stops free-running and answers every
+   `{"tick": n}` with exactly one frame. Seed every random number, and apply parameters between ticks. The three example
+   servers show it (`parse_control`, `parse_tick` and the `lock` state in `handler`).
 
 ## Live code
 
