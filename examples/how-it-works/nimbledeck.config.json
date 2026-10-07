@@ -33,7 +33,7 @@
   "recordings": {
     "stream-nbody": {
       "seconds": 9,
-      "steps": [{ "wait": 1500 }, { "set": "gravity", "value": 2.5 }, { "wait": 1500 }, { "set": "particles", "value": 1200 }]
+      "steps": [{ "wait": 1200 }, { "set": "particles", "value": 700 }, { "wait": 2200 }, { "set": "gravity", "value": 1.4 }]
     },
     "demo-compute": {
       "seconds": 9,
