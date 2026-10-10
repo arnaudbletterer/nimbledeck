@@ -9,7 +9,6 @@ docs/DECISIONS.md for the why. This file is kept out of the published site.
 |---|---|---|
 | Nimbledeck | `/Users/abletterer/Projects/nimbledeck`, remotes `origin` (Synology) and `github` (`git@github.com:arnaudbletterer/nimbledeck.git`) | Local `main` is about 180 commits ahead of `github/main`. **Not pushed on purpose**: pushing deploys the site to GitHub Pages. The owner decides when. |
 | Site (preview) | `npm run docs:build`, then `npm run docs:preview` -> http://127.0.0.1:4173/nimbledeck/ | Deck-first: `/` is the showcase deck, `/docs/`, `/playground/`, `/demos/how-it-works/`, `/demos/science/`. |
-| Lockstep 60 fps recording | branch `feat/lockstep-recording`, worktree `/Users/abletterer/.herdr/worktrees/nimbledeck/agent-a0112cdadcdeb976b` | Unfinished, see below. Not merged. |
 
 ## What is on `main` (all tested, local)
 
@@ -29,22 +28,13 @@ Last known checks on `main`: `npm test` 241 pass; link crawler 0 problems; `webs
 `examples/showcase/e2e-tour.mjs --dist <build with WEB_BASE=/>`, `examples/how-it-works/e2e-interactions.mjs`,
 `examples/motion-lab/lab-e2e.mjs` all pass (run them on a quiet machine, kill stale servers first).
 
-## Unfinished: lockstep 60 fps recording (branch `feat/lockstep-recording`)
+## Lockstep 60 fps recording: merged into `main`
 
-Goal: clips at exactly 60 fps whatever the machine speed (virtual time, one lossless frame per 1/60 s). Scope decided by the owner
-because of quota: **streams only** (nbody, swarm, Lorenz). Live code and marimo stay real time.
-
-- Done and committed on the branch: engine (`packages/cli/src/lockstep.mjs`), tick protocol in the three stream servers, `PyStream.vue`
-  hooks, config keys `isolate` / `realtime`, CLI `--fps --realtime --timeout`, manifest fields, tests written (not yet run), docs written.
-  The screenshot hang is fixed with Chrome flags (`LOCKSTEP_FLAGS` in `record.mjs`).
-- `stream-nbody` re-recorded in lockstep (540 frames, 60 fps, 2200x1000). The first version had the swarm flying off screen after 6 s
-  (gravity 2.5 with 1200 particles); the steps were changed to 700 particles then gravity 1.4 and the new clip looks good.
-- Still to do: set `"isolate": true` for `stream-lorenz` in `examples/science/nimbledeck.config.json`; record `stream-swarm` then
-  `stream-lorenz` one at a time (`NIMBLEDECK_PORT_OFFSET=50 node packages/cli/bin/nimbledeck.mjs run <deck.md>`, then
-  `node packages/cli/bin/nimbledeck.mjs record <deck.md> --url http://localhost:3080 --slide N`); check pts spacing with ffprobe and
-  look at extracted frames; run `npm test` (the tick-protocol test needs `uv`), `npm run docs:build`, the e2e scripts above and
-  `examples/how-it-works/record-e2e.mjs`; update the sizes table in docs/RECORDING.md; then merge into `main`.
-- If it goes wrong: leave the current 2x clips (they are fine, particle clips run at 19 to 35 fps).
+Streams only (owner's scope decision because of quota). `stream-nbody` and `stream-swarm` are re-recorded in lockstep (540 frames,
+exactly 60 fps, even pts spacing, 3.1 MB webm each). `stream-lorenz` stays as it was on purpose: the science slide now carries the
+equations over the lower left of the clip, so a fresh recording of the whole slide would burn them into the video (use the `isolate`
+option if you re-record it). Live code and marimo clips stay real time. Docs: `docs/RECORDING.md` ("Lockstep"). The branch
+`feat/lockstep-recording` and its worktree can be deleted.
 
 ## Open points before a push
 

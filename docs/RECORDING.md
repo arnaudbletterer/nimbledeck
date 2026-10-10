@@ -180,9 +180,9 @@ The clips of the example decks, 9 to 12 seconds (the sizes below are from before
 
 | Clip | Pixels | WebM (VP9) | MP4 (H.264) | Still |
 |---|---|---|---|---|
-| `stream-nbody` (200 to 1200 moving particles) | 2200 x 1000 | 2.8 MB | 3.7 MB | 79 KB |
-| `stream-swarm` | 2040 x 1120 | 2.5 MB | 3.7 MB | 233 KB |
-| `stream-lorenz` (whole slide) | 2560 x 1440 | 3.0 MB | 2.4 MB | 483 KB |
+| `stream-nbody` (700 moving particles, 60 fps lockstep) | 2200 x 1000 | 3.1 MB | 4.1 MB | 234 KB |
+| `stream-swarm` (60 fps lockstep) | 2040 x 1120 | 3.1 MB | 4.0 MB | 221 KB |
+| `stream-lorenz` (whole slide, real time: re-recording it lockstepped would burn the slide's equations into the clip) | 2560 x 1440 | 3.0 MB | 2.4 MB | 483 KB |
 | `demo-turing` | 2148 x 1208 | 1.3 MB | 0.9 MB | 259 KB |
 | `live-14`, `live-fft`, `live-fit`, `live-net` (typing, plot updating) | 2280 x 1000 to 2400 x 1208 | 0.7 to 1.0 MB | 0.7 to 1.1 MB | 250 to 350 KB |
 | `live-19` | 2280 x 920 | 0.6 MB | 0.6 MB | 175 KB |

@@ -10,7 +10,7 @@ import { chooseClock, PAGE_SHIM, ticksFor, tickMs, tickTime, withTimeout } from 
 import { encodeArgs, frameGeometry, intermediateArgs, parseRecordArgs } from '../src/record.mjs'
 
 test('ticks: 60 of them are exactly one second', () => {
-  assert.equal(tickMs(60) * 60, 1000)
+  assert.ok(Math.abs(tickMs(60) * 60 - 1000) < 1e-9)   // 1000 / 60 * 60 is 1000.0000000000001 in floating point
   assert.equal(tickTime(60, 60), 1000)
   assert.equal(ticksFor(1000, 60), 60)
   assert.equal(ticksFor(100, 60), 6)
