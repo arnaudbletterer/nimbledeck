@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "live-ai-attention",
+      "kind": "live",
+      "seconds": 16,
+      "width": 1200,
+      "height": 604,
+      "pixelWidth": 2400,
+      "pixelHeight": 1208,
+      "fps": 60,
+      "frames": 960,
+      "lockstep": false,
+      "reason": "live code waits for a Python runner that answers in real time, and lockstep does not cover it yet: the clip is filmed as it plays and holds frames",
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "live-ai-attention.webm",
+        "live-ai-attention.mp4"
+      ],
+      "poster": "live-ai-attention.jpg"
+    },
+    {
+      "id": "live-ai-sampler",
+      "kind": "live",
+      "seconds": 14.02,
+      "width": 1200,
+      "height": 604,
+      "pixelWidth": 2400,
+      "pixelHeight": 1208,
+      "fps": 60,
+      "frames": 841,
+      "lockstep": false,
+      "reason": "live code waits for a Python runner that answers in real time, and lockstep does not cover it yet: the clip is filmed as it plays and holds frames",
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "live-ai-sampler.webm",
+        "live-ai-sampler.mp4"
+      ],
+      "poster": "live-ai-sampler.jpg"
+    },
+    {
+      "id": "stream-ai-diffusion",
+      "kind": "stream",
+      "seconds": 17,
+      "width": 1280,
+      "height": 720,
+      "pixelWidth": 2560,
+      "pixelHeight": 1440,
+      "fps": 60,
+      "frames": 1020,
+      "lockstep": true,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "stream-ai-diffusion.webm",
+        "stream-ai-diffusion.mp4"
+      ],
+      "poster": "stream-ai-diffusion.jpg"
+    }
+  ]
+}

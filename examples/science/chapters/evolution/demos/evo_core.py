@@ -7,12 +7,11 @@ crowding (similar individuals compete), a heritability below 1 (selection sees t
 rotation of the whole landscape (the environment changes and the optimum moves).
 
 Wire format (see docs/WRITING.md, "Adding a streamed Python animation"): binary float32 frames [step_ms, n, x0, y0, ...] with x
-and y in [-2, 2] mapped on the canvas, plus two optional JSON text messages that PyStream paints: a `field` (the heat map of
-the landscape, sent only when it changes) and a `draw` list (plots and arrows, sent every frame). The client sends JSON with
+and y in [-2, 2] mapped on the canvas, with the heat map of the landscape as a raster block after the points (sent only when it
+changes) and, before each frame, a JSON `draw` list (plots and arrows) that PyStream paints over the points. The client sends JSON with
 n, dt, g and the extra sliders; the server answers the lockstep protocol of `nimbledeck record` (one frame per {"tick": n}).
 """
 import asyncio
-import base64
 import json
 import math
 import sys
@@ -72,12 +71,13 @@ def heat(f):
     return np.clip(rgb, 0, 255).astype(np.uint8)
 
 
-def field_message(box, rugged, env):
-    """The `field` message that paints the landscape into box = (x, y, size) of the canvas."""
+def raster_block(box, rugged, env):
+    """The raster block of a frame that paints the landscape into box = (x, y, size) of the canvas (see docs/WRITING.md)."""
     g = (np.arange(GRID) + 0.5) / GRID * 2 * SPAN - SPAN
     X, Y = np.meshgrid(g, g[::-1])                  # row 0 is the top: the largest trait 2
-    rgb = heat(landscape(X, Y, rugged, env))
-    return json.dumps({"field": {"x": box[0], "y": box[1], "w": box[2], "h": box[2], "nx": GRID, "ny": GRID, "rgb": base64.b64encode(rgb.tobytes()).decode()}})
+    rgba = np.dstack([heat(landscape(X, Y, rugged, env)), np.full((GRID, GRID), 255, np.uint8)])
+    head = np.array([1, box[0], box[1], box[2], box[2], GRID, GRID], dtype=np.float32)
+    return head.tobytes() + rgba.tobytes()
 
 
 class Evolution:
@@ -244,13 +244,12 @@ class Hero:
     def frame(self):
         sim = self.sim
         pts, mean = sim.step()
-        msgs = []
+        raster = b""
         key = (round(sim.p["rugged"], 4), round(sim.p["env"], 4))
-        if key != self.sent:
+        if key != self.sent:                        # a frame without the block keeps the last landscape
             self.sent = key
-            msgs.append(field_message(self.box, *key))
-        msgs.append(json.dumps({"draw": self.draw(mean)}, separators=(",", ":")))
-        return msgs, pts
+            raster = raster_block(self.box, *key)
+        return [json.dumps({"draw": self.draw(mean)}, separators=(",", ":"))], pts, raster
 
     def draw(self, mean):
         sim = self.sim
@@ -291,13 +290,12 @@ class Lens:
             # the landscape turns back and forth, 15 seconds a cycle, so the population always has a peak to chase
             sim.p["env"] = 0.3 * (1 - math.cos(2 * math.pi * sim.gen / 150))
         pts, mean = sim.step()
-        msgs = []
+        raster = b""
         key = round(sim.p["env"], 3)
         if key != self.sent:
             self.sent = key
-            msgs.append(field_message(self.box, 0.0, key))
-        msgs.append(json.dumps({"draw": self.draw(mean)}, separators=(",", ":")))
-        return msgs, pts
+            raster = raster_block(self.box, 0.0, key)
+        return [json.dumps({"draw": self.draw(mean)}, separators=(",", ":"))], pts, raster
 
     def draw(self, mean):
         sim = self.sim
@@ -412,11 +410,11 @@ def serve_view(make_view, name, default_port):
                 if pending:
                     m = dict(pending); pending.clear()
                     view.set(m)
-                msgs, pts = await asyncio.to_thread(view.frame)
+                msgs, pts, raster = await asyncio.to_thread(view.frame)
                 for text in msgs:
                     await ws.send(text)
                 ms = (time.perf_counter() - t0) * 1000
-                await ws.send(np.array([ms, len(pts)], dtype=np.float32).tobytes() + pts.tobytes())
+                await ws.send(np.array([ms, len(pts)], dtype=np.float32).tobytes() + pts.tobytes() + raster)
                 if not lock["on"]:
                     await asyncio.sleep(max(0, FRAME_S - (time.perf_counter() - t0)))
         except ConnectionClosed:

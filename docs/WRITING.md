@@ -165,28 +165,35 @@ A web page cannot run these. To make them play there too, record them once with 
 1. `demos/stream_<name>.py`: a WebSocket server (see `examples/how-it-works/demos/stream_nbody.py`). Frame format:
    binary float32 `[step_ms, n, x0, y0, x1, y1, ...]`. The client sends JSON parameters; apply them between steps.
 2. Register it under `streams` in the config, then use `<PyStream name="<name>" />`.
-3. Optional settings, all with the original look as default: `:colors="['--nd-accent', '#f472b6']"` cuts the points into
-   that many equal consecutive groups, one colour each (CSS colours or token names), so a trajectory keeps its colour;
-   `:size` is the dot size in logical pixels (2.2), `:fade` how much of the previous frame is erased per frame (0.25;
-   smaller gives longer trails); `:w` and `:h` set the logical canvas (1000 x 460), and the stream's x and y in
-   [-2, 2] map to its width and height; `:sliders` is three `{label, min, max, step, value}` objects for the `n`, `dt` and
-   `g` sliders that `controls` shows; `:extra` is more `{name, label, min, max, step, value}` sliders, each sent to the process under
-   its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows
-   ([Equations](EQUATIONS.md)).
-   Two optional JSON text messages, sent by the process before a frame, paint beside the points: `{"field": {"x", "y", "w", "h", "nx", "ny", "rgb"}}`
-   is an nx by ny image (`rgb` is base64 of nx*ny*3 bytes, top row first) stretched over the rectangle x, y, w, h (logical pixels)
-   behind the points and kept until the next `field`; `{"draw": [...]}` is a list of shapes in logical pixels drawn over the points,
-   replacing the previous list: `{t:"line", p:[x0,y0,x1,y1,...], c, w, a, dash}`, `{t:"dot", x, y, r, c, w, a}` (`w` set draws a ring),
-   `{t:"rect", x, y, w, h, c, a}` and `{t:"text", x, y, s, c, size, align, weight}`, with `c` a CSS colour or a token such as
-   `"--nd-chart-1"`. A heat map under a population and live plots over it need nothing else
-   (`examples/science/chapters/evolution/demos/evo_core.py`). A stream that sends neither is unchanged.
-3. A frame may also carry raster images (a heat map, a field), drawn smoothly scaled under the points. After the `2 + 2n`
-   floats of the points, append `[count, (x, y, w, h, iw, ih) * count]` as float32 (position and size in logical canvas
-   pixels, image size in pixels), then the `iw * ih * 4` RGBA bytes of every image in turn. A server that sends nothing
-   after its points draws as before. `values` on `<PyStream>` shows the number next to the `dt` and `g` sliders too.
-   `examples/science/chapters/climate` draws two Hovmoeller diagrams this way.
-3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
-4. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
+3. A stream draws in three layers, from the bottom: raster images, the points, shapes. Everything beyond the points is
+   optional: a server that sends only points draws as it always did. The wire format of a frame is binary float32,
+   `[step_ms, n, x0, y0, ..., x(n-1), y(n-1)]`, then optionally the raster block
+   `[count, (x, y, w, h, iw, ih) * count]` followed by the `iw * ih * 4` RGBA bytes of every image in turn (position and
+   size in logical canvas pixels, image size in pixels; smoothly scaled, drawn under the points). A frame without the block
+   keeps the images of the last one, so a static heat map is sent once and again only when it changes; `count` 0 clears them.
+   Shapes are a JSON text message sent before a frame, `{"draw": [...]}`, that replaces the previous list. Each shape is
+   `{t:"line", p:[x0,y0,x1,y1,...], c, w, a, dash}`, `{t:"dot", x, y, r, c, w, a}` (`w` set draws a ring),
+   `{t:"rect", x, y, w, h, c, a}` or `{t:"text", x, y, s, c, size, align, weight}`, in logical pixels, with `c` a CSS
+   colour or a token such as `"--nd-chart-1"`. The component draws on three canvases, so images and shapes stay sharp at the
+   real on-screen resolution. The settings of `<PyStream>`:
+
+   | Setting | Meaning (default) |
+   | --- | --- |
+   | `controls`, `hud`, `frame`, `color`, `recording` | The sliders, the fps readout, a frame, the dot colour, another recording file. |
+   | `:colors="['--nd-accent', '#f472b6']"` | One colour per group (CSS colours or tokens); the points are cut into that many equal consecutive groups, so a trajectory keeps its colour. |
+   | `:groups="[3000, 900]"` | Explicit point counts for the groups instead of equal ones. The server keeps the counts fixed and parks unused points off the canvas, at x = 9. |
+   | `:size`, `:sizes`, `:alphas` | Dot size in logical pixels (2.2); one size and one opacity (0 to 1) per group. |
+   | `:fade` | How much of the previous frame is erased each frame (0.25; 1 leaves no trail, smaller gives longer trails). |
+   | `:w`, `:h` | Logical canvas (1000 x 460); the stream's x and y in [-2, 2] map to its width and height. |
+   | `:sliders` | Three `{label, min, max, step, value}` objects for the `n`, `dt` and `g` sliders that `controls` shows. `[]` hides all three, so only the `extra` ones show. |
+   | `values` | Shows the number next to the `dt` and `g` sliders too (the `n` slider and every `extra` one always show it). |
+   | `:extra` | More `{name, label, min, max, step, value}` sliders, each sent to the process under its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows ([Equations](EQUATIONS.md)). An extra slider with `labels: ['linear', 'cosine']` shows the label of its value instead of the number. |
+   | `highlight` | The terms of an `<Equation>` the stream answers to ([Equations](EQUATIONS.md)). |
+
+   Examples: `examples/science/chapters/climate` (two Hovmoeller diagrams as images), `examples/science/chapters/evolution`
+   (a heat map as an image and live plots as shapes), `examples/science/chapters/ai` (groups, sizes, alphas, labels).
+4. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
+5. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
    protocol, opt-in and without changing the free-running loop: when a client message holds `"lockstep": true`, the server
    restarts from its seeded state, sends one text message `lockstep`, then stops free-running and answers every
    `{"tick": n}` with exactly one frame. Seed every random number, and apply parameters between ticks. The three example

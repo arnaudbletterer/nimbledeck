@@ -5,6 +5,7 @@ import { useCrisp } from '../composables/useCrisp'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
 import { links, formatValue } from '../composables/links.mjs'
+import { parseFrame, groupRanges, sliderText } from '../composables/pystream.mjs'
 import { useLinked } from '../composables/useLinked'
 import { useLockstep } from '../composables/lockstep'
 
@@ -20,17 +21,20 @@ import { useLockstep } from '../composables/lockstep'
 //   sliders three objects {label, min, max, step, value} for the n, dt and g sliders, in that order
 //   extra   more sliders {name, label, min, max, step, value}: each is sent to the process under its name (like n, dt and g) and
 //           published as the parameter `name`, which a \val{name}{...} of an <Equation> shows (composables/links.mjs)
-//   field / draw  two optional JSON text messages a process may send before a frame, to paint under and over the points:
-//           {"field": {"x","y","w","h","nx","ny","rgb"}}  an nx by ny image (rgb: base64 of nx*ny*3 bytes, row by row from the top)
-//                    stretched over the rectangle x,y,w,h (logical pixels) behind the points, kept until the next field;
-//           {"draw": [ {t:"line",p:[x,y,...],c,w,a,dash}, {t:"dot",x,y,r,c,w,a}, {t:"rect",x,y,w,h,c,a},
-//                      {t:"text",x,y,s,c,size,align,weight} ]}  a list of shapes in logical pixels (c: a CSS colour or a token like
-//                    "--nd-chart-1"), drawn above the points; each message replaces the previous list. Without them nothing changes.
+//   groups  point counts of the colour groups, in order (for example [3000, 900]); without it the points are cut into equal groups.
+//           A server keeps the counts fixed and pads unused points off the canvas (x = 9)
+//   sizes, alphas  one dot size (logical pixels) and one opacity (0 to 1) per group; default `size` and 1
 //   values  show the number next to the dt and g sliders too (the n slider always shows it)
+//   sliders: []  hides the n, dt and g sliders, so the controls are only the `extra` ones; an extra slider with
+//           `labels: ['linear', 'cosine']` shows the label of its value instead of the number
 //   images  none: a frame may carry raster images after its points (see docs/WRITING.md), drawn under the points
+//   draw    a JSON text message a process may send before a frame, with a list of shapes drawn over the points:
+//           {"draw": [ {t:"line",p:[x,y,...],c,w,a,dash}, {t:"dot",x,y,r,c,w,a}, {t:"rect",x,y,w,h,c,a},
+//                      {t:"text",x,y,s,c,size,align,weight} ]}  in logical pixels (c: a CSS colour or a token like
+//                    "--nd-chart-1"); each message replaces the previous list. Without it nothing changes.
 //   highlight  { "1": "note" }: the terms of an <Equation> this stream answers to (a ring in the term's colour and the note)
-interface Slider { label: string; min: number; max: number; step: number; value: number }
-const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; values?: boolean; sliders?: Slider[]; extra?: (Slider & { name: string })[]; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
+interface Slider { label: string; min: number; max: number; step: number; value: number; labels?: string[] }
+const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; values?: boolean; groups?: number[]; sizes?: number[]; alphas?: number[]; sliders?: Slider[]; extra?: (Slider & { name: string })[]; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
 const LW = props.w, LH = props.h
 const SL: Slider[] = props.sliders ?? [
   { label: 'particles', min: 100, max: 2000, step: 100, value: 400 },
@@ -43,7 +47,7 @@ const cv = ref<HTMLCanvasElement>()
 const bg = ref<HTMLCanvasElement>(), ov = ref<HTMLCanvasElement>()
 const { k } = useCrisp(root, { w: LW, h: LH })
 const state = ref<'offline' | 'live'>('offline')
-const n = ref(SL[0].value), dt = ref(SL[1].value), g = ref(SL[2].value)
+const n = ref(SL[0]?.value ?? 0), dt = ref(SL[1]?.value ?? 0), g = ref(SL[2]?.value ?? 0)
 const ex = reactive<Record<string, number>>(Object.fromEntries((props.extra ?? []).map((e) => [e.name, e.value])))
 const touched = new Set<string>()   // an extra slider is sent only once the viewer has moved it, so the process keeps its own default until then
 const { linked, linkAttrs } = useLinked(() => props.highlight)
@@ -60,10 +64,11 @@ function onTick() {
   ws.send(JSON.stringify({ tick: ls.n }))
 }
 
-// Optional layers (see the header): the field under the points and the shapes over them. Both keep their last message and are
+// Optional layers (see the header): raster images under the points and shapes over them. Both keep their last content and are
 // repainted when the canvas changes size, so they stay sharp at the real on-screen resolution.
 interface Shape { t: string; x?: number; y?: number; w?: number; h?: number; r?: number; p?: number[]; c?: string; a?: number; dash?: number[]; s?: string; size?: number; align?: CanvasTextAlign; weight?: number | string }
-let fieldMsg: { x: number; y: number; w: number; h: number; nx: number; ny: number; img: ImageData } | null = null
+interface Tile { x: number; y: number; w: number; h: number; tex: HTMLCanvasElement }
+let tiles: Tile[] = []
 let shapes: Shape[] = []
 function layer(c: HTMLCanvasElement | undefined) {
   if (!c) return null
@@ -73,13 +78,22 @@ function layer(c: HTMLCanvasElement | undefined) {
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); ctx.setTransform(k.value, 0, 0, k.value, 0, 0)
   return ctx
 }
-function paintField() {
+function paintImages() {
   const ctx = layer(bg.value)
-  if (!ctx || !fieldMsg) return
-  const f = fieldMsg, tmp = document.createElement('canvas')
-  tmp.width = f.nx; tmp.height = f.ny; tmp.getContext('2d')!.putImageData(f.img, 0, 0)
+  if (!ctx) return
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'
-  ctx.drawImage(tmp, f.x, f.y, f.w, f.h)
+  for (const t of tiles) ctx.drawImage(t.tex, t.x, t.y, t.w, t.h)
+}
+// A frame without a raster block keeps the images of the last one; a block with count 0 clears them (parseFrame in composables/pystream.mjs).
+function setImages(images: ReturnType<typeof parseFrame>['images']) {
+  if (!images) return
+  tiles = images.map((im) => {
+    const tex = document.createElement('canvas')
+    tex.width = im.iw; tex.height = im.ih
+    tex.getContext('2d')!.putImageData(new ImageData(im.rgba, im.iw, im.ih), 0, 0)
+    return { x: im.x, y: im.y, w: im.w, h: im.h, tex }
+  })
+  paintImages()
 }
 function paintShapes() {
   const ctx = layer(ov.value)
@@ -107,41 +121,9 @@ function paintShapes() {
 function onJson(text: string) {
   let m: any
   try { m = JSON.parse(text) } catch { return }
-  if (!m || typeof m !== 'object') return
-  const f = m.field
-  if (f && typeof f.rgb === 'string' && f.nx > 0 && f.ny > 0 && f.nx * f.ny <= 1 << 20) {
-    const bin = atob(f.rgb), px = f.nx * f.ny
-    if (bin.length === px * 3) {
-      const img = new ImageData(f.nx, f.ny)
-      for (let i = 0; i < px; i++) { img.data[i * 4] = bin.charCodeAt(i * 3); img.data[i * 4 + 1] = bin.charCodeAt(i * 3 + 1); img.data[i * 4 + 2] = bin.charCodeAt(i * 3 + 2); img.data[i * 4 + 3] = 255 }
-      fieldMsg = { x: +f.x || 0, y: +f.y || 0, w: +f.w || LW, h: +f.h || LH, nx: f.nx, ny: f.ny, img }
-      paintField()
-    }
-  }
-  if (Array.isArray(m.draw)) { shapes = m.draw; paintShapes() }
+  if (m && typeof m === 'object' && Array.isArray(m.draw)) { shapes = m.draw; paintShapes() }
 }
-watch(k, () => { paintField(); paintShapes() })
-// Optional raster layer of a frame, after the 2 + 2 * n floats of the points: [count, (x, y, w, h, iw, ih) * count] as float32,
-// then the RGBA bytes (iw * ih * 4 each) of every image in turn. x, y, w, h are in logical canvas pixels. Smoothly scaled, drawn
-// before the points. A frame without the block (every older server) draws as before.
-const tiles: HTMLCanvasElement[] = []
-function drawImages(ctx: CanvasRenderingContext2D, a: Float32Array, m: number, buf: ArrayBuffer) {
-  const o = 2 + 2 * m
-  if (a.length <= o) return
-  const count = a[o]
-  let byte = (o + 1 + 6 * count) * 4
-  for (let i = 0; i < count; i++) {
-    const [x, y, w, h, iw, ih] = a.subarray(o + 1 + 6 * i, o + 7 + 6 * i)
-    if (byte + iw * ih * 4 > buf.byteLength) return
-    const t = (tiles[i] ??= document.createElement('canvas'))
-    if (t.width !== iw || t.height !== ih) { t.width = iw; t.height = ih }
-    t.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(buf, byte, iw * ih * 4), iw, ih), 0, 0)
-    byte += iw * ih * 4
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'
-    ctx.drawImage(t, x, y, w, h)
-  }
-}
-
+watch(k, () => { paintImages(); paintShapes() })
 function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...(ls ? { lockstep: true } : {}), ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
 async function connect() {
   if (closed) return
@@ -159,31 +141,32 @@ async function connect() {
   sock.onmessage = (e) => {
     if (typeof e.data === 'string') { if (e.data === 'lockstep') { acked = true; holdHello?.(); holdHello = null } else if (e.data[0] === '{' && !(ls && !acked)) onJson(e.data); return }
     if (ls && !acked) return                           // a frame of the free-running start, before the process switched to ticks
-    const a = new Float32Array(e.data)               // [step_ms, n, x0, y0, x1, y1, ...]
-    stepMs.value = Math.round(a[0] * 10) / 10
-    const m = a[1], c = cv.value!, ctx = c.getContext('2d')!
+    const f = parseFrame(e.data)
+    stepMs.value = f.stepMs
+    const a = f.points, m = f.n, c = cv.value!, ctx = c.getContext('2d')!
     const pw = Math.round(LW * k.value), ph = Math.round(LH * k.value)
     if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph }   // sharp at the real on-screen resolution
     ctx.setTransform(k.value, 0, 0, k.value, 0, 0)
     // Fade the previous frame towards transparent (trails without an opaque background).
     ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = `rgba(0,0,0,${props.fade})`; ctx.fillRect(0, 0, LW, LH); ctx.globalCompositeOperation = 'source-over'
-    drawImages(ctx, a, m, e.data)
+    setImages(f.images)
     const cols = props.colors?.length ? props.colors.map(resolve) : [props.color ?? cssVar('--nd-ink')]
-    const sz = props.size
-    for (let i = 0; i < m; i++) {
-      ctx.fillStyle = cols[Math.min(cols.length - 1, Math.floor(i * cols.length / m))]
-      ctx.fillRect((a[2 + i * 2] * 0.25 + 0.5) * LW - sz / 2, (a[3 + i * 2] * 0.25 + 0.5) * LH - sz / 2, sz, sz)
-    }
+    groupRanges(m, cols.length, props.groups).forEach(([from, to], gi) => {
+      const sz = props.sizes?.[gi] ?? props.size
+      ctx.fillStyle = cols[Math.min(gi, cols.length - 1)]; ctx.globalAlpha = props.alphas?.[gi] ?? 1
+      for (let i = from; i < to; i++) ctx.fillRect((a[i * 2] * 0.25 + 0.5) * LW - sz / 2, (a[1 + i * 2] * 0.25 + 0.5) * LH - sz / 2, sz, sz)
+    })
+    ctx.globalAlpha = 1
     frames++; const now = performance.now()
     if (now - last >= 1000) { fps.value = Math.round(frames * 1000 / (now - last)); frames = 0; last = now }
     holdTick?.(); holdTick = null                      // drawn: the recorder may take its picture
   }
 }
-function stop() { fieldMsg = null; shapes = []; paintField(); paintShapes(); closed = true; clearTimeout(timer); release(); window.removeEventListener('nd-tick', onTick); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
+function stop() { tiles = []; shapes = []; paintImages(); paintShapes(); closed = true; clearTimeout(timer); release(); window.removeEventListener('nd-tick', onTick); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
 const active = useActive()
 const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
 watch(active, (a) => { stop(); if (a) { closed = false; if (ls) window.addEventListener('nd-tick', onTick); connect(); publish() } }, { immediate: true })
-const shown = (e: Slider) => formatValue(ex[e.name], (String(e.step).split('.')[1] ?? '').length)
+const shown = (e: Slider & { name: string }) => sliderText(e, ex[e.name], formatValue)
 function publish() { for (const [name, v] of Object.entries(ex)) links.setParam(name, v) }
 watch(ex, () => { if (active.value) publish() })
 onUnmounted(stop)
@@ -199,9 +182,11 @@ onUnmounted(stop)
     <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
     <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps<template v-if="!ls"> · Python step {{ stepMs }} ms</template></span>
     <div v-if="controls && !rec.shown" class="nd-ctl" :class="{ 'nd-ctl-many': extra?.length }">
-      <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
-      <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"><template v-if="values"> {{ dt }}</template></label>
-      <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"><template v-if="values"> {{ g }}</template></label>
+      <template v-if="SL.length >= 3">
+        <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
+        <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"><template v-if="values"> {{ dt }}</template></label>
+        <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"><template v-if="values"> {{ g }}</template></label>
+      </template>
       <label v-for="e in extra" :key="e.name">{{ e.label }} <input v-model.number="ex[e.name]" type="range" :min="e.min" :max="e.max" :step="e.step" @input="touched.add(e.name)" @change="send"> {{ shown(e) }}</label>
     </div>
   </div>
