@@ -2,12 +2,12 @@
   "demos": {
     "gw-detect": {
       "file": "demos/gw_detect.py",
-      "port": 2905
+      "port": 3000
     }
   },
   "streams": {},
   "runner": {
-    "port": 19105,
-    "token": "2ff1a54720665f1954b04551e151b59a"
+    "port": 19200,
+    "token": "9f3a652d6a1c2587ada0be8b049c90ad"
   }
 }

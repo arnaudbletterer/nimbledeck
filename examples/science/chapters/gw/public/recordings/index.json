@@ -4,13 +4,13 @@
     {
       "id": "demo-gw-detect",
       "kind": "demo",
-      "seconds": 43.2,
+      "seconds": 18.03,
       "width": 1200,
       "height": 604,
       "pixelWidth": 2400,
       "pixelHeight": 1208,
       "fps": 60,
-      "frames": 2592,
+      "frames": 1082,
       "lockstep": false,
       "reason": "a marimo demo runs in its own process (a cross-origin frame), where the recorder cannot hold time. Its output changes in steps: the clip waits for each step to settle and holds frames",
       "codecs": [
