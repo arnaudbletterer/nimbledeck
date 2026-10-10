@@ -151,6 +151,116 @@
           "wait": 3500
         }
       ]
+    },
+    "live-ai-sampler": {
+      "seconds": 14,
+      "steps": [
+        {
+          "wait": 1500
+        },
+        {
+          "type": "\n"
+        },
+        {
+          "key": "ControlOrMeta+Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "Home"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "6"
+        },
+        {
+          "wait": 3500
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "1"
+        },
+        {
+          "key": "0"
+        },
+        {
+          "key": "0"
+        },
+        {
+          "wait": 4500
+        }
+      ]
     }
   }
 }

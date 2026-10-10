@@ -40,6 +40,14 @@ Ports: stream 19600, runner 19700 (add the offset). Everything is prefixed `ai-`
 - Nothing is faked: the reverse trajectory is computed by `stream_ai_diffusion.py` with the same network, a step per network
   evaluation, in a worker thread while the forward process plays.
 
+## Recordings
+
+`public/recordings/` holds three clips (WebM, MP4, still) made by `nimbledeck record ai.md`: `stream-ai-diffusion` (17 s,
+60 fps lockstep, steps dragged from 40 to 8 at the end), `live-ai-sampler` (the steps edited to 6, then 100) and
+`live-ai-attention` (the word hungry changed to scared, then the temperature to 3). Slides 4 and 6 play the first and the
+last next to their equations, and the web edition plays all three. Re-record after changing the code of slide 3 or 5: the
+scripted keystrokes address lines by number.
+
 ## Why a package
 
 The live-code runner runs each snippet in an isolated process with no access to the deck folder, so the trained weights ship

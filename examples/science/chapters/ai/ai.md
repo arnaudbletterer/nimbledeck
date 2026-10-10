@@ -62,10 +62,10 @@ motion: none
 import numpy as np, matplotlib.pyplot as plt
 from aitoy import diffusion as D   # trained network
 
-steps, g, prompt = 50, 2.0, 1      # 1 smiley 2 spiral 3 AI
-s = np.linspace(1, 0, steps + 1)   # 1: noise, 0: picture
-abar = np.exp(-(0.1 * s + 9.95 * s**2))   # signal left
-  # cosine: np.clip(np.cos(s * np.pi / 2) ** 2, 1e-5, 1)
+steps, g, prompt = 50, 2.0, 1   # 1 smiley 2 spiral 3 AI
+s = np.linspace(1, 0, steps + 1)  # 1 noise, 0 picture
+abar = np.exp(-(0.1 * s + 9.95 * s**2))  # signal left
+  # cos: np.clip(np.cos(s * 1.57) ** 2, 1e-5, 1)
 
 rng = np.random.default_rng(0)
 x = rng.normal(size=(2000, 2))     # pure noise
@@ -81,7 +81,7 @@ for t, u in zip(abar[:-1], abar[1:]):
     x = mean + sig * rng.normal(size=x.shape)
     shots.append(x)
 
-fig, axs = plt.subplots(1, 4)
+fig, axs = plt.subplots(1, 4, figsize=(10, 3))
 for ax, k in zip(axs, np.linspace(0, steps, 4).astype(int)):
     ax.scatter(*shots[k].T, s=1); ax.axis("equal"); ax.axis("off")
 ```
@@ -116,7 +116,7 @@ tourScript:
 <Kinetic text="Add noise.|Learn to undo it." mode="lines" from="up" :stagger="260" size="m" accent="undo" />
 </At>
 <At :x="70" :y="250" :w="560" :z="1" enter="up" :delay="500">
-<Equation label="Forward process: x t given x zero is a Gaussian with mean the square root of alpha bar t times x zero, and variance one minus alpha bar t, times the identity. Reverse step: x t minus one equals one over the square root of alpha t times x t minus one minus alpha t over the square root of one minus alpha bar t times epsilon theta of x t and t, plus sigma t times z." align="left" :size="27">
+<Equation label="Forward process: x t given x zero is a Gaussian with mean the square root of alpha bar t times x zero, and variance one minus alpha bar t, times the identity. Reverse step: x t minus one equals one over the square root of alpha t times x t minus one minus alpha t over the square root of one minus alpha bar t times epsilon theta of x t and t, plus sigma t times z." align="left" :size="24">
 
 $$
 \begin{aligned}
@@ -132,6 +132,10 @@ $$
 Top: the forward process, a formula. Bottom: one reverse step, which needs the network.
 
 </At>
+<At :x="610" :y="130" :z="2"><Marker term="1">the picture, fading out</Marker></At>
+<At :x="900" :y="95" :z="2"><Marker term="2">the noise, growing</Marker></At>
+<At :x="660" :y="560" :z="2"><Marker term="3">the network's guess, reversed: the arrows</Marker></At>
+<At :x="930" :y="610" :z="2"><Marker term="4">fresh noise each step: the jitter</Marker></At>
 </Stage>
 
 <!--
@@ -208,10 +212,13 @@ tourScript:
 <Kinetic text="Every word|asks and answers." mode="lines" from="up" :stagger="260" size="m" accent="answers." />
 </At>
 <At :x="70" :y="290" :w="560" :z="1" enter="up" :delay="500">
-<Equation label="Attention of Q, K and V is the softmax of Q K transpose divided by the square root of d, times V." align="left" :size="34">
+<Equation label="Attention of Q, K and V is the softmax of Q K transpose divided by the square root of d, times V." align="left" :size="30">
 
 $$
-\mathrm{Attention}(Q,K,V) = \term{3}{\mathrm{softmax}}\Big(\frac{\term{1}{Q K^\top}}{\term{2}{\sqrt{d}}}\Big)\,\term{4}{V}
+\begin{aligned}
+\mathrm{Attention}(Q,K,V) &= \\[6pt]
+&\quad \term{3}{\mathrm{softmax}}\Big(\frac{\term{1}{Q K^\top}}{\term{2}{\sqrt{d}}}\Big)\,\term{4}{V}
+\end{aligned}
 $$
 
 </Equation>
@@ -222,6 +229,10 @@ On the right, the recording of the live slide. Rows look, columns are looked at.
 
 </At>
 <At :x="640" :y="58" :w="600" :h="604" :z="1" frame enter="left" :delay="300"><Clip src="/recordings/live-ai-attention.webm" fit="cover" position="right" /></At>
+<At :x="690" :y="150" :z="2"><Marker term="2">scores kept small</Marker></At>
+<At :x="880" :y="325" :z="2"><Marker term="1">query meets key</Marker></At>
+<At :x="1000" :y="482" :z="2"><Marker term="3">each row adds up to 1</Marker></At>
+<At :x="1050" :y="385" :z="2"><Marker term="4">the value that flows into it</Marker></At>
 </Stage>
 
 <!--

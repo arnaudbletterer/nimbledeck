@@ -21,3 +21,4 @@ dist-hosted/
 .looks-verify-*.md
 examples/theme-lab/shots/
 examples/*/public/.record-e2e/
+examples/science/chapters/*/public/nimbledeck.json
