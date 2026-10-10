@@ -6,6 +6,7 @@ import { useNimbleConfig, cssVar } from '../composables/useConfig'
 import { useRecording } from '../composables/useRecording'
 import { links, formatValue } from '../composables/links.mjs'
 import { useLinked } from '../composables/useLinked'
+import { useLockstep } from '../composables/lockstep'
 
 // Live Python animation: a Python process computes state and streams it over a WebSocket; this component
 // draws it on a canvas. Controls are sent back as JSON. See docs/WRITING.md for the wire format.
@@ -39,8 +40,18 @@ const touched = new Set<string>()   // an extra slider is sent only once the vie
 const { linked, linkAttrs } = useLinked(() => props.highlight)
 const fps = ref(0), stepMs = ref(0)
 let ws: WebSocket | null = null, timer = 0, frames = 0, last = performance.now(), closed = true
+// While `nimbledeck record` films this stream in lockstep (composables/lockstep.ts), the process computes one frame per
+// {tick: n} message instead of free-running, and the recorder waits for the frame before it takes the picture.
+const ls = useLockstep()
+let acked = false, holdHello: (() => void) | null = null, holdTick: (() => void) | null = null
+const release = () => { holdHello?.(); holdHello = null; holdTick?.(); holdTick = null }
+function onTick() {
+  if (!ls || !acked || ws?.readyState !== 1 || holdTick) return
+  holdTick = ls.hold(`stream-${props.name} (a frame from the process)`)
+  ws.send(JSON.stringify({ tick: ls.n }))
+}
 
-function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
+function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...(ls ? { lockstep: true } : {}), ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
 async function connect() {
   if (closed) return
   const port = (await useNimbleConfig()).streams[props.name]?.port
@@ -48,10 +59,15 @@ async function connect() {
   const sock = new WebSocket(`ws://127.0.0.1:${port}`)
   ws = sock
   sock.binaryType = 'arraybuffer'
-  sock.onopen = () => { state.value = 'live'; send() }
-  sock.onclose = () => { if (ws !== sock) return; state.value = 'offline'; fps.value = 0; timer = window.setTimeout(connect, 2000) }
+  sock.onopen = () => {
+    state.value = 'live'; send()
+    if (ls) { acked = false; holdHello = ls.hold(`stream-${props.name} (the process did not answer {lockstep: true}: does its server know the tick protocol?)`)}
+  }
+  sock.onclose = () => { release(); if (ws !== sock) return; state.value = 'offline'; fps.value = 0; timer = window.setTimeout(connect, 2000) }
   sock.onerror = () => sock.close()
   sock.onmessage = (e) => {
+    if (typeof e.data === 'string') { if (e.data === 'lockstep') { acked = true; holdHello?.(); holdHello = null } return }
+    if (ls && !acked) return                           // a frame of the free-running start, before the process switched to ticks
     const a = new Float32Array(e.data)               // [step_ms, n, x0, y0, x1, y1, ...]
     stepMs.value = Math.round(a[0] * 10) / 10
     const m = a[1], c = cv.value!, ctx = c.getContext('2d')!
@@ -68,12 +84,13 @@ async function connect() {
     }
     frames++; const now = performance.now()
     if (now - last >= 1000) { fps.value = Math.round(frames * 1000 / (now - last)); frames = 0; last = now }
+    holdTick?.(); holdTick = null                      // drawn: the recorder may take its picture
   }
 }
-function stop() { closed = true; clearTimeout(timer); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
+function stop() { closed = true; clearTimeout(timer); release(); window.removeEventListener('nd-tick', onTick); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
 const active = useActive()
 const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
-watch(active, (a) => { stop(); if (a) { closed = false; connect(); publish() } }, { immediate: true })
+watch(active, (a) => { stop(); if (a) { closed = false; if (ls) window.addEventListener('nd-tick', onTick); connect(); publish() } }, { immediate: true })
 const shown = (e: Slider) => formatValue(ex[e.name], (String(e.step).split('.')[1] ?? '').length)
 function publish() { for (const [name, v] of Object.entries(ex)) links.setParam(name, v) }
 watch(ex, () => { if (active.value) publish() })
@@ -86,7 +103,7 @@ onUnmounted(stop)
     <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
     <div v-else-if="state === 'offline' && !rec.pending" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
     <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
-    <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps · Python step {{ stepMs }} ms</span>
+    <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps<template v-if="!ls"> · Python step {{ stepMs }} ms</template></span>
     <div v-if="controls && !rec.shown" class="nd-ctl" :class="{ 'nd-ctl-many': extra?.length }">
       <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
       <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"></label>

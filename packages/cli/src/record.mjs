@@ -1,23 +1,31 @@
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { homedir, tmpdir } from 'node:os'
 import { basename, delimiter, dirname, join, relative, resolve } from 'node:path'
 import { findChrome } from './chrome.mjs'
 import { loadConfig, MAX_SECONDS, validateConfig } from './config.mjs'
+import { chooseClock, DEFAULT_FPS, LockstepClock, MAX_FPS, MIN_FPS, PAGE_SHIM, ticksFor, withTimeout } from './lockstep.mjs'
 import { mergeManifest, readManifest, recordingsDir, slideComponents, writeManifest } from './recordings.mjs'
 import { killTree, startDeck } from './run.mjs'
 import { splitSlides } from './slides.mjs'
 
 // `nimbledeck record <deck.md>`: play the running deck in Chrome, and film each live component (LiveCode, PyStream, Demo)
-// into public/recordings/<id>.webm (+ .mp4 when ffmpeg is on the PATH) and a poster. See docs/RECORDING.md.
+// into public/recordings/<id>.webm (+ .mp4 when ffmpeg is on the PATH) and a poster. By default the recorder drives time
+// (lockstep, lockstep.mjs) and takes one lossless frame per 1/60 s of virtual time; `--realtime` films what the screen shows
+// as it goes. See docs/RECORDING.md.
 
-const FPS = 30
+const FPS = DEFAULT_FPS
 const DENSITY = 2                                       // pixels per logical (CSS) pixel of a 1280 x 720 slide
+// Chrome flags for lockstep. Without the first one, a screenshot taken while virtual time is paused can wait for a "new content
+// rendering" timeout that only virtual time could end: it never answers (measured: after the deck mounts its other slides, on
+// Chrome 154 and the headless shell; advancing virtual time by a few seconds unsticks it, the flag avoids it). The others make
+// the compositor draw every stage before a screenshot and keep animations on the main thread, where the shim sets them.
+const LOCKSTEP_FLAGS = ['--disable-new-content-rendering-timeout', '--run-all-compositor-stages-before-draw', '--disable-threaded-animation', '--disable-threaded-scrolling', '--disable-checker-imaging']
 const CAPTURE = { w: 1280 * DENSITY, h: 720 * DENSITY }  // the browser draws the slide at 2560 x 1440: text and canvases at native 2x, kept as they are
 
 export function parseRecordArgs(args) {
-  const o = { slides: [], seconds: 8, width: CAPTURE.w, out: null, url: null }
+  const o = { slides: [], seconds: 8, width: CAPTURE.w, out: null, url: null, fps: FPS, realtime: false, timeout: 900 }
   const num = (flag, v) => { const n = Number(v); if (!Number.isFinite(n)) throw new Error(`${flag} needs a number (got ${JSON.stringify(v)})`); return n }
   for (let i = 0; i < args.length; i++) {
     const a = args[i]
@@ -29,11 +37,16 @@ export function parseRecordArgs(args) {
     else if (a === '--width') o.width = num(a, args[++i])
     else if (a === '--out') o.out = args[++i]
     else if (a === '--url') o.url = args[++i]
-    else throw new Error(`unknown option ${a} (use --slide, --seconds, --width, --out, --url)`)
+    else if (a === '--fps') o.fps = num(a, args[++i])
+    else if (a === '--timeout') o.timeout = num(a, args[++i])
+    else if (a === '--realtime') o.realtime = true
+    else throw new Error(`unknown option ${a} (use --slide, --seconds, --width, --out, --url, --fps, --realtime, --timeout)`)
   }
   if (o.slides.some((n) => n < 1)) throw new Error('slide numbers start at 1')
   if (!(o.seconds >= 1 && o.seconds <= MAX_SECONDS)) throw new Error(`--seconds must be from 1 to ${MAX_SECONDS}`)
   if (!(o.width >= 480 && o.width <= CAPTURE.w)) throw new Error(`--width must be from 480 to ${CAPTURE.w}`)
+  if (!(Number.isInteger(o.fps) && o.fps >= MIN_FPS && o.fps <= MAX_FPS)) throw new Error(`--fps must be a whole number from ${MIN_FPS} to ${MAX_FPS}`)
+  if (!(o.timeout >= 30 && o.timeout <= 7200)) throw new Error('--timeout must be from 30 to 7200 seconds (the wall-clock limit of one clip)')
   if (o.out !== null && (!o.out || /[\0]/.test(o.out))) throw new Error('--out needs a folder')
   if (o.url !== null && !/^https?:\/\/[^\s/]+\/?$/.test(o.url)) throw new Error('--url must look like http://localhost:3030')
   return o
@@ -98,13 +111,16 @@ export const QUALITY = { vp9Crf: 29, vp9MaxRate: '2800k', h264Crf: 21, h264MaxRa
 
 // ffmpeg arguments: PNG frames on stdin, the cropped video out (scaled only when a smaller --width asks for it). `kind` is
 // 'vp9' (webm), 'h264' (mp4) or 'vp8' (webm, the fallback of the ffmpeg Playwright ships). VP9 runs in two passes: pass 1
-// writes only a log (`passlog`), pass 2 the file.
-export function encodeArgs(kind, g, out, { fps = FPS, pass = 0, passlog = null } = {}) {
+// writes only a log (`passlog`), pass 2 the file. With `file`, the input is a lossless video already cut, scaled and tagged
+// (the intermediate of a lockstep clip, which is read twice), not PNG frames.
+export function encodeArgs(kind, g, out, { fps = FPS, pass = 0, passlog = null, file = null } = {}) {
   const scale = g.w === g.crop.w && g.h === g.crop.h ? '' : `scale=${g.w}:${g.h}:flags=lanczos,`
   // RGB to BT.709 limited range, and tagged so: browsers decode HD video as BT.709, and untagged video drifts in colour.
   const vf = `crop=${g.crop.w}:${g.crop.h}:${g.crop.x}:${g.crop.y},${scale}scale=out_color_matrix=bt709:out_range=tv,format=yuv420p`
   const tags = ['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv']
-  const input = ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'png', '-framerate', String(fps), '-i', 'pipe:0', '-vf', vf, '-an', '-r', String(fps), ...tags]
+  const input = file
+    ? ['-hide_banner', '-loglevel', 'error', '-y', '-i', file, '-an', '-r', String(fps), ...tags]
+    : ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'png', '-framerate', String(fps), '-i', 'pipe:0', '-vf', vf, '-an', '-r', String(fps), ...tags]
   const keyframes = ['-g', String(fps * 2)]
   if (kind === 'vp9') {
     const v = ['-c:v', 'libvpx-vp9', '-b:v', QUALITY.vp9MaxRate, '-crf', String(QUALITY.vp9Crf), '-row-mt', '1', '-tile-columns', '2', '-deadline', 'good', '-cpu-used', '1', ...keyframes, '-lag-in-frames', '25', '-auto-alt-ref', '1', '-tune-content', 'screen', '-pix_fmt', 'yuv420p']
@@ -148,20 +164,49 @@ export function planEncodes(ff, encoders = ff.system ? ffmpegEncoders(ff.system)
   return plan
 }
 
-// Runs ffmpeg with the frames on its stdin. Resolves with the file size, rejects with ffmpeg's own words.
-function encode(bin, args, frames) {
+// Runs ffmpeg with the frames on its stdin (none when it reads a file). Resolves when it ends, rejects with ffmpeg's own words.
+function encode(bin, args, frames = null) {
   return new Promise((ok, fail) => {
-    const p = spawn(bin, args, { stdio: ['pipe', 'ignore', 'pipe'] })
+    const p = spawn(bin, args, { stdio: [frames ? 'pipe' : 'ignore', 'ignore', 'pipe'] })
     let err = ''
     p.stderr.on('data', (d) => { err = (err + d).slice(-2000) })
     p.on('error', fail)
-    p.stdin.on('error', () => { /* ffmpeg ended early: its exit code tells why */ })
+    p.stdin?.on('error', () => { /* ffmpeg ended early: its exit code tells why */ })
     p.on('close', (code) => (code === 0 ? ok() : fail(new Error(`ffmpeg failed: ${err.trim().split('\n').pop()}`))))
+    if (!frames) return
     ;(async () => {
       for (const f of frames) if (!p.stdin.write(f)) await new Promise((r) => p.stdin.once('drain', r))
       p.stdin.end()
     })()
   })
+}
+
+// ffmpeg arguments of the intermediate of a lockstep clip: the frames cut, scaled, converted and tagged exactly as the final
+// encodes would, and kept lossless (FFV1), so the two VP9 passes and the H.264 pass read a file instead of a pipe.
+export function intermediateArgs(g, out, fps = FPS) {
+  const a = encodeArgs('vp8', g, out, { fps })
+  return [...a.slice(0, a.indexOf('-c:v', a.indexOf('-vf'))), '-c:v', 'ffv1', '-level', '3', '-g', '1', '-pix_fmt', 'yuv420p', out]
+}
+
+// A running ffmpeg that takes frames one at a time (a lockstep clip: nothing is kept in memory). `end()` waits for the file.
+class FrameSink {
+  constructor(bin, args) {
+    this.p = spawn(bin, args, { stdio: ['pipe', 'ignore', 'pipe'] })
+    let err = '', closed = false
+    this.p.stderr.on('data', (d) => { err = (err + d).slice(-2000) })
+    this.p.stdin.on('error', () => { /* its exit code tells why */ })
+    this.done = new Promise((ok, fail) => {
+      this.p.on('error', fail)
+      this.p.on('close', (code) => { closed = true; code === 0 ? ok() : fail(new Error(`ffmpeg failed: ${err.trim().split('\n').pop() || `exit ${code}`}`)) })
+    })
+    this.done.catch(() => {})
+    this.isClosed = () => closed
+  }
+  async write(buf) {
+    if (this.isClosed()) await this.done   // throws ffmpeg's own error
+    if (!this.p.stdin.write(buf)) await Promise.race([new Promise((r) => this.p.stdin.once('drain', r)), this.done])
+  }
+  async end() { this.p.stdin.end(); await this.done }
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -184,7 +229,7 @@ export const keyName = (k) => k.replace(/^(Mod|Cmd\/Ctrl)\+/, 'ControlOrMeta+')
 
 // The slider a step means: the one whose closest ancestor that holds the label text holds only that slider. Works for a
 // <label> around an <input type=range>, and for the custom sliders of marimo.
-async function findSlider(scope, label) {
+async function findSlider(scope, label, wait = sleep) {
   for (let tries = 0; tries < 30; tries++) {   // a demo may still be drawing its controls
     for (const h of await scope.locator('input[type=range], [role=slider]').elementHandles()) {
       const mine = await h.evaluate((el, src) => {
@@ -195,31 +240,34 @@ async function findSlider(scope, label) {
       }, esc(label))
       if (mine) return h
     }
-    await sleep(500)
+    await wait(500)
   }
   throw new Error(`no slider labelled "${label}"`)
 }
 
-async function runStep(page, root, scope, step, rand) {
-  if ('wait' in step) return sleep(step.wait)
+// One scripted step. `wait(ms)` is how time passes: a real sleep, or ticks of the lockstep clock (then every frame of the wait is
+// taken). In lockstep the page is driven without Playwright's locators, whose waits poll with timers of their own.
+async function runStep(page, root, scope, step, rand, wait = sleep, lockstep = false) {
+  if ('wait' in step) return wait(step.wait)
   if ('key' in step) return page.keyboard.press(keyName(step.key))
   if ('type' in step) {
-    await root.locator('.cm-content').click()
+    if (lockstep) await root.evaluate((el) => el.querySelector('.cm-content').focus())
+    else await root.locator('.cm-content').click()
     await page.keyboard.press('ControlOrMeta+End')
     if (step.replace) { await page.keyboard.press('ControlOrMeta+a'); await page.keyboard.press('Delete') }
     for (const ch of step.type) {
       if (ch === '\n') await page.keyboard.press('Enter'); else await page.keyboard.type(ch)
-      await sleep(typingDelay(ch, rand))
+      await wait(typingDelay(ch, rand))
     }
     return
   }
   if ('set' in step) {
-    const slider = await findSlider(scope, step.set)
+    const slider = await findSlider(scope, step.set, wait)
     if ((await slider.evaluate((el) => el.tagName)) === 'INPUT') {
       const from = Number(await slider.inputValue())
       for (let i = 1; i <= 10; i++) {   // a drag, not a jump
         await slider.evaluate((el, v) => { el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })) }, from + ((step.value - from) * i) / 10)
-        await sleep(60)
+        await wait(60)
       }
     } else {   // a custom slider (marimo's): arrow keys move it one step at a time
       await slider.focus()
@@ -232,13 +280,18 @@ async function runStep(page, root, scope, step, rand) {
         const up = diff > 0
         // Page keys move ten steps; the size of a step is learnt from the first arrow press.
         await page.keyboard.press(unit && Math.abs(diff) >= 10 * unit ? (up ? 'PageUp' : 'PageDown') : (up ? 'ArrowRight' : 'ArrowLeft'))
-        await sleep(40)
+        await wait(40)
         if (!unit) unit = Math.abs((await now()) - v)
       }
     }
     return
   }
   if ('click' in step) {
+    if (lockstep) {
+      const hit = await root.evaluate((el, text) => { const b = [...el.querySelectorAll('button')].find((x) => x.textContent.includes(text)); b?.click(); return !!b }, step.click)
+      if (!hit) throw new Error(`no button "${step.click}"`)
+      return
+    }
     const button = scope.getByRole('button', { name: step.click }).first()
     return (await button.count()) ? button.click() : scope.getByText(step.click).first().click()
   }
@@ -250,7 +303,17 @@ const CLEAN = '*{cursor:none!important}.slidev-nav,.slidev-controls,#slidev-goto
 // What "live" looks like in the DOM (data-state of the component), and what to wait for after that.
 const READY = { stream: 'live', demo: 'live', live: 'ok' }
 
-async function filmComponent({ page, cdp, base, slide, comp, cfgRec, o, log }) {
+// Hides everything on the slide that is not the component or what it sits in (its parents keep their backgrounds): a clip of a
+// stream that has a paragraph and equations laid over it holds only the stream. `visibility`, so nothing moves.
+const isolate = (sel) => {
+  const el = document.querySelector(sel)
+  for (let a = el; a && a !== document.body; a = a.parentElement) {
+    for (const sib of a.parentElement?.children ?? []) if (sib !== a && !/^(SCRIPT|STYLE|LINK)$/.test(sib.tagName)) sib.style.setProperty('visibility', 'hidden', 'important')
+  }
+}
+
+// Opens the slide, waits until the component is live and still, and measures its box.
+async function openComponent({ page, base, slide, comp, cfgRec, o, log }) {
   const sel = `[data-rec-id="${comp.id}"]`
   const root = page.locator(sel).first()
   await page.goto(`${base}/${slide}?clicks=99`, { waitUntil: 'domcontentloaded', timeout: 30000 })
@@ -263,32 +326,91 @@ async function filmComponent({ page, cdp, base, slide, comp, cfgRec, o, log }) {
     try { await scope.locator('body').filter({ hasText: /\S{3}/ }).waitFor({ timeout: 20000 }) } catch { log(`  ${comp.id}: the demo shows nothing yet, recording anyway`) }
   }
   await page.addStyleTag({ content: CLEAN })
+  if (cfgRec.isolate) await page.evaluate(isolate, sel)
   await page.waitForTimeout(1500)
   await page.evaluate(() => document.activeElement?.blur?.())
-  const geo = frameGeometry(await root.boundingBox(), o.width)
+  return { root, scope, geo: frameGeometry(await root.boundingBox(), o.width) }
+}
 
-  const timeline = new Timeline()
-  // The screencast of the DevTools protocol, as PNG: lossless, and 35 to 60 frames a second at this size (measured). It sends
-  // frames in CSS pixels, so the page is laid out at the capture size itself rather than at 1280 x 720 with a 2x density:
+// After a step, the screen of a demo that computes elsewhere changes once the answer is back, then stays still: wait for that.
+async function settle(lastFrame, since) {
+  const t0 = Date.now()
+  while (Date.now() - t0 < 20000) {
+    const quiet = Date.now() - lastFrame()
+    if (lastFrame() >= since ? quiet >= 700 : Date.now() - since >= 3000) return
+    await sleep(100)
+  }
+}
+
+// Real time: the screencast of the DevTools protocol delivers a frame when the screen changes, the timeline keeps the latest of
+// every 1/fps slot and holds the last frame on a still screen. How many frames the machine managed is printed.
+async function filmRealtime({ page, cdp, ready, comp, cfgRec, o }) {
+  const { root, scope } = ready
+  const timeline = new Timeline(o.fps)
+  // The screencast sends frames in CSS pixels, so the page is laid out at the capture size itself rather than at 1280 x 720 with a 2x density:
   // the screencast of a 2x page is only 1280 x 720 (Page.captureScreenshot gives 2x but manages 16 to 25 frames a second).
-  let raw = 0
-  const onFrame = (f) => { raw++; timeline.add(f.metadata.timestamp, Buffer.from(f.data, 'base64')); cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {}) }
+  let raw = 0, lastFrame = Date.now()
+  const onFrame = (f) => { raw++; lastFrame = Date.now(); timeline.add(f.metadata.timestamp, Buffer.from(f.data, 'base64')); cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {}) }
   cdp.on('Page.screencastFrame', onFrame)
   await cdp.send('Page.startScreencast', { format: 'png', maxWidth: CAPTURE.w, maxHeight: CAPTURE.h, everyNthFrame: 1 })
   const started = Date.now()
   const rand = rng()
   let failure = null
   for (const step of cfgRec.steps ?? []) {
-    try { await runStep(page, root, scope, step, rand) } catch (e) { failure = new Error(`step ${JSON.stringify(step).slice(0, 80)} failed: ${String(e.message).split('\n')[0]}`); break }
+    try {
+      await runStep(page, root, scope, step, rand)
+      if (comp.kind === 'demo' && 'set' in step) await settle(() => lastFrame, Date.now())
+    } catch (e) { failure = new Error(`step ${JSON.stringify(step).slice(0, 80)} failed: ${String(e.message).split('\n')[0]}`); break }
   }
   const wanted = (cfgRec.seconds ?? o.seconds) * 1000, spent = Date.now() - started
   if (!failure) await sleep(spent < wanted ? wanted - spent : 600)   // steps that run long get a short tail instead of being cut
   await cdp.send('Page.stopScreencast')
   cdp.off('Page.screencastFrame', onFrame)
   if (failure) throw failure
-  const frames = timeline.frames(Math.min(MAX_SECONDS, (Date.now() - started) / 1000))
+  const wall = (Date.now() - started) / 1000
+  const frames = timeline.frames(Math.min(MAX_SECONDS, wall))
   if (!frames) throw new Error(`${comp.id}: the browser sent no frames`)
-  return { frames, geo, seconds: frames.length / FPS, captured: raw / ((Date.now() - started) / 1000) }
+  return { frames, seconds: frames.length / o.fps, count: frames.length, wall, detail: `browser sent ${(raw / wall).toFixed(0)} frames/s, the rest holds the last frame`, posterFrame: frames.at(-1), posterGeo: ready.geo }
+}
+
+// Lockstep: the recorder drives time (lockstep.mjs). Each tick is 1/fps second of virtual time, then one lossless screenshot of the
+// box of the component, piped to ffmpeg at once into a lossless intermediate file (two-pass VP9 and H.264 read it afterwards).
+async function filmLockstep({ page, cdp, ready, comp, cfgRec, o, plan, tmp, log }) {
+  const { root, scope, geo } = ready
+  const frameGeo = { ...geo, crop: { x: 0, y: 0, w: geo.crop.w, h: geo.crop.h } }   // the screenshots are already cut
+  const direct = !plan.some((p) => p.kind === 'vp9')   // VP8 only (the ffmpeg of Playwright): one pass, straight from the pipe
+  const mezz = join(tmp, `nd-lockstep-${process.pid}-${comp.id}.mkv`)
+  const sink = direct
+    ? new FrameSink(plan[0].bin, encodeArgs('vp8', frameGeo, join(tmp, `nd-lockstep-${process.pid}-${comp.id}.webm`), { fps: o.fps }))
+    : new FrameSink(plan[0].bin, intermediateArgs(frameGeo, mezz, o.fps))
+  const clock = new LockstepClock({ page, cdp, fps: o.fps })
+  const clip = { x: geo.crop.x, y: geo.crop.y, width: geo.crop.w, height: geo.crop.h, scale: 1 }
+  const deadline = Date.now() + o.timeout * 1000
+  let last = null
+  clock.capture = async () => {
+    if (Date.now() > deadline) throw new Error(`${comp.id}: more than ${o.timeout} s of wall time for one clip (--timeout); stopped at frame ${clock.n}`)
+    const r = await withTimeout(cdp.send('Page.captureScreenshot', { format: 'png', clip, captureBeyondViewport: false, fromSurface: true, optimizeForSpeed: true }), 60000, `${comp.id}: frame ${clock.n}, the browser took no screenshot`)
+    last = Buffer.from(r.data, 'base64')
+    await withTimeout(sink.write(last), 120000, `${comp.id}: frame ${clock.n}, ffmpeg did not take the frame`)
+    if (clock.n % (o.fps * 2) === 0) log(`    ${clock.n} frames (${(clock.n / o.fps).toFixed(0)} s of video) after ${((Date.now() - started) / 1000).toFixed(0)} s`)
+  }
+  const started = Date.now()
+  try {
+    await clock.start()
+    const rand = rng(), wait = (ms) => clock.sleep(ms)
+    for (const step of cfgRec.steps ?? []) {
+      try { await runStep(page, root, scope, step, rand, wait, true) } catch (e) { throw new Error(`step ${JSON.stringify(step).slice(0, 80)} failed: ${String(e.message).split('\n')[0]}`) }
+    }
+    const total = Math.min(MAX_SECONDS * o.fps, Math.max(Math.round((cfgRec.seconds ?? o.seconds) * o.fps), clock.n + ticksFor(600, o.fps)))   // steps that run long get a short tail
+    while (clock.n < total) await clock.tick()
+    await sink.end()
+  } catch (e) {
+    try { sink.p.kill() } catch { /* gone */ }
+    rmSync(mezz, { force: true })
+    throw e
+  }
+  const wall = (Date.now() - started) / 1000
+  return { mezz: direct ? null : mezz, direct, seconds: clock.n / o.fps, count: clock.n, wall, detail: `${(wall / (clock.n / o.fps)).toFixed(1)} s of wall time per second of video`, posterFrame: last, posterGeo: frameGeo, frameGeo }
 }
 
 // A poster from the last frame at full pixel size, cut (and scaled when asked) by the browser itself: the ffmpeg Playwright
@@ -335,7 +457,7 @@ export async function recordDeck(deckPath, root, args) {
   process.once('SIGINT', () => cleanup().then(() => process.exit(130)))
 
   const done = [], failed = []
-  let browser
+  let browser, lockBrowser = null   // lockstep needs its own flags (LOCKSTEP_FLAGS): a second browser, started on first use
   try {
     // The deck needs a moment before it answers.
     for (let i = 0; ; i++) {
@@ -344,33 +466,50 @@ export async function recordDeck(deckPath, root, args) {
       await sleep(500)
     }
     const chrome = findChrome()
-    browser = await chromium.launch(chrome ? { executablePath: chrome } : {})
-    const page = await browser.newPage({ viewport: { width: CAPTURE.w, height: CAPTURE.h }, deviceScaleFactor: 1 })
-    page.on('dialog', (d) => d.dismiss())
-    const cdp = await page.context().newCDPSession(page)
+    const launch = (args = []) => chromium.launch({ ...(chrome ? { executablePath: chrome } : {}), args })
+    browser = await launch()
     mkdirSync(out, { recursive: true })
     for (const { slide, comps } of targets) {
       for (const comp of comps) {
-        log(`slide ${slide}: ${comp.id}`)
+        const cfgRec = cfg.recordings[comp.id] ?? {}
+        const mode = chooseClock({ realtime: o.realtime, kind: comp.kind, cfgRealtime: cfgRec.realtime })
+        log(`slide ${slide}: ${comp.id} (${mode.lockstep ? `lockstep, ${o.fps} fps` : `real time, ${o.fps} fps${mode.reason ? `; ${mode.reason}` : ''}`})`)
+        const page = await (mode.lockstep ? (lockBrowser ??= await launch(LOCKSTEP_FLAGS)) : browser).newPage({ viewport: { width: CAPTURE.w, height: CAPTURE.h }, deviceScaleFactor: 1 })
+        let film = null
         try {
-          const { frames, geo, seconds, captured } = await filmComponent({ page, cdp, base, slide, comp, cfgRec: cfg.recordings[comp.id] ?? {}, o, log })
+          page.on('dialog', (d) => d.dismiss())
+          if (mode.lockstep) await page.addInitScript(PAGE_SHIM)
+          const ready = await openComponent({ page, base, slide, comp, cfgRec, o, log })
+          const cdp = await page.context().newCDPSession(page)
+          const geo = ready.geo
+          film = await (mode.lockstep ? filmLockstep : filmRealtime)({ page, cdp, ready, comp, cfgRec, o, plan, tmp: tmpdir(), log })
           const files = []
           const stem = join(out, comp.id)
+          const t0 = Date.now()
           for (const { ext, kind, bin } of plan) {
             try {
-              if (kind === 'vp9') { const passlog = join(tmpdir(), `nd-pass-${process.pid}-${comp.id}`); try { await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { pass: 1, passlog }), frames); await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { pass: 2, passlog }), frames) } finally { rmSync(`${passlog}-0.log`, { force: true }) } }
-              else await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`), frames)
+              if (film.direct) { renameSync(join(tmpdir(), `nd-lockstep-${process.pid}-${comp.id}.webm`), `${stem}.${ext}`) }
+              else if (kind === 'vp9') { const passlog = join(tmpdir(), `nd-pass-${process.pid}-${comp.id}`); try { await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { pass: 1, passlog, fps: o.fps, file: film.mezz }), film.mezz ? null : film.frames); await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { pass: 2, passlog, fps: o.fps, file: film.mezz }), film.mezz ? null : film.frames) } finally { rmSync(`${passlog}-0.log`, { force: true }) } }
+              else await encode(bin, encodeArgs(kind, geo, `${stem}.${ext}`, { fps: o.fps, file: film.mezz }), film.mezz ? null : film.frames)
               files.push(`${comp.id}.${ext}`)
             } catch (e) { if (ext === 'webm') throw e; log(`  no ${ext} (${e.message})`); rmSync(`${stem}.${ext}`, { force: true }) }
           }
           if (!plan.some((p) => p.ext === 'mp4')) rmSync(`${stem}.mp4`, { force: true })
-          writeFileSync(`${stem}.jpg`, Buffer.from(await poster(page, frames.at(-1), geo), 'base64'))
-          log(`  ${seconds.toFixed(1)} s, ${geo.w}x${geo.h} px (${geo.logical.w}x${geo.logical.h} css), browser sent ${captured.toFixed(0)} frames/s: ${files.map((f) => `${f} ${kb(join(out, f))}`).join(', ')}, ${comp.id}.jpg ${kb(`${stem}.jpg`)}`)
-          done.push({ id: comp.id, kind: comp.kind, seconds: Math.round(seconds * 10) / 10, width: geo.logical.w, height: geo.logical.h, pixelWidth: geo.w, pixelHeight: geo.h, fps: FPS, codecs: plan.filter((p) => files.includes(`${comp.id}.${p.ext}`)).map((p) => p.kind), files, poster: `${comp.id}.jpg` })
+          // The poster is cut by a page of its own: the clip's page may have its virtual time paused, which stalls the file reader.
+          const pp = await browser.newPage()
+          try { writeFileSync(`${stem}.jpg`, Buffer.from(await poster(pp, film.posterFrame, film.posterGeo), 'base64')) } finally { await pp.close().catch(() => {}) }
+          log(`  ${mode.lockstep ? 'lockstep' : 'real time'}: ${film.count} frames, ${film.seconds.toFixed(2)} s at ${o.fps} fps, ${geo.w}x${geo.h} px (${geo.logical.w}x${geo.logical.h} css); filmed in ${film.wall.toFixed(0)} s (${film.detail}), encoded in ${((Date.now() - t0) / 1000).toFixed(0)} s`)
+          log(`  ${files.map((f) => `${f} ${kb(join(out, f))}`).join(', ')}, ${comp.id}.jpg ${kb(`${stem}.jpg`)}`)
+          done.push({ id: comp.id, kind: comp.kind, seconds: Math.round(film.seconds * 100) / 100, width: geo.logical.w, height: geo.logical.h, pixelWidth: geo.w, pixelHeight: geo.h, fps: o.fps, frames: film.count, lockstep: mode.lockstep, ...(mode.reason ? { reason: mode.reason } : {}), codecs: plan.filter((p) => files.includes(`${comp.id}.${p.ext}`)).map((p) => p.kind), files, poster: `${comp.id}.jpg` })
         } catch (e) { failed.push(comp.id); console.error(`  ERROR ${comp.id}: ${e.message}`) }
+        finally {
+          if (film?.mezz) rmSync(film.mezz, { force: true })
+          await page.close().catch(() => {})
+        }
       }
     }
   } finally {
+    await lockBrowser?.close()
     await browser?.close()
     await cleanup()
   }

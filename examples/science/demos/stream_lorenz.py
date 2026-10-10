@@ -110,18 +110,55 @@ def parse_params(raw):
     return out
 
 
+def parse_control(raw):
+    """True when a client message asks for lockstep (`{"lockstep": true}`, sent by `nimbledeck record`)."""
+    try:
+        msg = json.loads(raw)
+    except (TypeError, ValueError):
+        return False
+    return isinstance(msg, dict) and msg.get("lockstep") is True
+
+
+def parse_tick(raw):
+    """True for a lockstep tick (`{"tick": n}`): the client wants exactly one more frame."""
+    try:
+        msg = json.loads(raw)
+    except (TypeError, ValueError):
+        return False
+    return isinstance(msg, dict) and isinstance(msg.get("tick"), int) and not isinstance(msg.get("tick"), bool)
+
+
 async def handler(ws):
     sim = Lorenz()
     pending = {}
+    ticks = asyncio.Queue()   # lockstep: one entry per tick, None when the client has gone
+    lock = {"asked": False, "on": False}
 
     async def recv():
-        async for msg in ws:
-            pending.update(parse_params(msg))   # applied between steps, never mid-step
+        try:
+            async for msg in ws:
+                pending.update(parse_params(msg))   # applied between steps, never mid-step
+                if parse_control(msg):
+                    lock["asked"] = True
+                elif lock["on"] and parse_tick(msg):
+                    ticks.put_nowait(1)
+        finally:
+            ticks.put_nowait(None)
 
     task = asyncio.create_task(recv())
     try:
         while True:
             t0 = time.perf_counter()
+            if lock["asked"] and not lock["on"]:
+                # `nimbledeck record` films in lockstep: start again from the seeded state, say so in a text frame, and from now on
+                # compute exactly one frame per {"tick": n} message, so the recording does not depend on the speed of this machine
+                lock["on"] = True
+                sim = Lorenz()
+                await ws.send("lockstep")
+            if lock["on"]:
+                if await ticks.get() is None:
+                    return
+                t0 = time.perf_counter()
             if pending:
                 m = dict(pending); pending.clear()
                 sim.dt = float(m.get("dt", sim.dt))
@@ -131,7 +168,8 @@ async def handler(ws):
             pts = await asyncio.to_thread(sim.step)
             ms = (time.perf_counter() - t0) * 1000
             await ws.send(np.array([ms, len(pts)], dtype=np.float32).tobytes() + pts.tobytes())
-            await asyncio.sleep(max(0, FRAME_S - (time.perf_counter() - t0)))
+            if not lock["on"]:
+                await asyncio.sleep(max(0, FRAME_S - (time.perf_counter() - t0)))
     except ConnectionClosed:
         pass
     finally:

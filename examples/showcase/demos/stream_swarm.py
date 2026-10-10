@@ -27,7 +27,7 @@ class Swarm:
         self.reset(n)
 
     def reset(self, n):
-        rng = np.random.default_rng(3)
+        rng = self.rng = np.random.default_rng(3)   # the respawns draw from it too: the same swarm every time
         self.p = (rng.normal(0, 0.9, (n, 2))).astype(np.float32)
         self.v = np.zeros((n, 2), np.float32)
 
@@ -48,7 +48,7 @@ class Swarm:
         self.p += self.v * self.dt
         far = (np.abs(self.p) > 1.9).any(1)   # leave the frame: respawn near the centre
         if far.any():
-            self.p[far] = np.random.normal(0, 0.4, (int(far.sum()), 2)).astype(np.float32)
+            self.p[far] = self.rng.normal(0, 0.4, (int(far.sum()), 2)).astype(np.float32)
             self.v[far] = 0
 
 
@@ -70,18 +70,55 @@ def parse_params(raw):
     return out
 
 
+def parse_control(raw):
+    """True when a client message asks for lockstep (`{"lockstep": true}`, sent by `nimbledeck record`)."""
+    try:
+        msg = json.loads(raw)
+    except (TypeError, ValueError):
+        return False
+    return isinstance(msg, dict) and msg.get("lockstep") is True
+
+
+def parse_tick(raw):
+    """True for a lockstep tick (`{"tick": n}`): the client wants exactly one more frame."""
+    try:
+        msg = json.loads(raw)
+    except (TypeError, ValueError):
+        return False
+    return isinstance(msg, dict) and isinstance(msg.get("tick"), int) and not isinstance(msg.get("tick"), bool)
+
+
 async def handler(ws):
     sim = Swarm()
     pending = {}
+    ticks = asyncio.Queue()   # lockstep: one entry per tick, None when the client has gone
+    lock = {"asked": False, "on": False}
 
     async def recv():
-        async for msg in ws:
-            pending.update(parse_params(msg))   # applied between steps, never mid-step
+        try:
+            async for msg in ws:
+                pending.update(parse_params(msg))   # applied between steps, never mid-step
+                if parse_control(msg):
+                    lock["asked"] = True
+                elif lock["on"] and parse_tick(msg):
+                    ticks.put_nowait(1)
+        finally:
+            ticks.put_nowait(None)
 
     task = asyncio.create_task(recv())
     try:
         while True:
             t0 = time.perf_counter()
+            if lock["asked"] and not lock["on"]:
+                # `nimbledeck record` films in lockstep: start again from the seeded state, say so in a text frame, and from now on
+                # compute exactly one frame per {"tick": n} message, so the recording does not depend on the speed of this machine
+                lock["on"] = True
+                sim = Swarm()
+                await ws.send("lockstep")
+            if lock["on"]:
+                if await ticks.get() is None:
+                    return
+                t0 = time.perf_counter()
             if pending:
                 m = dict(pending); pending.clear()
                 if "n" in m and m["n"] != len(sim.p): sim.reset(m["n"])
@@ -90,7 +127,8 @@ async def handler(ws):
             ms = (time.perf_counter() - t0) * 1000
             head = np.array([ms, len(sim.p)], dtype=np.float32)
             await ws.send(head.tobytes() + sim.p.astype(np.float32).tobytes())
-            await asyncio.sleep(max(0, FRAME_S - (time.perf_counter() - t0)))
+            if not lock["on"]:
+                await asyncio.sleep(max(0, FRAME_S - (time.perf_counter() - t0)))
     except ConnectionClosed:
         pass
     finally:

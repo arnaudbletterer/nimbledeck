@@ -28,7 +28,9 @@
       "height": 560,
       "pixelWidth": 2040,
       "pixelHeight": 1120,
-      "fps": 30,
+      "fps": 60,
+      "frames": 540,
+      "lockstep": true,
       "codecs": [
         "vp9",
         "h264"

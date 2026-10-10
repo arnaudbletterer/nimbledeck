@@ -63,6 +63,8 @@ export function validateConfig(cfg, root) {
 
 // `recordings` scripts what `nimbledeck record` does on a slide (docs/RECORDING.md):
 //   { "stream-nbody": { "seconds": 10, "steps": [ { "wait": 800 }, { "set": "gravity", "value": 2 } ] } }
+// `isolate: true` hides the rest of the slide, so the clip holds only the component (a stream with a paragraph or equations laid over it).
+// `realtime: true` films this clip as it plays on the screen, without driving time (docs/RECORDING.md, "Lockstep").
 // A step has one action: wait (ms), type (text typed into a LiveCode editor, with "replace": true to clear it first),
 // key (a key press), set (a slider, found by its label, with a "value"), click (a button, found by its text).
 const ACTIONS = ['wait', 'type', 'key', 'set', 'click']
@@ -78,7 +80,8 @@ export function validateRecordings(rec, cfg) {
     if (!m) { errors.push(`${at}: the name must be live-<id>, stream-<name> or demo-<name>`); continue }
     if (m[1] !== 'live' && !(cfg[`${m[1]}s`] ?? {})[m[2]]) errors.push(`${at}: no ${m[1]} called "${m[2]}" in ${m[1]}s`)
     if (!r || typeof r !== 'object' || Array.isArray(r)) { errors.push(`${at}: must be an object with "seconds" and "steps"`); continue }
-    for (const k of Object.keys(r)) if (!['seconds', 'steps'].includes(k)) errors.push(`${at}.${k}: unknown key (use "seconds" and "steps")`)
+    for (const k of Object.keys(r)) if (!['seconds', 'steps', 'isolate', 'realtime'].includes(k)) errors.push(`${at}.${k}: unknown key (use "seconds", "steps", "isolate" and "realtime")`)
+    for (const k of ['isolate', 'realtime']) if (r[k] !== undefined && typeof r[k] !== 'boolean') errors.push(`${at}.${k}: must be true or false`)
     if (r.seconds !== undefined && !(typeof r.seconds === 'number' && r.seconds >= 1 && r.seconds <= MAX_SECONDS)) errors.push(`${at}.seconds: ${JSON.stringify(r.seconds)} must be a number from 1 to ${MAX_SECONDS}`)
     if (r.steps === undefined) continue
     if (!Array.isArray(r.steps) || r.steps.length > 200) { errors.push(`${at}.steps: must be a list of at most 200 steps`); continue }
