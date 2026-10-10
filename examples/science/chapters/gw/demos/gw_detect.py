@@ -15,7 +15,7 @@ def _():
 
 @app.cell
 def _(mo):
-    mc = mo.ui.slider(10, 60, step=0.5, value=18, label="Template chirp mass (solar masses)", show_value=True, full_width=True)
+    mc = mo.ui.slider(10, 60, step=0.5, value=18, label="Template chirp mass", show_value=True, full_width=True)
     dist = mo.ui.slider(500, 3000, step=100, value=1800, label="Distance (Mpc)", show_value=True, full_width=True)
     seed = mo.ui.slider(1, 20, step=1, value=7, label="Noise sample", show_value=True, full_width=True)
     return dist, mc, seed

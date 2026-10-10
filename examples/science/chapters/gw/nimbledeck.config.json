@@ -21,17 +21,17 @@
       "seconds": 12,
       "steps": [
         {
-          "wait": 2500
+          "wait": 6000
         },
         {
-          "set": "Template chirp mass (solar masses)",
+          "set": "Template chirp mass",
           "value": 24
         },
         {
           "wait": 3000
         },
         {
-          "set": "Template chirp mass (solar masses)",
+          "set": "Template chirp mass",
           "value": 30
         },
         {
