@@ -1,0 +1,4 @@
+.nimbledeck/
+public/nimbledeck.json
+dist/
+.web-build.md
