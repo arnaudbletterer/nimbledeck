@@ -101,6 +101,9 @@
           "wait": 1500
         },
         {
+          "type": "\n"
+        },
+        {
           "key": "ControlOrMeta+Home"
         },
         {
