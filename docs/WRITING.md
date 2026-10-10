@@ -173,6 +173,13 @@ A web page cannot run these. To make them play there too, record them once with 
    `g` sliders that `controls` shows; `:extra` is more `{name, label, min, max, step, value}` sliders, each sent to the process under
    its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows
    ([Equations](EQUATIONS.md)).
+   Two optional JSON text messages, sent by the process before a frame, paint beside the points: `{"field": {"x", "y", "w", "h", "nx", "ny", "rgb"}}`
+   is an nx by ny image (`rgb` is base64 of nx*ny*3 bytes, top row first) stretched over the rectangle x, y, w, h (logical pixels)
+   behind the points and kept until the next `field`; `{"draw": [...]}` is a list of shapes in logical pixels drawn over the points,
+   replacing the previous list: `{t:"line", p:[x0,y0,x1,y1,...], c, w, a, dash}`, `{t:"dot", x, y, r, c, w, a}` (`w` set draws a ring),
+   `{t:"rect", x, y, w, h, c, a}` and `{t:"text", x, y, s, c, size, align, weight}`, with `c` a CSS colour or a token such as
+   `"--nd-chart-1"`. A heat map under a population and live plots over it need nothing else
+   (`examples/science/chapters/evolution/demos/evo_core.py`). A stream that sends neither is unchanged.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 4. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
    protocol, opt-in and without changing the free-running loop: when a client message holds `"lockstep": true`, the server

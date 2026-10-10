@@ -20,6 +20,12 @@ import { useLockstep } from '../composables/lockstep'
 //   sliders three objects {label, min, max, step, value} for the n, dt and g sliders, in that order
 //   extra   more sliders {name, label, min, max, step, value}: each is sent to the process under its name (like n, dt and g) and
 //           published as the parameter `name`, which a \val{name}{...} of an <Equation> shows (composables/links.mjs)
+//   field / draw  two optional JSON text messages a process may send before a frame, to paint under and over the points:
+//           {"field": {"x","y","w","h","nx","ny","rgb"}}  an nx by ny image (rgb: base64 of nx*ny*3 bytes, row by row from the top)
+//                    stretched over the rectangle x,y,w,h (logical pixels) behind the points, kept until the next field;
+//           {"draw": [ {t:"line",p:[x,y,...],c,w,a,dash}, {t:"dot",x,y,r,c,w,a}, {t:"rect",x,y,w,h,c,a},
+//                      {t:"text",x,y,s,c,size,align,weight} ]}  a list of shapes in logical pixels (c: a CSS colour or a token like
+//                    "--nd-chart-1"), drawn above the points; each message replaces the previous list. Without them nothing changes.
 //   highlight  { "1": "note" }: the terms of an <Equation> this stream answers to (a ring in the term's colour and the note)
 interface Slider { label: string; min: number; max: number; step: number; value: number }
 const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; sliders?: Slider[]; extra?: (Slider & { name: string })[]; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
@@ -32,6 +38,7 @@ const SL: Slider[] = props.sliders ?? [
 const resolve = (c: string) => (c.startsWith('--') ? cssVar(c) : c)
 const root = ref<HTMLElement>()
 const cv = ref<HTMLCanvasElement>()
+const bg = ref<HTMLCanvasElement>(), ov = ref<HTMLCanvasElement>()
 const { k } = useCrisp(root, { w: LW, h: LH })
 const state = ref<'offline' | 'live'>('offline')
 const n = ref(SL[0].value), dt = ref(SL[1].value), g = ref(SL[2].value)
@@ -51,6 +58,67 @@ function onTick() {
   ws.send(JSON.stringify({ tick: ls.n }))
 }
 
+// Optional layers (see the header): the field under the points and the shapes over them. Both keep their last message and are
+// repainted when the canvas changes size, so they stay sharp at the real on-screen resolution.
+interface Shape { t: string; x?: number; y?: number; w?: number; h?: number; r?: number; p?: number[]; c?: string; a?: number; dash?: number[]; s?: string; size?: number; align?: CanvasTextAlign; weight?: number | string }
+let fieldMsg: { x: number; y: number; w: number; h: number; nx: number; ny: number; img: ImageData } | null = null
+let shapes: Shape[] = []
+function layer(c: HTMLCanvasElement | undefined) {
+  if (!c) return null
+  const pw = Math.round(LW * k.value), ph = Math.round(LH * k.value)
+  if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph }
+  const ctx = c.getContext('2d')!
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); ctx.setTransform(k.value, 0, 0, k.value, 0, 0)
+  return ctx
+}
+function paintField() {
+  const ctx = layer(bg.value)
+  if (!ctx || !fieldMsg) return
+  const f = fieldMsg, tmp = document.createElement('canvas')
+  tmp.width = f.nx; tmp.height = f.ny; tmp.getContext('2d')!.putImageData(f.img, 0, 0)
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(tmp, f.x, f.y, f.w, f.h)
+}
+function paintShapes() {
+  const ctx = layer(ov.value)
+  if (!ctx) return
+  for (const s of shapes) {
+    const col = resolve(s.c ?? '--nd-ink')
+    ctx.globalAlpha = s.a ?? 1; ctx.fillStyle = col; ctx.strokeStyle = col
+    if (s.t === 'line' && s.p && s.p.length >= 4) {
+      ctx.lineWidth = s.w ?? 1.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.setLineDash(s.dash ?? [])
+      ctx.beginPath(); ctx.moveTo(s.p[0], s.p[1])
+      for (let i = 2; i + 1 < s.p.length; i += 2) ctx.lineTo(s.p[i], s.p[i + 1])
+      ctx.stroke(); ctx.setLineDash([])
+    } else if (s.t === 'dot') {
+      ctx.beginPath(); ctx.arc(s.x ?? 0, s.y ?? 0, s.r ?? 3, 0, 6.2832)
+      if (s.w) { ctx.lineWidth = s.w; ctx.stroke() } else ctx.fill()
+    } else if (s.t === 'rect') {
+      ctx.fillRect(s.x ?? 0, s.y ?? 0, s.w ?? 0, s.h ?? 0)
+    } else if (s.t === 'text' && s.s != null) {
+      ctx.font = `${s.weight ?? 500} ${s.size ?? 16}px ${cssVar('--nd-font-body')}`; ctx.textAlign = s.align ?? 'left'; ctx.textBaseline = 'alphabetic'
+      ctx.fillText(s.s, s.x ?? 0, s.y ?? 0)
+    }
+  }
+  ctx.globalAlpha = 1
+}
+function onJson(text: string) {
+  let m: any
+  try { m = JSON.parse(text) } catch { return }
+  if (!m || typeof m !== 'object') return
+  const f = m.field
+  if (f && typeof f.rgb === 'string' && f.nx > 0 && f.ny > 0 && f.nx * f.ny <= 1 << 20) {
+    const bin = atob(f.rgb), px = f.nx * f.ny
+    if (bin.length === px * 3) {
+      const img = new ImageData(f.nx, f.ny)
+      for (let i = 0; i < px; i++) { img.data[i * 4] = bin.charCodeAt(i * 3); img.data[i * 4 + 1] = bin.charCodeAt(i * 3 + 1); img.data[i * 4 + 2] = bin.charCodeAt(i * 3 + 2); img.data[i * 4 + 3] = 255 }
+      fieldMsg = { x: +f.x || 0, y: +f.y || 0, w: +f.w || LW, h: +f.h || LH, nx: f.nx, ny: f.ny, img }
+      paintField()
+    }
+  }
+  if (Array.isArray(m.draw)) { shapes = m.draw; paintShapes() }
+}
+watch(k, () => { paintField(); paintShapes() })
 function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...(ls ? { lockstep: true } : {}), ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
 async function connect() {
   if (closed) return
@@ -66,7 +134,7 @@ async function connect() {
   sock.onclose = () => { release(); if (ws !== sock) return; state.value = 'offline'; fps.value = 0; timer = window.setTimeout(connect, 2000) }
   sock.onerror = () => sock.close()
   sock.onmessage = (e) => {
-    if (typeof e.data === 'string') { if (e.data === 'lockstep') { acked = true; holdHello?.(); holdHello = null } return }
+    if (typeof e.data === 'string') { if (e.data === 'lockstep') { acked = true; holdHello?.(); holdHello = null } else if (e.data[0] === '{' && !(ls && !acked)) onJson(e.data); return }
     if (ls && !acked) return                           // a frame of the free-running start, before the process switched to ticks
     const a = new Float32Array(e.data)               // [step_ms, n, x0, y0, x1, y1, ...]
     stepMs.value = Math.round(a[0] * 10) / 10
@@ -87,7 +155,7 @@ async function connect() {
     holdTick?.(); holdTick = null                      // drawn: the recorder may take its picture
   }
 }
-function stop() { closed = true; clearTimeout(timer); release(); window.removeEventListener('nd-tick', onTick); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
+function stop() { fieldMsg = null; shapes = []; paintField(); paintShapes(); closed = true; clearTimeout(timer); release(); window.removeEventListener('nd-tick', onTick); const w = ws; ws = null; w?.close(); state.value = 'offline'; fps.value = 0 }
 const active = useActive()
 const rec = reactive(useRecording(() => `stream-${props.name}`, () => props.recording, computed(() => state.value === 'offline'), active))
 watch(active, (a) => { stop(); if (a) { closed = false; if (ls) window.addEventListener('nd-tick', onTick); connect(); publish() } }, { immediate: true })
@@ -99,7 +167,9 @@ onUnmounted(stop)
 
 <template>
   <div ref="root" class="nd-scene" :class="{ 'nd-framed': frame }" :data-fps="fps" :data-state="state" data-kind="pystream" :data-rec-id="`stream-${name}`" v-bind="linkAttrs">
+    <canvas v-show="!rec.shown" ref="bg" :width="LW" :height="LH" />
     <canvas v-show="!rec.shown" ref="cv" :width="LW" :height="LH" />
+    <canvas v-show="!rec.shown" ref="ov" :width="LW" :height="LH" />
     <Recorded v-if="rec.shown" :src="rec.src!" :poster="rec.poster" :reduced="rec.reduced" />
     <div v-else-if="state === 'offline' && !rec.pending" class="nd-off">Python stream offline. Start everything with <code>nimbledeck run</code></div>
     <span v-if="linked?.note" class="nd-linkchip">{{ linked.note }}</span>
