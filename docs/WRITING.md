@@ -171,6 +171,11 @@ A web page cannot run these. To make them play there too, record them once with 
    `g` sliders that `controls` shows; `:extra` is more `{name, label, min, max, step, value}` sliders, each sent to the process under
    its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows
    ([Equations](EQUATIONS.md)).
+3. A frame may also carry raster images (a heat map, a field), drawn smoothly scaled under the points. After the `2 + 2n`
+   floats of the points, append `[count, (x, y, w, h, iw, ih) * count]` as float32 (position and size in logical canvas
+   pixels, image size in pixels), then the `iw * ih * 4` RGBA bytes of every image in turn. A server that sends nothing
+   after its points draws as before. `values` on `<PyStream>` shows the number next to the `dt` and `g` sliders too.
+   `examples/science/chapters/climate` draws two Hovmoeller diagrams this way.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 4. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
    protocol, opt-in and without changing the free-running loop: when a client message holds `"lockstep": true`, the server
