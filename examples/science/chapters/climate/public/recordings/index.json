@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "live-enkf",
+      "kind": "live",
+      "seconds": 10,
+      "width": 1232,
+      "height": 688,
+      "pixelWidth": 2464,
+      "pixelHeight": 1376,
+      "fps": 30,
+      "frames": 300,
+      "lockstep": false,
+      "reason": "live code waits for a Python runner that answers in real time, and lockstep does not cover it yet: the clip is filmed as it plays and holds frames",
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "live-enkf.webm",
+        "live-enkf.mp4"
+      ],
+      "poster": "live-enkf.jpg"
+    },
+    {
+      "id": "stream-climate-l96",
+      "kind": "stream",
+      "seconds": 22.53,
+      "width": 1180,
+      "height": 540,
+      "pixelWidth": 2360,
+      "pixelHeight": 1080,
+      "fps": 30,
+      "frames": 676,
+      "lockstep": true,
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "stream-climate-l96.webm",
+        "stream-climate-l96.mp4"
+      ],
+      "poster": "stream-climate-l96.jpg"
+    }
+  ]
+}
