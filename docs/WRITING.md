@@ -170,7 +170,10 @@ A web page cannot run these. To make them play there too, record them once with 
    [-2, 2] map to its width and height; `:sliders` is three `{label, min, max, step, value}` objects for the `n`, `dt` and
    `g` sliders that `controls` shows; `:extra` is more `{name, label, min, max, step, value}` sliders, each sent to the process under
    its `name` once the viewer moves it and published as a parameter that `\val{name}{...}` of an `<Equation>` shows
-   ([Equations](EQUATIONS.md)).
+   ([Equations](EQUATIONS.md)). `:groups="[3000, 900]"` gives the colour groups explicit point counts instead of equal
+   ones (the server keeps the counts fixed and parks unused points off the canvas, at x = 9), `:sizes` and `:alphas` give each
+   group its own dot size and opacity, `:sliders="[]"` hides the three base sliders so only the `extra` ones show, and an extra
+   slider with `labels: ['linear', 'cosine']` shows the label of its value instead of the number.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 4. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
    protocol, opt-in and without changing the free-running loop: when a client message holds `"lockstep": true`, the server
