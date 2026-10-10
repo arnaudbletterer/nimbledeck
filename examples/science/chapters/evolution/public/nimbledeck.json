@@ -1,0 +1,21 @@
+{
+  "demos": {},
+  "streams": {
+    "evo-landscape": {
+      "file": "demos/stream_evo.py",
+      "port": 19440
+    },
+    "evo-breeder": {
+      "file": "demos/stream_evo_breeder.py",
+      "port": 19441
+    },
+    "evo-price": {
+      "file": "demos/stream_evo_price.py",
+      "port": 19442
+    }
+  },
+  "runner": {
+    "port": 19540,
+    "token": "8ac3dbeee24c428bd5d59a79b507ec33"
+  }
+}
