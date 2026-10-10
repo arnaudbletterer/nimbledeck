@@ -1,0 +1,156 @@
+{
+  "python": {
+    "version": "3.12",
+    "requirements": "demos/requirements.txt"
+  },
+  "streams": {
+    "ai-diffusion": {
+      "file": "demos/stream_ai_diffusion.py",
+      "port": 19600
+    }
+  },
+  "limits": {
+    "maxTitle": 40,
+    "maxBullets": 7
+  },
+  "runner": {
+    "port": 19700
+  },
+  "recordings": {
+    "stream-ai-diffusion": {
+      "seconds": 17,
+      "isolate": true,
+      "steps": [
+        {
+          "wait": 9300
+        },
+        {
+          "set": "steps",
+          "value": 8
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "live-ai-attention": {
+      "seconds": 16,
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "type": "\n"
+        },
+        {
+          "key": "ControlOrMeta+Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "End"
+        },
+        {
+          "key": "ArrowLeft"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "s"
+        },
+        {
+          "key": "c"
+        },
+        {
+          "key": "a"
+        },
+        {
+          "key": "r"
+        },
+        {
+          "key": "e"
+        },
+        {
+          "key": "d"
+        },
+        {
+          "wait": 3800
+        },
+        {
+          "key": "Home"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "ArrowRight"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "Backspace"
+        },
+        {
+          "key": "3"
+        },
+        {
+          "wait": 3500
+        }
+      ]
+    }
+  }
+}

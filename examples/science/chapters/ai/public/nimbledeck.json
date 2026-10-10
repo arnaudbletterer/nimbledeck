@@ -1,0 +1,13 @@
+{
+  "demos": {},
+  "streams": {
+    "ai-diffusion": {
+      "file": "demos/stream_ai_diffusion.py",
+      "port": 19647
+    }
+  },
+  "runner": {
+    "port": 19747,
+    "token": "8aa9c5489ec35c7d0d59273c8ec287a9"
+  }
+}
