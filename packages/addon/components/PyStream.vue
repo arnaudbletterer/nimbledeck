@@ -26,9 +26,11 @@ import { useLockstep } from '../composables/lockstep'
 //           {"draw": [ {t:"line",p:[x,y,...],c,w,a,dash}, {t:"dot",x,y,r,c,w,a}, {t:"rect",x,y,w,h,c,a},
 //                      {t:"text",x,y,s,c,size,align,weight} ]}  a list of shapes in logical pixels (c: a CSS colour or a token like
 //                    "--nd-chart-1"), drawn above the points; each message replaces the previous list. Without them nothing changes.
+//   values  show the number next to the dt and g sliders too (the n slider always shows it)
+//   images  none: a frame may carry raster images after its points (see docs/WRITING.md), drawn under the points
 //   highlight  { "1": "note" }: the terms of an <Equation> this stream answers to (a ring in the term's colour and the note)
 interface Slider { label: string; min: number; max: number; step: number; value: number }
-const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; sliders?: Slider[]; extra?: (Slider & { name: string })[]; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
+const props = withDefaults(defineProps<{ name: string; controls?: boolean; hud?: boolean; frame?: boolean; color?: string; recording?: string; colors?: string[]; size?: number; fade?: number; w?: number; h?: number; values?: boolean; sliders?: Slider[]; extra?: (Slider & { name: string })[]; highlight?: Record<string, string> | string[] }>(), { controls: false, hud: false, frame: false, size: 2.2, fade: 0.25, w: 1000, h: 460 })
 const LW = props.w, LH = props.h
 const SL: Slider[] = props.sliders ?? [
   { label: 'particles', min: 100, max: 2000, step: 100, value: 400 },
@@ -119,6 +121,27 @@ function onJson(text: string) {
   if (Array.isArray(m.draw)) { shapes = m.draw; paintShapes() }
 }
 watch(k, () => { paintField(); paintShapes() })
+// Optional raster layer of a frame, after the 2 + 2 * n floats of the points: [count, (x, y, w, h, iw, ih) * count] as float32,
+// then the RGBA bytes (iw * ih * 4 each) of every image in turn. x, y, w, h are in logical canvas pixels. Smoothly scaled, drawn
+// before the points. A frame without the block (every older server) draws as before.
+const tiles: HTMLCanvasElement[] = []
+function drawImages(ctx: CanvasRenderingContext2D, a: Float32Array, m: number, buf: ArrayBuffer) {
+  const o = 2 + 2 * m
+  if (a.length <= o) return
+  const count = a[o]
+  let byte = (o + 1 + 6 * count) * 4
+  for (let i = 0; i < count; i++) {
+    const [x, y, w, h, iw, ih] = a.subarray(o + 1 + 6 * i, o + 7 + 6 * i)
+    if (byte + iw * ih * 4 > buf.byteLength) return
+    const t = (tiles[i] ??= document.createElement('canvas'))
+    if (t.width !== iw || t.height !== ih) { t.width = iw; t.height = ih }
+    t.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(buf, byte, iw * ih * 4), iw, ih), 0, 0)
+    byte += iw * ih * 4
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(t, x, y, w, h)
+  }
+}
+
 function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...(ls ? { lockstep: true } : {}), ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
 async function connect() {
   if (closed) return
@@ -144,6 +167,7 @@ async function connect() {
     ctx.setTransform(k.value, 0, 0, k.value, 0, 0)
     // Fade the previous frame towards transparent (trails without an opaque background).
     ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = `rgba(0,0,0,${props.fade})`; ctx.fillRect(0, 0, LW, LH); ctx.globalCompositeOperation = 'source-over'
+    drawImages(ctx, a, m, e.data)
     const cols = props.colors?.length ? props.colors.map(resolve) : [props.color ?? cssVar('--nd-ink')]
     const sz = props.size
     for (let i = 0; i < m; i++) {
@@ -176,8 +200,8 @@ onUnmounted(stop)
     <span v-if="hud && !rec.shown" class="nd-hud">{{ fps }} fps<template v-if="!ls"> · Python step {{ stepMs }} ms</template></span>
     <div v-if="controls && !rec.shown" class="nd-ctl" :class="{ 'nd-ctl-many': extra?.length }">
       <label>{{ SL[0].label }} <input v-model.number="n" type="range" :min="SL[0].min" :max="SL[0].max" :step="SL[0].step" @change="send"> {{ n }}</label>
-      <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"></label>
-      <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"></label>
+      <label>{{ SL[1].label }} <input v-model.number="dt" type="range" :min="SL[1].min" :max="SL[1].max" :step="SL[1].step" @change="send"><template v-if="values"> {{ dt }}</template></label>
+      <label>{{ SL[2].label }} <input v-model.number="g" type="range" :min="SL[2].min" :max="SL[2].max" :step="SL[2].step" @change="send"><template v-if="values"> {{ g }}</template></label>
       <label v-for="e in extra" :key="e.name">{{ e.label }} <input v-model.number="ex[e.name]" type="range" :min="e.min" :max="e.max" :step="e.step" @input="touched.add(e.name)" @change="send"> {{ shown(e) }}</label>
     </div>
   </div>

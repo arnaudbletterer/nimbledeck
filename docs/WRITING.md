@@ -180,6 +180,11 @@ A web page cannot run these. To make them play there too, record them once with 
    `{t:"rect", x, y, w, h, c, a}` and `{t:"text", x, y, s, c, size, align, weight}`, with `c` a CSS colour or a token such as
    `"--nd-chart-1"`. A heat map under a population and live plots over it need nothing else
    (`examples/science/chapters/evolution/demos/evo_core.py`). A stream that sends neither is unchanged.
+3. A frame may also carry raster images (a heat map, a field), drawn smoothly scaled under the points. After the `2 + 2n`
+   floats of the points, append `[count, (x, y, w, h, iw, ih) * count]` as float32 (position and size in logical canvas
+   pixels, image size in pixels), then the `iw * ih * 4` RGBA bytes of every image in turn. A server that sends nothing
+   after its points draws as before. `values` on `<PyStream>` shows the number next to the `dt` and `g` sliders too.
+   `examples/science/chapters/climate` draws two Hovmoeller diagrams this way.
 3. Smoothness is bounded by the Python step time: about 16 ms per step for 60 fps.
 4. To be filmed at exactly 60 fps by `nimbledeck record` ([Recording](RECORDING.md)), the server also speaks the lockstep
    protocol, opt-in and without changing the free-running loop: when a client message holds `"lockstep": true`, the server
