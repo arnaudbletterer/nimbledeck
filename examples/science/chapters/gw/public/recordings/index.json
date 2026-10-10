@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "demo-gw-detect",
+      "kind": "demo",
+      "seconds": 18.03,
+      "width": 1200,
+      "height": 604,
+      "pixelWidth": 2400,
+      "pixelHeight": 1208,
+      "fps": 60,
+      "frames": 1082,
+      "lockstep": false,
+      "reason": "a marimo demo runs in its own process (a cross-origin frame), where the recorder cannot hold time. Its output changes in steps: the clip waits for each step to settle and holds frames",
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "demo-gw-detect.webm",
+        "demo-gw-detect.mp4"
+      ],
+      "poster": "demo-gw-detect.jpg"
+    },
+    {
+      "id": "live-gw-matched",
+      "kind": "live",
+      "seconds": 14,
+      "width": 1200,
+      "height": 640,
+      "pixelWidth": 2400,
+      "pixelHeight": 1280,
+      "fps": 60,
+      "frames": 840,
+      "lockstep": false,
+      "reason": "live code waits for a Python runner that answers in real time, and lockstep does not cover it yet: the clip is filmed as it plays and holds frames",
+      "codecs": [
+        "vp9",
+        "h264"
+      ],
+      "files": [
+        "live-gw-matched.webm",
+        "live-gw-matched.mp4"
+      ],
+      "poster": "live-gw-matched.jpg"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+/* Let the studio slide show through, and make the marimo page read on a dark slide. */
+html, body, #root, #App, main { background: transparent !important; color: #f2eee6 !important; }
+.marimo-cell, .marimo-cell > * { background: transparent !important; box-shadow: none !important; border: 0 !important; }
+:root, .dark, .light {
+  --foreground: #f2eee6; --muted-foreground: #9aa3b8; --background: transparent;
+  --slider-color: #22d3ee; --primary: #22d3ee;
+}
+body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, system-ui, sans-serif; font-size: 17px; }
+h2 { color: #f2eee6 !important; font-weight: 800; letter-spacing: -0.03em; border: 0; margin: 0 0 4px; }
+p, label, span { color: #cfd3de; }
+strong { color: #22d3ee; font-weight: 600; }
+input[type="range"] { accent-color: #22d3ee; }
+.notebook-actions-dropdown, .notebook-actions-dropdown *, div[class*="print:hidden"][class*="fixed"] { display: none !important; }
+h2, h2 * { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, system-ui, sans-serif !important; font-size: 30px !important; }
