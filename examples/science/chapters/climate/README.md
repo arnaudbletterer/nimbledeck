@@ -8,11 +8,11 @@ days per time unit.
 ## Run it
 
 ```sh
-NIMBLEDECK_PORT_OFFSET=100 node ../../../../packages/cli/bin/nimbledeck.mjs run climate.md      # live
-NIMBLEDECK_PORT_OFFSET=100 node ../../../../packages/cli/bin/nimbledeck.mjs check climate.md
-NIMBLEDECK_PORT_OFFSET=100 node ../../../../packages/cli/bin/nimbledeck.mjs verify climate.md   # with the deck running
-NIMBLEDECK_PORT_OFFSET=500 node ../../../../packages/cli/bin/nimbledeck.mjs record climate.md   # films the stream
-node build-web.mjs                                                                         # static edition, plays the clip
+NIMBLEDECK_PORT_OFFSET=200 node ../../../../packages/cli/bin/nimbledeck.mjs run climate.md      # live
+NIMBLEDECK_PORT_OFFSET=200 node ../../../../packages/cli/bin/nimbledeck.mjs check climate.md
+NIMBLEDECK_PORT_OFFSET=200 node ../../../../packages/cli/bin/nimbledeck.mjs verify climate.md   # with the deck running
+NIMBLEDECK_PORT_OFFSET=200 node ../../../../packages/cli/bin/nimbledeck.mjs record climate.md   # films the stream
+node build-web.mjs                                                                         # static edition, plays the clips
 ```
 
 Ports: stream 19200, runner 19300, deck 3030 (plus the offset). NumPy, matplotlib and websockets only; the first run downloads
@@ -28,8 +28,10 @@ them into uv's cache, then it works offline.
 | 4 | One model. One update. | Lorenz-96 and the Kalman analysis, one coloured term each, pointing at the recording of slide 2 |
 | 5 | The spread should match the error. | the spread-skill relation, coloured like the curves of the recording |
 
-Slides 2 and 3 need `nimbledeck run`. The static edition plays the recording of slide 2 in their place; slide 3 has no
-recording yet and is left out.
+Slides 2 and 3 need `nimbledeck run`. The static edition plays their recordings instead: `stream-climate-l96` (a free
+forecast, then assimilation switched on, then noisier instruments; 20 s, 30 fps, lockstep) and `live-enkf` (the localisation
+radius edited from 4 to 50: the filter diverges). Checked: a static build served under its base path with no Python, every
+media file answers 200, no external request, no KaTeX error, `check` 0 and 0, `verify` clean.
 
 ## Files
 
