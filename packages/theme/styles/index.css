@@ -175,6 +175,7 @@
   box-shadow: 0 0 28px 3px color-mix(in srgb, var(--nd-accent) 40%, transparent); }
 .nd-pane-in { position: absolute; inset: 0; padding: 40px 40px 76px; z-index: 1; }
 .nd-caption { position: absolute; left: 40px; bottom: 28px; z-index: 3; font-size: 18px; color: var(--nd-muted); }
+.nd-body-cap { left: 70px; right: 140px; bottom: 46px; }   /* a source line under the content of a default slide, above the footer */
 .nd-split-cap { left: 88px; right: calc(50% + 40px); }   /* a source line under the words of a split slide */
 .nd-pill { position: absolute; right: 32px; bottom: 24px; z-index: 3; padding: 4px 16px; border-radius: 999px; font-size: 16px; color: var(--nd-muted);
   background: color-mix(in srgb, var(--nd-surface) 80%, transparent); border: 1px solid var(--nd-line); font-variant-numeric: tabular-nums; }
@@ -183,6 +184,10 @@
 .nd-num h2 { margin: 0; font-family: var(--nd-font-display); font-size: 72px; line-height: 1; padding-right: 0.08em; font-weight: 800; letter-spacing: -0.04em; white-space: nowrap;
   background: var(--nd-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .nd-num p { margin: 18px 0 0; font-size: 22px; line-height: 1.35; color: var(--nd-muted); }
+.nd-num p strong { color: var(--nd-ink); }
+.nd-num p:has(a) { font-size: 19px; }   /* the source line of a card: venue and DOI, small and muted, never wider than the card */
+.nd-num a { overflow-wrap: anywhere; }
+.nd-num h3 { margin: 0 0 14px; font-size: 18px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--nd-accent); }   /* a kicker above the figure of a card */
 /* Display titles never carry the title bar rule, in any variant. Hero text sits on a scrim so a live background stays readable. */
 .slidev-layout .nd-big h1, .slidev-layout.nd-big h1 { border: 0; padding: 0; }
 .nd-hero .nd-bg::after { content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -259,6 +264,11 @@ html.nd-touring .nd-zoom-enter-active, html.nd-touring .nd-zoom-leave-active { t
   .nd-num:has(.nd-stat.nd-on) { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .9s cubic-bezier(.16, 1, .3, 1); }
   .nd-num:nth-child(2):has(.nd-stat.nd-on) { transition-delay: .14s; } .nd-num:nth-child(3):has(.nd-stat.nd-on) { transition-delay: .28s; } .nd-num:nth-child(4):has(.nd-stat.nd-on) { transition-delay: .42s; }
 }
+/* `class: nd-cards` on a numbers slide: text cards (a year, a line of authors, a few sentences) instead of big figures. They start under the
+   sentence below the title, share one height (the tallest) and align their content from the top, so the kickers and the figures line up. */
+.nd-cards .nd-nums { top: 180px; bottom: auto; align-content: start; }
+.nd-cards .nd-num { justify-content: flex-start; padding: 40px 40px 32px; }
+.nd-cards .nd-num::before { left: 40px; }
 @media (prefers-reduced-motion: reduce) { .nd-num { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
 /* ==== Look catalogue ====
