@@ -581,6 +581,39 @@
 .nd-crowd-ctl small, .nd-polls-ctl small { font: 15px/1.3 var(--nd-font-body); color: var(--nd-muted); }
 .nd-crowd-ctl input[type="range"], .nd-polls-ctl input[type="range"] { margin: 8px 0 0; width: 100%; accent-color: var(--nd-accent); }
 @media (prefers-reduced-motion: reduce) { .nd-crowd-chip { animation: none; } }
+/* ==== <Chance>: why a positive test is often wrong. Sick is the pink chart colour, healthy is grey, "tested positive" is amber. ==== */
+.nd-chance { position: relative; color: var(--nd-ink); font-family: var(--nd-font-body); }
+.nd-chance canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.nd-chance-cap { position: absolute; left: 0; font: 500 20px/1.2 var(--nd-font-body); color: var(--nd-muted); }
+.nd-chance-cap-top { font: 600 17px/1.2 var(--nd-font-body); letter-spacing: .1em; text-transform: uppercase; }
+.nd-chance-key { position: absolute; left: 0; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 26px; font: 600 21px/1.2 var(--nd-font-body); }
+.nd-chance .nd-chance-key, .nd-chance .nd-chance-key li { margin-left: 0; padding-left: 0; }
+.nd-chance-key li { padding: 0; animation: nd-chance-in .5s both; }
+.nd-chance-key li::before, .nd-chance-key li::marker { content: none; }
+.nd-chance .nd-chance-key-flow { position: absolute; left: 0; bottom: 0; margin: 0; font-size: 19px; }
+.nd-chance-key i, .nd-chance-label i, .nd-chance-ringkey i { display: inline-block; width: 15px; height: 15px; border-radius: 50%; margin-right: 10px; vertical-align: -1px; box-sizing: border-box; }
+.nd-chance-sick i, i.nd-chance-sick { background: var(--nd-chart-3); }
+.nd-chance-healthy i, i.nd-chance-healthy { background: var(--nd-muted); opacity: .6; }
+.nd-chance-pos i, i.nd-chance-pos { border: 3px solid var(--nd-chart-4); width: 19px; height: 19px; vertical-align: -3px; }
+.nd-chance-label { position: absolute; left: 0; font: 600 26px/1.2 var(--nd-font-body); transition: opacity .5s; }
+.nd-chance-label b { font-weight: 800; color: var(--nd-ink); }
+.nd-chance-hide { opacity: 0; }
+.nd-chance-ringkey { position: absolute; right: 0; top: 4px; font: 500 20px/1.2 var(--nd-font-body); color: var(--nd-muted); }
+.nd-chance-read { position: absolute; display: grid; grid-template-columns: auto 1fr; gap: 4px 22px; align-items: end; }
+.nd-chance-big { font: 800 86px/.95 var(--nd-font-display); letter-spacing: -.04em; color: var(--nd-chart-3); white-space: nowrap; }
+.nd-chance-big span { font-size: .36em; letter-spacing: 0; font-weight: 700; }
+.nd-chance-bigcap { font: 600 22px/1.2 var(--nd-font-body); padding-bottom: 8px; }
+.nd-chance-say { grid-column: 1 / -1; margin: 6px 0 0; font: 500 24px/1.3 var(--nd-font-body); }
+.nd-chance-play .nd-chance-read { grid-template-columns: 1fr; gap: 6px; align-content: start; }
+.nd-chance-play .nd-chance-big { font-size: 110px; }
+.nd-chance-play .nd-chance-say { font-size: 26px; min-height: 102px; }
+.nd-chance-read label { display: flex; flex-direction: column; grid-column: 1 / -1; margin-top: 14px; }
+.nd-chance-read label span { font: 600 16px/1.2 var(--nd-font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--nd-muted); }
+.nd-chance-read label b { font: 700 30px/1.2 var(--nd-font-display); }
+.nd-chance-read input[type="range"] { margin: 8px 0 0; width: 100%; accent-color: var(--nd-accent); }
+@keyframes nd-chance-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .nd-chance-key li { animation: none; } .nd-chance-label { transition: none; } }
+
 .nd-polls-stats { position: absolute; left: 0; right: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 40px; align-content: center; }
 .nd-polls-stats b { display: block; font: 800 46px/1.05 var(--nd-font-display); letter-spacing: -0.03em; color: var(--nd-accent); }
 .nd-polls-stats small { display: block; font: 16px/1.25 var(--nd-font-body); color: var(--nd-muted); }
