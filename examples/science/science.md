@@ -60,8 +60,8 @@ tourScript:
 
 The condition affects 1 person in 1,000, and the test is 99% accurate.
 
-<Stage :h="380">
-<At :w="1140" :h="380">
+<Stage :h="400">
+<At :y="30" :w="1140" :h="370">
 <Quiz answer="D">
 <Choice letter="A">About 99 in 100</Choice>
 <Choice letter="B">About 90 in 100</Choice>
