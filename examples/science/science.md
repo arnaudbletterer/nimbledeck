@@ -31,7 +31,7 @@ tourScript:
 
 A routine check-up for something that affects 1 person in 1,000. The test says: positive.
 
-<Stage :h="480">
+<Stage :h="520">
 <At :x="0" :y="30" :w="620" :h="400" enter="up" :delay="200" middle>
 <Stat value="99" suffix="%" label="accurate: it catches 99 of 100 sick people and clears 99 of 100 healthy ones" :duration="1400" />
 </At>
@@ -56,7 +56,7 @@ tourScript:
 
 The condition affects 1 person in 1,000, and the test is 99% accurate.
 
-<Stage :h="480">
+<Stage :h="520">
 <At :y="30" :w="1140" :h="400">
 <Quiz answer="D">
 <Choice letter="A">About 99 in 100</Choice>
@@ -87,7 +87,7 @@ tourScript:
 
 Most people guess far higher. Here is why.
 
-<Stage :h="480">
+<Stage :h="520">
 <At :x="0" :y="30" :w="1140" :h="400" middle>
 <Stat value="9" suffix="%" label="chance that Sam is really sick" :duration="1600" />
 </At>
@@ -112,8 +112,8 @@ tourScript:
 
 Picture 10,000 people. Each dot is one person, and only 1 in 1,000 is sick.
 
-<Stage :h="480">
-<At :x="383" :y="30" :w="374" :h="450" enter="scale" :delay="200"><Chance mode="crowd" :w="374" :h="450" :steps="1" /></At>
+<Stage :h="520">
+<At :x="383" :y="30" :w="374" :h="440" enter="scale" :delay="200"><Chance mode="crowd" :w="374" :h="440" :steps="1" /></At>
 </Stage>
 
 ::caption::
@@ -136,8 +136,8 @@ tourScript:
 
 Now everyone is tested. The test catches the sick, and wrongly flags 1 healthy person in 100.
 
-<Stage :h="480">
-<At :x="383" :y="30" :w="374" :h="450"><Chance mode="crowd" :w="374" :h="450" :from="1" :steps="2" /></At>
+<Stage :h="520">
+<At :x="383" :y="30" :w="374" :h="440"><Chance mode="crowd" :w="374" :h="440" :from="1" :steps="2" /></At>
 </Stage>
 
 <!--
@@ -155,7 +155,7 @@ tourScript:
 
 The healthy are so many that their false alarms outnumber the real cases ten to one.
 
-<Stage :h="480">
+<Stage :h="520">
 <At :y="30" :w="1140" :h="340"><Chance mode="rows" :w="1100" :h="330" :from="1" :steps="1" /></At>
 </Stage>
 
@@ -175,8 +175,8 @@ tourScript:
 
 Drag the slider: the condition gets more common, and the sentence follows.
 
-<Stage :h="480">
-<At :y="30" :w="1140" :h="450"><Chance mode="play" controls="prevalence" :w="1140" :h="450" /></At>
+<Stage :h="520">
+<At :y="30" :w="1140" :h="410"><Chance mode="play" controls="prevalence" :w="1140" :h="410" /></At>
 </Stage>
 
 <!--
@@ -195,8 +195,8 @@ tourScript:
 
 Drag the sliders: the condition stays at 1 in 1,000, and the sentence follows.
 
-<Stage :h="480">
-<At :y="30" :w="1140" :h="450"><Chance mode="play" controls="accuracy" :w="1140" :h="450" /></At>
+<Stage :h="520">
+<At :y="30" :w="1140" :h="410"><Chance mode="play" controls="accuracy" :w="1140" :h="410" /></At>
 </Stage>
 
 <!--
@@ -214,7 +214,7 @@ tourScript:
 
 When something is rare, even a good test gives mostly false alarms.
 
-<Stage :h="480">
+<Stage :h="520">
 <At :x="0" :y="30" :w="540" :h="440" enter="up" :delay="300"><Chance mode="pile" :w="540" :h="430" :prev="0.001" /></At>
 <At :x="600" :y="30" :w="540" :h="440" enter="up" :delay="600"><Chance mode="pile" :w="540" :h="430" :prev="0.1" /></At>
 </Stage>
@@ -238,8 +238,8 @@ tourScript:
 
 After a positive test, ask for counts of people.
 
-<Stage :h="480">
-<At :x="0" :y="30" :w="560" :h="330" enter="left" :delay="300" frame pad="28px 32px">
+<Stage :h="520">
+<At :x="0" :y="30" :w="560" :h="360" enter="left" :delay="300" frame pad="28px 32px">
 
 **Ask your doctor**
 
@@ -248,7 +248,7 @@ After a positive test, ask for counts of people.
 - What comes next: a second test?
 
 </At>
-<At :x="600" :y="30" :w="540" :h="330" enter="left" :delay="500" frame pad="28px 32px">
+<At :x="600" :y="30" :w="540" :h="360" enter="left" :delay="500" frame pad="28px 32px">
 
 **The same idea elsewhere**
 
@@ -281,7 +281,7 @@ tourScript:
 
 For the curious (optional): the rule counts the real cases among all the positives.
 
-<Stage :h="480">
+<Stage :h="520">
 <At :x="640" :y="30" :w="500" :h="440" enter="left" :delay="300"><Chance mode="pile" :w="500" :h="430" :prev="0.001" /></At>
 <At :x="0" :y="110" :w="600" enter="up" :delay="500">
 <Equation label="Bayes' rule in words. The chance that a positive test is real equals the people who are sick and test positive, divided by the people who are sick and test positive plus the healthy people who test positive. With the numbers of the story, 10 divided by 10 plus 100, about 9 percent." align="left" :size="25" :decimals="{ riskppv: 0 }" :params="{ risktp: 10, riskfp: 100, riskppv: 9 }">

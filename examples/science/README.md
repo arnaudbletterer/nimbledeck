@@ -21,7 +21,7 @@ Every content slide (all but the cover and the closing slide, which are lead lay
 | Layout | One family: `default` for every content slide, `numbers` (`class: nd-cards`) for the references and the credits. Never `split` or `stage`, whose chrome differs. |
 | Title | One zone: the title bar of the theme (56 px, rule below), at most 40 characters, a message or a name. |
 | Sentence | The first line under the title, 24 px, in ink: the one thing the slide says. Never a kicker. |
-| Picture | A `<Stage :h="480">` whose first block starts 30 px under the sentence (the cards start at the same place). |
+| Picture | A `<Stage :h="520">` whose first block starts 30 px under the sentence (the cards start at the same place). |
 | Source line | `::caption::`, 18 px, muted, on the left gutter just above the footer, only where a claim needs one. |
 | Footer | The deck title, 18 px, muted, bottom left. |
 | Page number | A quiet `n/17`, the same 18 px, on the right gutter and the same baseline as the footer (`style.css`). |
