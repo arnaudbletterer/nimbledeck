@@ -41,3 +41,4 @@ compose components for common effects.
 - `node website/hosted-media-e2e.mjs` does the same base-path media check for the hosted example deck.
 - Both web builds share `packages/cli/src/webedition.mjs`, which leaves out the slides that need `nimbledeck run`.
 - A slide that should be interactive in the tour gets a `tourScript`, and `sounds` if it has sound (see `docs/TOUR.md`). Run `nimbledeck check` and `examples/showcase/e2e-tour.mjs` after changing them.
+- The site bar and the tour are the addon's `SiteBar`, shown only when the page defines `window.__ND_SITE__` (the site build does it for the showcase and the hosted decks; `docs/TOUR.md`). The science deck has its own grammar test, `examples/science/coherence.mjs`, part of its `e2e.mjs`.

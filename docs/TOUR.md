@@ -82,6 +82,17 @@ Built-in sounds, synthesised with the Web Audio API (no files, offline): `click`
 `success`, `soft-boom`, `pluck`, `typing`, `swell`, `finale`, `pad`, `uplift`. Everything passes through a limiter and a master
 gain, so stacked cues stay quiet. `<SoundToggle />` is the speaker button and `<Equalizer />` draws the real output.
 
+## The site bar: any deck gets it
+
+The bar (wordmark, links, slide arrows, "Play the tour" with a clock such as `0:13 / 2:25`, the big "Watch the tour" button on the first
+slide, a progress hairline) is the addon's `SiteBar` component, mounted by the addon's `global-top.vue`. A deck needs no code for it.
+It renders only when the page defines `window.__ND_SITE__` (`{ docs, playground, github, science? }`) and adds the class `nd-site-bar` to
+`<html>`: `website/build.mjs` writes both into the built pages of the showcase, `/demos/how-it-works/` and `/demos/science/`
+(`dressDeck` in `website/home.mjs`). The dev server, the PDF export and any other build define neither, so nothing shows and nothing takes room.
+`/?tour` starts the tour by itself, a real key, click, wheel turn or touch takes over, and a shield keeps the real pointer off the slide while
+it plays. The speaker button and the "with sound" switch appear only for a deck with `ndSound` or `ndSlideSound`, so a quiet deck shows
+neither. To give another hosted deck the bar, call `dressDeck` on its folder after the build and give its slides a `tour:` time.
+
 ## Ending a deck
 
 `<NextSteps />` on a closing slide shows link cards read from `window.__ND_SITE__`: docs, playground, the science deck when

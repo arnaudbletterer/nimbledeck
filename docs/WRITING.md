@@ -50,7 +50,7 @@ layout: two-cols
 | `cover`, `closing` | first and last slide | `# Title`, `#### date`, `#### subtitle`; `closing` also takes an optional `::bg::` |
 | `agenda` | 3 to 8 items | numbered list, subtitle in *italics* on the next line |
 | `divider` | section break | `# Section` |
-| `default` | bullets, tables, callouts | `# Title`, then Markdown |
+| `default` | bullets, tables, callouts, a `<Stage>` | `# Title`, then Markdown; optional `::caption::`, a small source line above the footer, on the left gutter |
 | `two-cols` | two parallel columns | `::title::`, `::default::`, `::right::` |
 | `photo-right` | idea plus photo | `image:` frontmatter, `::title::`, `::default::` |
 | `full` | a full-frame element: website, animation, video, photo with text | no title bar or footer; the slot fills the 1280 x 720 slide |
@@ -63,7 +63,7 @@ Showcase layouts, for keynote-style decks (they look best with `ndVariant: studi
 | `statement` | one sentence, very large | optional `::bg::` (a `<Stage full>`), `#### kicker` (small, above), then `# The sentence` (up to about 70 characters) or a `<Kinetic>` |
 | `split` | words on the left, a live component on the right | `# Title`, `#### kicker`, a paragraph; `::right::` fills the right half (use `<Stage :w="640" :h="720">`); optional `::bg::` behind both; optional `::caption::`, a small line bottom left under the words (a source, for example) |
 | `stage` | a live component with almost no chrome | the slot (`<Stage full>` or a 1200 x 604 `<Stage>`), `::caption::` bottom left, page pill bottom right |
-| `numbers` | 2 to 4 big figures | `# Title`, then `::a::`, `::b::`, `::c::`, `::d::`, each `## 60 fps` plus one line of text, or a `<Stat>`. Four figures sit in a 2 x 2 grid and each card enters in turn |
+| `numbers` | 2 to 4 big figures | `# Title`, then `::a::`, `::b::`, `::c::`, `::d::`, each `## 60 fps` plus one line of text, or a `<Stat>`. Four figures sit in a 2 x 2 grid and each card enters in turn. `class: nd-cards` on the slide makes text cards instead: `### kicker`, `## 1763`, a `**bold**` line, sentences, and a last line with a link (small, muted); three cards share one height and start under the sentence |
 
 Diagrams: a fenced `mermaid` block. Builds: wrap a list in `<v-clicks>`. Speaker notes: an HTML comment at the end of
 a slide.
