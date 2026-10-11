@@ -185,8 +185,8 @@ The clips of the example decks, 9 to 12 seconds (the sizes below are from before
 | `live-19` | 2280 x 920 | 0.6 MB | 0.6 MB | 175 KB |
 | `demo-compute`, `live-20` | 2280 x 920 | 0.2 to 0.3 MB | 0.2 to 0.3 MB | 47 to 81 KB |
 
-The ten clips of the science deck (`examples/science/public/recordings`, three of them real-time live-code clips of 1 to 2 MB, the
-streams 2 to 7 MB each) take 69 MB with their stills, both formats. Moving particles are the worst case, since every frame differs, so their
+For scale, ten clips of an earlier science deck (three real-time live-code clips of 1 to 2 MB, the streams 2 to 7 MB each) took
+69 MB with their stills, both formats; the current science deck has no recordings at all, because it runs in the browser. Moving particles are the worst case, since every frame differs, so their
 rate is capped (VP9 at 2.8 Mbit/s, H.264 at 3.4 Mbit/s, about 3 to 4 MB per 9 seconds); a calm slide never reaches the cap
 and stays under 1 MB. A clip of 12 seconds with moving particles would reach 4 to 5 MB. Keep clips short: 8 to 12 seconds
 loops well. `--width 1280` makes a clip about a third of the size, at the 1x look of the first version.

@@ -21,24 +21,22 @@ docs/DECISIONS.md for the why. This file is kept out of the published site.
   `examples/showcase/public/audio/CREDITS.md` and on the sound slide). Decorative cues were removed on purpose.
 - Recordings (`nimbledeck record`): 2x native pixels, lossless PNG frames, VP9 webm + H.264 mp4 from the system ffmpeg
   (`brew install ffmpeg`), played by `Recorded.vue` when the Python process is not reachable. 11 clips under `examples/*/public/recordings`.
-- Science deck (26 slides, five chapters) with LaTeX equations, `\term{n}{...}` colour links, live parameters (docs/EQUATIONS.md). See the section below.
+- LaTeX equations, `\term{n}{...}` colour links, live parameters (docs/EQUATIONS.md). The science deck (15 slides, one idea, no Python) is described below.
 - Offline-first (docs/OFFLINE.md), performance work (docs/PERFORMANCE.md), CI on 3 OSes.
 
 Last known checks on `main`: `npm test` 241 pass; link crawler 0 problems; `website/site-e2e.mjs`, `examples/showcase/e2e.mjs`,
 `examples/showcase/e2e-tour.mjs --dist <build with WEB_BASE=/>`, `examples/how-it-works/e2e-interactions.mjs`,
 `examples/motion-lab/lab-e2e.mjs` all pass (run them on a quiet machine, kill stale servers first).
 
-## Science deck v2 (branch `feat/science-v2`, not merged)
+## Science deck: one idea (branch `feat/science-risk-story`, not merged)
 
-One talk of 26 slides: opening, chapter map, five chapters (risk 5, everyday AI 5, evolution 4, climate 4, gravitational waves 5) and
-a closing slide. Edit the files in `examples/science/chapters/`, then `node compose.mjs` rewrites `science.md` (committed, because
-the CLI, the web edition and the recorder read one flat file; Slidev's `src:` would hide the slides from them). Demos, streams and
-the ten recordings live once, in `examples/science/{demos,public,nimbledeck.config.json}`. `PyStream` has one protocol for the
-three chapter extensions (docs/WRITING.md); the old evolution `field` JSON message became the raster block. Slides left out of
-the talk were deleted with their assets (polls noise equation, diffusion sampler code, Price equation, spread-skill relation);
-the Price view survives in `demos/evo_core.py` but no stream serves it. Check with `node walk.mjs <url> <dir>` (screenshots of
-every slide, console, requests, KaTeX errors) and `node e2e-risk.mjs <url>`. Ports: add `NIMBLEDECK_PORT_OFFSET`; one runner (19100),
-streams 19200 to 19600, demo 2900.
+The five-chapter, 26-slide talk was replaced by one story for a general audience: why a positive test is often wrong (15 slides,
+about three minutes, predict then reveal). `examples/science/science.md` is edited directly; there is no compose step, no Python, no
+recording and no runner, so the dev server and the hosted edition are the same deck. New `<Chance>` component (four plain-word
+pictures, one colour each for sick, healthy and tested positive), `split` gained a `::caption::` slot for source lines, and every
+claim is cited (`examples/science/REFERENCES.md`, verified against Crossref and PubMed; `packages/cli/test/science-refs.test.mjs`).
+The old chapters, demos and recordings are recoverable from commit `5722d9e` and the branches `feat/sci-*`. Check with
+`node walk.mjs <url> <dir>` and `node e2e.mjs <url>` in `examples/science`.
 
 ## Lockstep 60 fps recording: merged into `main`
 

@@ -154,7 +154,7 @@ const showHint = computed(() => !moved.value && !playing.value && currentPage.va
 const links = computed(() => [
   { label: 'Docs', href: site!.docs },
   { label: 'Playground', href: site!.playground },
-  ...(site!.science ? [{ label: 'Science deck', href: site!.science }] : []),
+  ...(site!.science ? [{ label: 'Science, in one idea', href: site!.science }] : []),
   { label: 'GitHub', href: site!.github, external: true },
 ])
 </script>

@@ -5,10 +5,12 @@ has not had a tagged release yet, so everything below sits under Unreleased.
 
 ## Unreleased
 
-- Replace the science deck with a talk of five chapters, each with one hero demo the audience changes and its equations
-  pointing at the picture: risk and probability (new `<Crowd>` and `<Polls>`), everyday AI (diffusion and attention toy
-  models), evolution, climate (Lorenz-96 and the ensemble Kalman filter) and gravitational waves. `examples/science/compose.mjs`
-  builds `science.md` from the chapter files. `<PyStream>` gains raster images, `draw` shapes, `groups`, `sizes`, `alphas`,
+- Replace the science deck with one story for a general audience, "Science, in one idea": why a positive test is often wrong
+  (15 slides, about three minutes, a guess and then the reveal, pictures the viewer changes, every claim cited in
+  `examples/science/REFERENCES.md`). It runs in the browser alone: no Python, no recordings, the same deck on the dev server and on the
+  site. New `<Chance>` component; the `split` layout takes a `::caption::` line; the site bar and the next-steps card say "Science, in
+  one idea". The earlier five-chapter talk (26 slides) is in git history. Also new, used by that talk's risk chapter and kept: `<Crowd>`
+  and `<Polls>`. `<PyStream>` gains raster images, `draw` shapes, `groups`, `sizes`, `alphas`,
   `values` and slider `labels` (one table in docs/WRITING.md); `<NextSteps>` takes `skip`.
 - Add equations: LaTeX in the Markdown is typeset by KaTeX with local fonts and styled by the theme in every look. `\term{n}{...}`
   colours a part with a chart colour and names it, `\val{name}{...}` is a number that follows a slider. `<Equation>` points,

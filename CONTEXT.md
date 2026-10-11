@@ -33,10 +33,7 @@ The deck playing itself like a video, with a clock, a cursor that performs scrip
 The deck that sells Nimbledeck itself. It is the front page of the site.
 
 **Science deck**
-The second flagship deck, for researchers and science communicators. It shows that a research result can stay alive in the room.
+The second flagship deck, for a general audience: one idea, why a positive test is often wrong, told as a story with a guess, a reveal and pictures the viewer plays with. It needs no Python and cites its sources.
 
-**Chapter** (science deck)
-A run of slides about one research field, built around one hero demo.
-
-**Hero demo** (science deck)
-The one live demo that carries a chapter: a modern research result the audience can change and watch respond, with its equations next to it.
+**Predict then reveal** (science deck)
+The teaching device: the viewer commits to a guess (a quiz) before the deck shows the answer and the picture that explains it.

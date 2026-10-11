@@ -15,7 +15,7 @@ const cards = computed<Card[]>(() => {
   const list: Card[] = []
   if (site?.docs) list.push({ key: 'docs', title: 'Read the docs', promise: 'Every layout, component and rule, with examples.', href: site.docs })
   if (site?.playground) list.push({ key: 'playground', title: 'Open the playground', promise: 'Edit a layout and watch it change.', href: site.playground })
-  if (site?.science) list.push({ key: 'science', title: 'See the science deck', promise: 'Live Python and equations in a real talk.', href: site.science })
+  if (site?.science) list.push({ key: 'science', title: 'Science, in one idea', promise: 'Why a positive test is often wrong, as a story you can play with.', href: site.science })
   list.push({ key: 'github', title: 'Star it on GitHub', promise: 'Read the source, clone it, make a deck.', href: site?.github ?? props.github, external: true })
   if (site) list.push({ key: 'replay', title: 'Replay the tour', promise: 'Watch it play itself again, with sound.' })
   return list.filter((c) => !props.skip?.includes(c.key))   // `skip`: card keys to leave out (a deck does not link to itself)

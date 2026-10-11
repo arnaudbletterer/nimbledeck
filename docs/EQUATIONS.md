@@ -203,9 +203,8 @@ $$ \term{1}{x(t)} = \term{2}{e^{-\zeta\omega_0 t}}\cos\omega_d t $$
 
 A line chart of more than 30 points is drawn without dots and keeps every label; write `''` for the labels you want blank.
 
-The science deck (`examples/science/science.md`) uses all of it: Bayes' theorem lighting the dots of a crowd, the
-replicator-mutator and breeder's equations over a population, Lorenz-96 and the Kalman update, the forward and reverse steps
-of diffusion, attention, and the chirp and matched-filter equations over a simulated detection.
+The science deck (`examples/science/science.md`) uses it for Bayes' rule written in words, with its coloured terms lighting the
+groups of dots of a `<Chance mode="pile">` next to it.
 
 ## Limits
 
