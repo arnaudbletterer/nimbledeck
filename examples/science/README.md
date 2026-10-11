@@ -1,102 +1,86 @@
-# Science, live
+# Science, in one idea
 
-A talk for researchers and science communicators, in one Markdown file (`science.md`, 26 slides). Five chapters, each built
-around one hero demo that the audience changes and whose equations point at the picture: touch a term and the part of the demo it
-describes lights up. The message: show the experiment, not the screenshot.
+**Why a positive test is often wrong.** A talk of 15 slides and about three minutes for a general audience, in one Markdown file
+(`science.md`). It tells a story (Sam tests positive), asks the viewer to guess, reveals the answer (about 9 in 100), then shows
+why with pictures the viewer changes: 10,000 dots, two rows of positives, sliders for how rare the condition is and how good the
+test is. The device is predict, then reveal. Each slide says one thing in one plain sentence next to one picture.
 
-**Everything is simulated or a toy model, and every slide says so.** No real data is used: the polls are binomial draws, the
-detector noise is Gaussian, the atmosphere has 40 variables, the neural networks have a few thousand to 145,000 numbers, the
-organisms are dots on a made-up landscape.
+**The deck needs no Python.** Every picture runs in the browser, so `npm run dev`, `nimbledeck run` and the hosted edition behave
+the same and nothing is recorded. **Everything is simulated**: Sam, the condition and the people are made up, no real disease is
+named, and the first and last slides say "An illustration, not medical advice."
+
+Colour means one thing everywhere: pink is sick, grey is healthy, an amber ring or frame is "the test said positive".
+
+## The slides
+
+| # | Slide | The one sentence | Picture |
+|---|---|---|---|
+| 1 | You tested positive. | How worried should you be? | dots background |
+| 2 | Sam tests positive | A routine check-up for something that affects 1 person in 1,000. The test says: positive. | the test is 99% accurate, in words |
+| 3 | How likely is Sam to be sick? | The condition affects 1 person in 1,000, and the test is 99% accurate. | `<Quiz>`: the guess |
+| 4 | About 9 in 100 | Most people guess far higher. Here is why. | a big 9% |
+| 5 | Ten of them are sick | Each dot is one person, and only 1 in 1,000 is sick. | `<Chance mode="crowd">`, one click |
+| 6 | Who tests positive? | The test catches the sick, and wrongly flags 1 healthy person in 100. | the same crowd, two clicks |
+| 7 | Of 110 positives, only 10 are sick | The healthy are so many that their false alarms outnumber the real cases ten to one. | `<Chance mode="rows">` |
+| 8 | Change how rare it is | (a sentence that follows the slider) | `<Chance mode="play" controls="prevalence">` |
+| 9 | Change how good the test is | (a sentence that follows the sliders) | `<Chance mode="play" controls="accuracy">` |
+| 10 | A rule of thumb | When something is rare, even a good test gives mostly false alarms. | two piles, rare against common |
+| 11 | What to ask | Three questions to ask after a positive test, and the same idea elsewhere. | lists |
+| 12 | Bayes' rule, in colour | Bayes' rule counts the real cases among all the positives. (for the curious) | `<Equation>` terms light the dots |
+| 13 | Ask how rare it is | A positive test is a clue, not a verdict. | closing, `<NextSteps>` |
+| 14, 15 | Standing on the shoulders of... | The eight references with DOIs, the credits and the disclaimer | text |
+
+Slides 4, 5, 10, 11 and 12 carry a small source line (the `::caption::` of the `split` and `stage` layouts). The speaker notes name
+the references by key.
+
+## Sources
+
+`REFERENCES.md` lists every source with author, year, title, venue, DOI, the claim the deck uses it for, and how it was checked
+(Crossref, PubMed or a paper that reports it). `packages/cli/test/science-refs.test.mjs` fails when a key in the notes is not in
+that file or an entry is never cited. Figures quoted as "what most people answer" are only the counts reported in the Casscells
+study (11 of 60) and the Hoffrage and Gigerenzer study (about 10 against about 46 percent).
 
 ## Files
 
 | Path | What it is |
 |---|---|
-| `chapters/open.md`, `<chapter>.md`, `close.md` | The slides, one file per part. Edit these. |
-| `compose.mjs` | Writes `science.md` from them (`--check` in CI, `--only risk,gw` writes a deck of those chapters to work on one) |
-| `science.md` | Generated and committed: the CLI, the web edition and the recorder read one flat file |
-| `demos/` | Python of all chapters: models, stream servers, the marimo demo, the `aitoy` package, training scripts |
-| `public/` | The ten recordings (`public/recordings`), the still of the equation slide of the gravitational waves chapter |
-| `nimbledeck.config.json` | Demo, streams, ONE runner, limits and the scripted steps of every recording |
-| `walk.mjs`, `shot.mjs`, `e2e-risk.mjs` | Browser checks (below) |
+| `science.md` | The deck. Edit it directly. |
+| `REFERENCES.md` | The sources and how each was verified |
+| `nimbledeck.config.json` | Only the checker limits: no demo, stream, runner or recording |
+| `build-web.mjs` | Builds the web edition (`WEB_BASE`, `WEB_OUT`); the site build calls it for `/demos/science/` |
+| `walk.mjs`, `shot.mjs`, `e2e.mjs` | Browser checks (below) |
 
-The chapters are not runnable alone any more: their demos and recordings live once, here. `node compose.mjs --only gw` and
-`nimbledeck run science-gw.md` gives a deck of one chapter with the same config.
-
-## The slides
-
-| # | Slide | What it is |
-|---|---|---|
-| 1 | Science, live. | Title with four looping clips of the hero demos |
-| 2 | Five experiments. | The chapter map |
-| 3 | How likely are you sick? | Risk: the question, no numbers |
-| 4 | 10,000 people. One test. | `<Crowd>`: 10,000 dots, sliders for prevalence, sensitivity, specificity, natural frequencies. Browser only |
-| 5 | Bayes, in colour. | Bayes' theorem; terms light the dot groups; live numbers |
-| 6 | 2,000 polls. One truth. | `<Polls>`: simulated polls, margin, bias slider. Browser only |
-| 7 | (live code) | NumPy poll simulation with reach and weighting |
-| 8 | Noise in. A picture out. | Everyday AI: chapter title |
-| 9 | Noise becomes a picture. | `PyStream` ai-diffusion: a trained toy diffusion model; steps, schedule, guidance, prompt |
-| 10 | Add noise. Learn to undo it. | The forward and reverse steps, over the diffusion clip |
-| 11 | (live code) | Two layers of attention on "the cat chased the mouse because it was hungry" |
-| 12 | Every word asks and answers. | softmax(QK^T / sqrt d) V, over the attention clip |
-| 13 | Copy. Mutate. Filter. Repeat. | Evolution: chapter title |
-| 14 | Dots climb a landscape. | `PyStream` evo-landscape, eight sliders, live plots; replicator-mutator equation |
-| 15 | (live code) | The whole model on one screen |
-| 16 | The response to selection. | Breeder's equation; `PyStream` evo-breeder draws S and R |
-| 17 | The weather forgets in two weeks. | Climate: chapter title |
-| 18 | (hero) | `PyStream` climate-l96: truth, ensemble mean, error and spread; assimilation on or off |
-| 19 | (live code) | A complete ensemble Kalman filter |
-| 20 | One model. One update. | Lorenz-96 and the Kalman update, over the clip |
-| 21 | Gravitational waves | Chapter title |
-| 22 | Simulated strain | `Demo` gw-detect (marimo): slide the template mass until the SNR peak locks on |
-| 23 | (live code) | The matched filter in code; edit the mass, band, taper |
-| 24 | Three equations. One detection. | Chirp, chirp mass, SNR; terms point at a still of the simulation |
-| 25 | The real event, for scale | Published values of GW150914 |
-| 26 | What you just saw | Closing: one Markdown file, `run`, `record`, link cards |
-
-Left out of the talk and deleted with their assets: the polls noise equation, the diffusion sampler as code, the Price equation and
-the spread-skill relation (see git history of the chapter branches `feat/sci-*`).
+The components are `<Chance>` (`packages/addon/components/Chance.vue`, words in `composables/chance.mjs`), `<Quiz>`, `<Stat>`,
+`<Kinetic>`, `<Equation>` and `<NextSteps>`.
 
 ## Run it
 
 ```sh
 npm install                                   # once, from the repository root
 cd examples/science
-node ../../packages/cli/bin/nimbledeck.mjs run science.md        # http://localhost:3030 (NIMBLEDECK_PORT_OFFSET moves every port)
-node ../../packages/cli/bin/nimbledeck.mjs check science.md
-node ../../packages/cli/bin/nimbledeck.mjs verify science.md     # with the deck running
-node walk.mjs http://localhost:3030 shots                        # two screenshots per slide, console and request report
-node e2e-risk.mjs http://localhost:3030                          # the crowd and the polls respond to their sliders
-WEB_BASE=/ node build-web.mjs                                    # the web edition, no Python, plays the recordings
+npm run dev                                   # http://localhost:3030 (plain Slidev, no Python, no uv)
+npm run check                                 # nimbledeck check: 0 errors, 0 warnings
+npm run verify                                # with the deck running: nothing overflows or is clipped
+node walk.mjs http://localhost:3030 shots     # two screenshots per slide (as it opens, with every click shown), console and request report
+node e2e.mjs http://localhost:3030            # the guess, the clicks, the sliders and their sentences, a term of the equation
+WEB_BASE=/ node build-web.mjs                 # the web edition, the same deck
 ```
 
-The first run lets uv fetch Python 3.12 and the packages of `demos/requirements.txt`; after that it works offline. The marimo
-demo of slide 22 takes about 20 seconds to appear the first time.
+The deck has a tour (`tour:` seconds and `tourScript` steps): on the guess slide the cursor hovers a wrong answer, then clicks the
+right one; on the two play slides it drags the sliders so the viewer sees the interaction. The sounds are the quiz chime and the
+number landing, which the components play themselves.
 
-Ports: deck 3030, demo 2900 (marimo, 3600 with offset 700), streams 19200 (climate), 19400 and 19401 (evolution), 19600 (AI),
-runner 19100, plus the offset.
+## What was cut
 
-## Record it
-
-`nimbledeck record science.md` films every live slide into `public/recordings` following the steps of `nimbledeck.config.json`;
-`--slide 14 16` films only those. The ids are explicit (`<LiveCode id="...">`), so they survive a change of slide numbers. The
-live-code steps address lines by number: after editing the code of a live-code slide, record it again. The web edition
-(`build-web.mjs`) keeps a slide with live components only when all of them have a recording: here all ten do.
+The earlier talk had five chapters (risk, everyday AI, evolution, climate, gravitational waves), 26 slides, Python streams, a marimo
+demo, ten recordings (69 MB) and live-code slides: too much, with too little context for a general audience. Its sources, demos,
+recordings and assets are recoverable from commit `5722d9e` and from the branches `feat/sci-*`. The `<Crowd>` and `<Polls>`
+components, their tests and the `<PyStream>` extensions stay in the addon.
 
 ## Honest limits
 
-- Risk: the crowd shows expected counts, not a random draw (9.0 percent by Bayes, 10 of 110 as whole people). The polls are one
-  specific bias model (a share of A supporters do not answer).
-- AI: toy networks on made-up data. At temperature 3 the attention clip ends on a wrong answer ("sheep"), on purpose of the
-  recording: the toy degrades when its attention is spread out.
-- Evolution: asexual individuals, two traits, a made-up landscape; two peaks are two lineages, not two species.
-- Climate: Lorenz-96 with a perfect model; the two-week limit is a property of the real atmosphere, not proved by the toy.
-- Gravitational waves: the toy noise curve is bucket-shaped, not a measured one; the inspiral stops at 220 Hz; no LIGO data.
-- The live-code editors show about 23 to 27 lines: the edited lines are at the top, the plotting lines scroll.
-
-## References
-
-Bayes 1763; Eddy 1982; Gigerenzer and Hoffrage 1995; Meng 2018 (risk). Ho, Jain and Abbeel 2020; Ho and Salimans 2022; Vaswani et
-al. 2017 (AI). Hofbauer and Sigmund 1998; Lush 1937; Falconer and Mackay 1996 (evolution). Lorenz 1996; Evensen 1994; Burgers, van
-Leeuwen and Evensen 1998 (climate). Abbott et al. 2016, Phys. Rev. Lett. 116, 061102; Maggiore vol. 1 (gravitational waves). The
-speaker notes carry the full citations next to each equation.
+- The dots show expected counts of 10,000 people, not a random draw: 1 in 1,000 is exactly 10 sick, 100 false alarms, 110 positives
+  (9.1 percent as whole people, 9.0 percent exactly).
+- One test with one error rate for sick and for healthy people; real tests, and real conditions, are less tidy.
+- The studies cited are about doctors and students reading a test; the deck says so and claims no more.
+- Checked in Chrome only; the look is `studio` (dark). Other looks change the colours of pink, grey and amber.

@@ -3,8 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "compose": "node compose.mjs",
-    "dev": "nimbledeck run science.md",
+    "dev": "slidev science.md",
     "check": "nimbledeck check science.md",
     "verify": "nimbledeck verify science.md",
     "build": "slidev build science.md",
