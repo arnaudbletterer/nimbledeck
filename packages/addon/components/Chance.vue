@@ -94,8 +94,8 @@ function draw(): boolean {
   lv.tpL = ease(lv.tpL, !lit || lit === 'tp' || lit === 'pos' ? 1 : 0.15); lv.fpL = ease(lv.fpL, !lit || lit === 'fp' || lit === 'pos' ? 1 : 0.15)
   let moving = (Object.keys(lv) as (keyof typeof lv)[]).some((x) => lv[x] !== prev[x])
   if (props.mode === 'crowd') {
-    const sz = sq.value, pitch = sz / cols
-    const at = (i: number) => [(i % cols + 0.5) * pitch, (Math.floor(i / cols) + 0.5) * pitch]
+    const m = 16, sz = sq.value - 2 * m, pitch = sz / cols    // an inset, so the halos and rings of the dots at the edge are not cut by the canvas
+    const at = (i: number) => [m + (i % cols + 0.5) * pitch, m + (Math.floor(i / cols) + 0.5) * pitch]
     g.fillStyle = col.muted; g.globalAlpha = 0.5; g.beginPath()
     for (let i = 0; i < N; i++) if ((status[i] !== TP && status[i] !== FN) || lv.sick < 1) { const [x, y] = at(i); g.moveTo(x + pitch * 0.3, y); g.arc(x, y, pitch * 0.3, 0, 6.2832) }
     g.fill()
