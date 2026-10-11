@@ -402,6 +402,11 @@ async function fullTests(browser) {
     check('nimbledeck run starts the deck', up, `${((Date.now() - t0) / 1000).toFixed(1)} s on ${origin}`)
     if (!up) return
 
+    // Vite optimises its dependencies the first time a page needs them and answers 504 "Outdated Optimize Dep" to a page loaded meanwhile:
+    // a cold dev server (CI) would show that in the console of the measured pass. Load every slide once, unmeasured, first.
+    const warm = await browser.newPage()
+    for (let n = 1; n <= allSlides.length; n++) await warm.goto(`${origin}/${n}?clicks=99`, { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {})
+    await warm.close()
     const s = await open(browser, { origin: new URL(origin).origin })
     // The runner and the stream are on 127.0.0.1 (a different origin from localhost): they are the deck's own, not "external".
     await s.context.unroute(() => true).catch(() => {})
