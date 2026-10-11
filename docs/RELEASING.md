@@ -39,7 +39,7 @@ Keep a clone of Nimbledeck at a tag next to the brand repository, or inside it a
 
 ```sh
 git submodule add <Nimbledeck URL> vendor/nimbledeck
-git -C vendor/nimbledeck checkout v0.1.0
+git -C vendor/nimbledeck checkout v0.2.0
 npm --prefix vendor/nimbledeck install
 ```
 
@@ -65,7 +65,7 @@ version does not exist on the npm registry.
 ### Not recommended: an npm git dependency
 
 ```json
-{ "dependencies": { "nimbledeck-workspace": "git+<Nimbledeck URL>#v0.1.0" } }
+{ "dependencies": { "nimbledeck-workspace": "git+<Nimbledeck URL>#v0.2.0" } }
 ```
 
 The tag is pinned and nothing needs to be cloned by hand, but this does not give you the packages. The repository root

@@ -6,7 +6,7 @@ type: software
 authors:
   - family-names: Bletterer
     given-names: Arnaud
-version: 0.1.0
+version: 0.2.0
 date-released: 2026-10-11
 license: MIT
 repository-code: "https://github.com/arnaudbletterer/nimbledeck"
