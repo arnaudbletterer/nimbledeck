@@ -182,13 +182,11 @@ The clips of the example decks, 9 to 12 seconds (the sizes below are from before
 |---|---|---|---|---|
 | `stream-nbody` (700 moving particles, 60 fps lockstep) | 2200 x 1000 | 3.1 MB | 4.1 MB | 234 KB |
 | `stream-swarm` (60 fps lockstep) | 2040 x 1120 | 3.1 MB | 4.0 MB | 221 KB |
-| `stream-lorenz` (whole slide, real time: re-recording it lockstepped would burn the slide's equations into the clip) | 2560 x 1440 | 3.0 MB | 2.4 MB | 483 KB |
-| `demo-turing` | 2148 x 1208 | 1.3 MB | 0.9 MB | 259 KB |
-| `live-14`, `live-fft`, `live-fit`, `live-net` (typing, plot updating) | 2280 x 1000 to 2400 x 1208 | 0.7 to 1.0 MB | 0.7 to 1.1 MB | 250 to 350 KB |
 | `live-19` | 2280 x 920 | 0.6 MB | 0.6 MB | 175 KB |
 | `demo-compute`, `live-20` | 2280 x 920 | 0.2 to 0.3 MB | 0.2 to 0.3 MB | 47 to 81 KB |
 
-All 11 clips, both formats and the stills: 33 MB. Moving particles are the worst case, since every frame differs, so their
+The ten clips of the science deck (`examples/science/public/recordings`, three of them real-time live-code clips of 1 to 2 MB, the
+streams 2 to 7 MB each) take 69 MB with their stills, both formats. Moving particles are the worst case, since every frame differs, so their
 rate is capped (VP9 at 2.8 Mbit/s, H.264 at 3.4 Mbit/s, about 3 to 4 MB per 9 seconds); a calm slide never reaches the cap
 and stays under 1 MB. A clip of 12 seconds with moving particles would reach 4 to 5 MB. Keep clips short: 8 to 12 seconds
 loops well. `--width 1280` makes a clip about a third of the size, at the 1x look of the first version.

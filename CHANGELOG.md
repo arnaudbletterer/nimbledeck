@@ -5,6 +5,11 @@ has not had a tagged release yet, so everything below sits under Unreleased.
 
 ## Unreleased
 
+- Replace the science deck with a talk of five chapters, each with one hero demo the audience changes and its equations
+  pointing at the picture: risk and probability (new `<Crowd>` and `<Polls>`), everyday AI (diffusion and attention toy
+  models), evolution, climate (Lorenz-96 and the ensemble Kalman filter) and gravitational waves. `examples/science/compose.mjs`
+  builds `science.md` from the chapter files. `<PyStream>` gains raster images, `draw` shapes, `groups`, `sizes`, `alphas`,
+  `values` and slider `labels` (one table in docs/WRITING.md); `<NextSteps>` takes `skip`.
 - Add equations: LaTeX in the Markdown is typeset by KaTeX with local fonts and styled by the theme in every look. `\term{n}{...}`
   colours a part with a chart colour and names it, `\val{name}{...}` is a number that follows a slider. `<Equation>` points,
   reveals and updates them, `highlight` on `PyStream`, `LiveCode`, `Demo`, `Chart` and `Scene3D` and `<Marker>` link them to a

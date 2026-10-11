@@ -21,19 +21,29 @@ docs/DECISIONS.md for the why. This file is kept out of the published site.
   `examples/showcase/public/audio/CREDITS.md` and on the sound slide). Decorative cues were removed on purpose.
 - Recordings (`nimbledeck record`): 2x native pixels, lossless PNG frames, VP9 webm + H.264 mp4 from the system ffmpeg
   (`brew install ffmpeg`), played by `Recorded.vue` when the Python process is not reachable. 11 clips under `examples/*/public/recordings`.
-- Science deck (21 slides) with LaTeX equations, `\term{n}{...}` colour links, live parameters (docs/EQUATIONS.md).
+- Science deck (26 slides, five chapters) with LaTeX equations, `\term{n}{...}` colour links, live parameters (docs/EQUATIONS.md). See the section below.
 - Offline-first (docs/OFFLINE.md), performance work (docs/PERFORMANCE.md), CI on 3 OSes.
 
 Last known checks on `main`: `npm test` 241 pass; link crawler 0 problems; `website/site-e2e.mjs`, `examples/showcase/e2e.mjs`,
 `examples/showcase/e2e-tour.mjs --dist <build with WEB_BASE=/>`, `examples/how-it-works/e2e-interactions.mjs`,
 `examples/motion-lab/lab-e2e.mjs` all pass (run them on a quiet machine, kill stale servers first).
 
+## Science deck v2 (branch `feat/science-v2`, not merged)
+
+One talk of 26 slides: opening, chapter map, five chapters (risk 5, everyday AI 5, evolution 4, climate 4, gravitational waves 5) and
+a closing slide. Edit the files in `examples/science/chapters/`, then `node compose.mjs` rewrites `science.md` (committed, because
+the CLI, the web edition and the recorder read one flat file; Slidev's `src:` would hide the slides from them). Demos, streams and
+the ten recordings live once, in `examples/science/{demos,public,nimbledeck.config.json}`. `PyStream` has one protocol for the
+three chapter extensions (docs/WRITING.md); the old evolution `field` JSON message became the raster block. Slides left out of
+the talk were deleted with their assets (polls noise equation, diffusion sampler code, Price equation, spread-skill relation);
+the Price view survives in `demos/evo_core.py` but no stream serves it. Check with `node walk.mjs <url> <dir>` (screenshots of
+every slide, console, requests, KaTeX errors) and `node e2e-risk.mjs <url>`. Ports: add `NIMBLEDECK_PORT_OFFSET`; one runner (19100),
+streams 19200 to 19600, demo 2900.
+
 ## Lockstep 60 fps recording: merged into `main`
 
 Streams only (owner's scope decision because of quota). `stream-nbody` and `stream-swarm` are re-recorded in lockstep (540 frames,
-exactly 60 fps, even pts spacing, 3.1 MB webm each). `stream-lorenz` stays as it was on purpose: the science slide now carries the
-equations over the lower left of the clip, so a fresh recording of the whole slide would burn them into the video (use the `isolate`
-option if you re-record it). Live code and marimo clips stay real time. Docs: `docs/RECORDING.md` ("Lockstep"). The branch
+exactly 60 fps, even pts spacing, 3.1 MB webm each). The science deck's old Lorenz clip is gone with the old deck. Live code and marimo clips stay real time. Docs: `docs/RECORDING.md` ("Lockstep"). The branch
 `feat/lockstep-recording` and its worktree can be deleted.
 
 ## Open points before a push
@@ -41,7 +51,6 @@ option if you re-record it). Live code and marimo clips stay real time. Docs: `d
 - Aurora background contrast in `plain` and `studio-light` is below 4.5:1 (`examples/theme-lab/presets-e2e.mjs`), same on the base code.
 - The runner test "code above the memory limit is stopped and reported" times out under load (passes alone).
 - Not tested: Safari, Firefox, Windows locally, audible sound, weaker GPUs.
-- `stream-lorenz` clip has the old title and paragraph burnt in: never re-record it without `isolate`.
 - Markdown slide numbers: some e2e scripts hard-code slides 11 and 12 (quiz, compare); update them if slides are inserted before.
 - Merged feature branches and agent worktrees under `/Users/abletterer/.herdr/worktrees/nimbledeck/` can be deleted once merged.
 

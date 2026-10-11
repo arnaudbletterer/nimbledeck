@@ -86,7 +86,8 @@ gain, so stacked cues stay quiet. `<SoundToggle />` is the speaker button and `<
 
 `<NextSteps />` on a closing slide shows link cards read from `window.__ND_SITE__`: docs, playground, the science deck when
 the site has one, GitHub, and "Replay the tour" (it sends `nd-tour-replay`, which the site bar answers by going to slide 1 and
-playing). Without `__ND_SITE__` only the GitHub card shows. A tour script may `hover` a card but never clicks a link.
+playing). Without `__ND_SITE__` only the GitHub card shows. `:skip="['science']"` leaves cards out (keys: `docs`, `playground`,
+`science`, `github`, `replay`), for a deck that should not link to itself. A tour script may `hover` a card but never clicks a link.
 
 ## Tips for agents
 
