@@ -23,7 +23,9 @@ The whole talk in one question. Sam is made up, the condition is made up, and th
 ---
 layout: split
 motion: slide-left
-tour: 9
+tour: 12
+tourScript:
+  - { at: 9, wait: 1 }
 ---
 
 #### Meet Sam
@@ -84,7 +86,9 @@ Take a guess before the reveal; click an answer or press 1 to 4. The condition i
 layout: split
 motion: focus
 background: aurora
-tour: 8
+tour: 11
+tourScript:
+  - { at: 8, wait: 1 }
 ---
 
 #### The answer
@@ -103,7 +107,7 @@ Most people guess far higher. Here is why.
 
 ::caption::
 
-Casscells et al., 1978: 11 of 60 doctors and students got a similar question right.
+Casscells et al., 1978, as reported by Manrai et al., 2014: 11 of 60 doctors and students got a similar question right.
 
 <!--
 The exact figure is 9.0 percent: 10 sick people among 110 who test positive is 9.1 percent, because people come in whole numbers. In 1978 Casscells, Schoenberger and Graboys asked 60 people at Harvard teaching hospitals (20 students, 20 house officers, 20 attending physicians) a similar question: a condition affecting 1 in 1,000 people and a test with a 5 percent false positive rate. Eleven of the 60 gave the right answer (about 2 percent) and the most common answer, from 27 of 60, was 95 percent. Manrai et al. (2014) asked again and found much the same. Eddy (1982) described the same kind of error in how physicians read a mammogram. refs: [casscells1978] [manrai2014] [eddy1982]
@@ -207,7 +211,7 @@ motion: fade-up
 tour: 14
 tourScript:
   - { at: 2.0, drag: ".nd-chance-read label:nth-of-type(1) input", from: 0.98, to: 0.6, over: 2.2, caption: "catches fewer sick people" }
-  - { at: 5.6, drag: ".nd-chance-read label:nth-of-type(2) input", from: 0.9, to: 1, over: 2.2, caption: "clears more healthy people" }
+  - { at: 5.6, drag: ".nd-chance-read label:nth-of-type(2) input", from: 0.9, to: 0.99, over: 2.2, caption: "clears more healthy people" }
 ---
 
 # Change how good the test is
@@ -224,7 +228,9 @@ Here the condition stays at 1 in 1,000. Catching fewer sick people hurts a littl
 layout: stage
 motion: fade-up
 background: gradient
-tour: 10
+tour: 13
+tourScript:
+  - { at: 11, wait: 1 }
 ---
 
 <Stage :w="1200" :h="604">
@@ -249,7 +255,9 @@ Same test, same 99 percent accuracy, two worlds. Left: the condition is rare (1 
 ---
 layout: split
 motion: pop
-tour: 11
+tour: 12
+tourScript:
+  - { at: 10, wait: 1 }
 ---
 
 #### After a positive test
@@ -267,9 +275,9 @@ tour: 11
 
 #### The same idea elsewhere
 
-- An airport scanner: danger is rare, so many beeps will be harmless.
-- A fraud alert on your card: fraud is rare, so many alerts will be you.
-- A fire alarm: fires are rare, so many alarms will be false.
+- A scanner: if danger is rare, most beeps are false alarms.
+- A card alert: if fraud is rare, most alerts are really you.
+- A fire alarm: if fires are rare, most alarms are false.
 
 </At>
 </Stage>
@@ -279,7 +287,7 @@ tour: 11
 Doctors reason better with counts of people: Hoffrage and Gigerenzer, 1998.
 
 <!--
-Asking for counts of people ("out of 100 people with a positive test") rather than percentages is the advice of Gigerenzer and colleagues (2007). In the 1998 study of 48 physicians, about 10 percent of the answers were correct when the information was given as probabilities, and about 46 percent when it was given as natural frequencies (counts of people). The three examples are the same arithmetic, not measured rates. refs: [hoffrage1998] [gigerenzer2007]
+Asking for counts of people ("out of 100 people with a positive test") rather than percentages is the advice of Gigerenzer and colleagues (2007). In the 1998 study of 48 physicians, about 10 percent of the answers were correct when the information was given as probabilities, and about 46 percent when it was given as natural frequencies (counts of people). The three examples are the same arithmetic ("if it is rare, most alerts are false"), not measured rates. The brief's example "1 in 10 gives about 50 percent" does not hold for a 99 percent test: 1 in 10 gives 92 in 100, and 1 in 100 gives 50 in 100. refs: [hoffrage1998] [gigerenzer2007]
 -->
 
 ---
@@ -295,7 +303,12 @@ tourScript:
 ---
 
 <Stage :w="1200" :h="604">
-<At :x="40" :y="20" :w="640"><Kinetic text="Bayes' rule, in colour" mode="words" from="up" :stagger="120" size="m" accent="colour" /></At>
+<At :x="40" :y="10" :w="640" enter="up">
+
+#### For the curious (optional)
+
+</At>
+<At :x="40" :y="70" :w="640"><Kinetic text="Bayes' rule, in colour" mode="words" from="up" :stagger="120" size="m" accent="colour" /></At>
 <At :x="40" :y="190" :w="600" enter="up" :delay="500">
 <Equation label="Bayes' rule in words. The chance that a positive test is real equals the people who are sick and test positive, divided by the people who are sick and test positive plus the healthy people who test positive. With the numbers of the story, 10 divided by 10 plus 100, about 9 percent." align="left" :size="25" :decimals="{ riskppv: 0 }" :params="{ risktp: 10, riskfp: 100, riskppv: 9 }">
 
@@ -329,7 +342,9 @@ This is Bayes' rule, written in words and then in the counts of the story. Point
 layout: closing
 motion: spotlight
 background: aurora
-tour: 8
+tour: 9
+tourScript:
+  - { at: 7, wait: 1 }
 ---
 
 # Ask how rare it is
@@ -347,7 +362,9 @@ The one sentence to remember: when something is rare, even a good test gives mos
 ---
 layout: default
 motion: fade-up
-tour: 10
+tour: 11
+tourScript:
+  - { at: 9, wait: 1 }
 ---
 
 # Standing on the shoulders of... 1 of 2
@@ -366,7 +383,9 @@ refs: [bayes1763] [kahneman1973] [casscells1978] [eddy1982]
 ---
 layout: default
 motion: fade-up
-tour: 10
+tour: 11
+tourScript:
+  - { at: 9, wait: 1 }
 ---
 
 # Standing on the shoulders of... 2 of 2
@@ -374,7 +393,7 @@ tour: 10
 - Gigerenzer and Hoffrage (1995). How to improve Bayesian reasoning without instruction: frequency formats. *Psychological Review* 102, 684-704. doi:10.1037/0033-295X.102.4.684
 - Hoffrage and Gigerenzer (1998). Using natural frequencies to improve diagnostic inferences. *Academic Medicine* 73, 538-540. doi:10.1097/00001888-199805000-00024
 - Gigerenzer et al. (2007). Helping doctors and patients make sense of health statistics. *Psychological Science in the Public Interest* 8, 53-96. doi:10.1111/j.1539-6053.2008.00033.x
-- Manrai et al. (2014). Medicine's uncomfortable relationship with math. *JAMA Internal Medicine* 174, 991. doi:10.1001/jamainternmed.2014.1059
+- Manrai et al. (2014). Medicine's uncomfortable relationship with math. *JAMA Internal Medicine* 174, 991-993. doi:10.1001/jamainternmed.2014.1059
 
 An illustration, not medical advice. Simulated people. Made with Nimbledeck (Slidev), equations by KaTeX. Full list: REFERENCES.md.
 

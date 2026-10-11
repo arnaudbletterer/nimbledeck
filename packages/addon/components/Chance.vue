@@ -164,7 +164,11 @@ function publish() {
 }
 watch(active, (a) => {
   cancelAnimationFrame(raf); raf = 0
-  if (!a) { if (!reduced) { lv.sick = lv.tp = lv.fp = lv.a = lv.b = 0 }; return }
+  if (!a) {
+    if (!reduced) { lv.sick = lv.tp = lv.fp = lv.a = lv.b = 0 }
+    prevI.value = nearestCommon(props.prev); sens.value = Math.round(props.sens * 1000) / 10; spec.value = Math.round(props.spec * 1000) / 10   // leaving the slide resets the sliders
+    return
+  }
   refresh()
   if (props.mode === 'pile') publish()
 }, { immediate: true })
