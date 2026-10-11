@@ -2,9 +2,8 @@
 
 ## License
 
-**No license has been chosen yet.** There is no `LICENSE` file, so by default nobody but the owner may copy, use or
-change this code. Choosing one (and adding the file) is the owner's decision and should happen before the repository is
-shared outside the owner's organisation. [THIRD_PARTY.md](../THIRD_PARTY.md) lists the licenses of what Nimbledeck builds on.
+Nimbledeck is released under the [MIT license](../LICENSE). The one exception is the showcase music, "Origami" by Scott Buckley
+(CC-BY 4.0), which keeps its own credit. [THIRD_PARTY.md](../THIRD_PARTY.md) lists the licenses of what Nimbledeck builds on.
 
 ## Versions
 

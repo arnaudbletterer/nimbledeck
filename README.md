@@ -137,4 +137,4 @@ cross-platform process handling, but it has never been run there), Firefox and S
 decks, presenter mode with live components, recording a talk. Known gaps are listed in
 [docs/DECISIONS.md](docs/DECISIONS.md#known-gaps).
 
-License: not chosen yet (to be decided by the owner). Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md).
+License: [MIT](LICENSE). The showcase music "Origami" by Scott Buckley is CC-BY 4.0 and keeps its own credit. Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md).

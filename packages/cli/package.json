@@ -1,6 +1,7 @@
 {
   "name": "nimbledeck",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "CLI for Nimbledeck: run a deck with its live demos, and check a deck against the slide rules.",
   "type": "module",
   "bin": {

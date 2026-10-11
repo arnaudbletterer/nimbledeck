@@ -1,6 +1,7 @@
 {
   "name": "slidev-theme-nimbledeck",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Nimbledeck base theme: twenty looks (plain, paper, night, studio, editorial, swiss, neon, terminal, ...), listed in looks.json. The eight base layouts plus five showcase layouts.",
   "keywords": ["slidev-theme", "slidev"],
   "engines": { "slidev": ">=0.50.0" },
