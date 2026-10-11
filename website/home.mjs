@@ -63,9 +63,7 @@ export function homePage(html, { cfg, titles, hasScience, preloads = [] }) {
 <meta property="og:image" content="${url}social.jpg">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The first slide of the Nimbledeck deck: Slides that move.">
+<meta property="og:image:alt" content="Nimbledeck: Markdown in, motion out, with three slides of the showcase deck: twenty looks, a live canvas and a 3D scene.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(TITLE)}">
 <meta name="twitter:description" content="${esc(DESCRIPTION)}">
