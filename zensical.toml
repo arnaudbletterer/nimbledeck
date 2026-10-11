@@ -26,6 +26,7 @@ nav = [
   ] },
   { "Live demos" = "demos.md" },
   { "Run it locally" = "run-locally.md" },
+  { "Credits" = "credits.md" },
 ]
 
 [project.theme]

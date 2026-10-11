@@ -26,8 +26,9 @@ Nimbledeck keeps Slidev's strengths and adds the missing parts. The measurements
 
 ## What it builds on, and what it adds
 
-Built on (all permissively licensed, see [THIRD_PARTY.md](THIRD_PARTY.md)): Slidev, Vue, three.js, Mermaid,
-marimo, numpy, websockets.
+Built on the work of others, with gratitude (all permissively licensed, see [THIRD_PARTY.md](THIRD_PARTY.md) and [docs/credits.md](docs/credits.md)):
+Slidev above all, then Vue, KaTeX, three.js, Chart.js, Mermaid, CodeMirror, marimo, numpy, websockets, Playwright, FFmpeg and Zensical.
+The showcase music is "Origami" by Scott Buckley (CC-BY 4.0).
 
 | Package | What it is |
 |---|---|
