@@ -465,9 +465,9 @@ tourScript:
 
 # Made with Nimbledeck
 
-#### This whole talk is one Markdown file: pictures you can play with, a quiz, equations, and a tour that plays itself.
+#### This whole talk is one Markdown file.
 
-Everything you touched here runs in your browser.
+Pictures you can play with, a quiz, equations and a tour that plays itself, all running in your browser.
 
 <NextSteps :skip="['science']" />
 
