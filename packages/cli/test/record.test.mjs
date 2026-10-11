@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { delimiter, join } from 'node:path'
 import { loadConfig, validateConfig, validateRecordings } from '../src/config.mjs'
 import { encodeArgs, findFfmpeg, frameGeometry, keyName, parseRecordArgs, planEncodes, planTargets, QUALITY, Timeline, typingDelay } from '../src/record.mjs'
 
@@ -85,9 +86,10 @@ test('with a system ffmpeg the recorder writes VP9 and H.264; without one, only 
 })
 
 test('ffmpeg is found on the PATH and in the Playwright cache, newest build first', () => {
-  const files = new Set(['/usr/bin/ffmpeg', '/c/ms-playwright/ffmpeg-1011/ffmpeg-linux', '/c/ms-playwright/ffmpeg-1009/ffmpeg-linux'])
-  const f = findFfmpeg({ platform: 'linux', env: { PATH: '/bin:/usr/bin', PLAYWRIGHT_BROWSERS_PATH: '/c/ms-playwright' }, exists: (p) => files.has(p), list: () => ['chromium-1', 'ffmpeg-1009', 'ffmpeg-1011'] })
-  assert.deepEqual(f, { bundled: '/c/ms-playwright/ffmpeg-1011/ffmpeg-linux', system: '/usr/bin/ffmpeg' })
+  const at = (...p) => join(...p)   // the paths the code builds use the separator of the machine running the test
+  const files = new Set([at('/usr/bin', 'ffmpeg'), at('/c/ms-playwright', 'ffmpeg-1011', 'ffmpeg-linux'), at('/c/ms-playwright', 'ffmpeg-1009', 'ffmpeg-linux')])
+  const f = findFfmpeg({ platform: 'linux', env: { PATH: ['/bin', '/usr/bin'].join(delimiter), PLAYWRIGHT_BROWSERS_PATH: '/c/ms-playwright' }, exists: (p) => files.has(p), list: () => ['chromium-1', 'ffmpeg-1009', 'ffmpeg-1011'] })
+  assert.deepEqual(f, { bundled: at('/c/ms-playwright', 'ffmpeg-1011', 'ffmpeg-linux'), system: at('/usr/bin', 'ffmpeg') })
   const none = findFfmpeg({ platform: 'win32', env: { PATH: 'C:/x' }, exists: () => false, list: () => { throw new Error('no cache') } })
   assert.deepEqual(none, { bundled: null, system: null })
 })

@@ -69,7 +69,7 @@ const freePort = () => new Promise((res) => { const s = net.createServer(); s.li
 
 test('a stream answers one frame per tick, the same frames every time', { skip: !hasUv && 'uv not installed', timeout: 120000 }, async () => {
   const demo = join(here, '../../../examples/how-it-works/demos/stream_nbody.py'), port = await freePort()
-  const proc = spawn('uv', ['run', '--quiet', '--with', 'websockets', '--with', 'numpy', 'python', demo, '--port', String(port), '--origin', 'http://localhost:3030'], { stdio: ['ignore', 'pipe', 'inherit'] })
+  const proc = spawn('uv', ['run', '--quiet', '--with', 'websockets', '--with', 'numpy', 'python', demo, '--port', String(port), '--origin', 'http://localhost:3030'], { stdio: ['ignore', 'pipe', 'inherit'], env: { ...process.env, PYTHONUNBUFFERED: '1' } })   // unbuffered: the "ws://" line must reach us through a pipe
   try {
     await new Promise((ok, fail) => { proc.stdout.on('data', (d) => /ws:\/\//.test(String(d)) && ok()); proc.on('exit', () => fail(new Error('server exited'))) })
     const session = () => new Promise((resolve, reject) => {
@@ -89,5 +89,5 @@ test('a stream answers one frame per tick, the same frames every time', { skip: 
     const a = await session(), b = await session()
     assert.equal(a.length, 5, 'exactly one frame per tick, nothing in between')
     assert.deepEqual(a, b, 'same particles every run')
-  } finally { proc.kill() }
+  } finally { if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], { stdio: 'ignore' }); else proc.kill() }   // on Windows kill() stops uv only: its python child would keep the pipe, and the test run, open
 })
