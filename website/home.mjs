@@ -61,6 +61,8 @@ export function homePage(html, { cfg, titles, hasScience, preloads = [] }) {
 <meta property="og:description" content="${esc(DESCRIPTION)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${url}social.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The first slide of the Nimbledeck deck: Slides that move.">

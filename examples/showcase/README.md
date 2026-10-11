@@ -66,7 +66,7 @@ into the page, and without it (dev server, PDF export, any other build) the bar 
 - The tour is a video with a length and a clock: the button shows `0:13 / 2:38`, the hairline under the bar follows the clock, a big "Watch the tour" button sits on the first slide, and `/?tour` starts it by itself. A finished tour plays again from the start.
 - A slide stays on screen for 8 seconds in the tour. `tour: 14` in a slide's frontmatter changes that; click builds share the
   slide's time (at least 2.5 seconds each).
-- `node website/make-social.mjs` regenerates `public/social.jpg`, the 1200 x 630 preview used by link cards.
+- `node website/make-social.mjs` regenerates `public/social.jpg`, the 1280 x 640 preview used by link cards and by GitHub (it composes three real slides over the name and the tagline).
 
 ## Tour script and sound
 
