@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useNav } from '@slidev/client'
+import { useNav, useSlideContext } from '@slidev/client'
 import SoundToggle from './SoundToggle.vue'
 import { begin, end, holdFor, isViewer, pageRoot, planOf, runSlide, settled } from '../composables/tourEngine'
 import { setSound, sound, soundOn } from '../composables/useSound'
