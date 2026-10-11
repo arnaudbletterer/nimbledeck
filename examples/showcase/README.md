@@ -60,7 +60,7 @@ node e2e-web.mjs http://localhost:8123/nimbledeck/demos/showcase/
 ## On the site
 
 `npm run docs:build` at the repository root builds this deck, with `build:web`, as the front page of the site. The bar,
-the first-slide hint and the tour live in `global-top.vue` and appear only there: the build injects `window.__ND_SITE__`
+the first-slide hint and the tour are the addon's `SiteBar` component and appear only on the hosted site: the build injects `window.__ND_SITE__`
 into the page, and without it (dev server, PDF export, any other build) the bar renders nothing and takes no room.
 
 - The tour is a video with a length and a clock: the button shows `0:13 / 2:38`, the hairline under the bar follows the clock, a big "Watch the tour" button sits on the first slide, and `/?tour` starts it by itself. A finished tour plays again from the start.

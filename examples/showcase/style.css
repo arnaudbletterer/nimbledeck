@@ -1,6 +1,0 @@
-/* The hosted site puts a 40px bar above the slides. website/build.mjs adds the `nd-site-bar` class to <html> before anything
-   paints, so the slide area is smaller from the first frame and the bar never covers a slide. */
-html.nd-site-bar { --nd-site-bar-h: 40px; background: var(--nd-bg, #000); }
-html.nd-site-bar body { background: var(--nd-bg, #000); }
-html.nd-site-bar #page-root { box-sizing: border-box; padding-top: var(--nd-site-bar-h); }
-@media print { html.nd-site-bar #page-root { padding-top: 0; } }

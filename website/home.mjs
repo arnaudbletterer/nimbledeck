@@ -37,6 +37,17 @@ export function firstSlidePreloads(siteDir, deckFile, base) {
     .map((f) => `<link rel="modulepreload" crossorigin href="${base}assets/${f}">`)
 }
 
+// The page script that turns the site bar on (the addon's SiteBar renders nothing without it). A hosted deck other than the front door
+// calls it too, through `dressDeck`.
+export const siteScript = (links) => `<script>window.__ND_SITE__=${JSON.stringify(links)};document.documentElement.classList.add('nd-site-bar')</script>`
+
+// Gives a built deck (its folder under site/) the site bar: the same links as the front door, minus a link to the deck itself.
+export function dressDeck(dir, cfg, { hasScience, self }) {
+  const file = join(dir, 'index.html')
+  const links = { docs: `${cfg.base}docs/`, playground: `${cfg.base}playground/`, github: cfg.github, ...(hasScience && self !== 'science' ? { science: `${cfg.base}demos/science/` } : {}) }
+  writeFileSync(file, readFileSync(file, 'utf8').replace('</head>', `${siteScript(links)}</head>`))
+}
+
 // Takes the index.html that Slidev wrote and makes it the site's front door.
 export function homePage(html, { cfg, titles, hasScience, preloads = [] }) {
   const url = cfg.url
@@ -59,7 +70,7 @@ export function homePage(html, { cfg, titles, hasScience, preloads = [] }) {
 <meta name="twitter:image" content="${url}social.jpg">
 <meta name="theme-color" content="#07090f">
 ${preloads.join('\n')}
-<script>window.__ND_SITE__=${JSON.stringify(links)};document.documentElement.classList.add('nd-site-bar')</script>
+${siteScript(links)}
 <style>.nd-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}</style>
 `
   const body = `

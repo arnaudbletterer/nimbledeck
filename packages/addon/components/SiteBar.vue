@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useNav } from '@slidev/client'
-import SoundToggle from 'slidev-addon-nimbledeck/components/SoundToggle.vue'
-import { begin, end, holdFor, isViewer, pageRoot, planOf, runSlide, settled } from 'slidev-addon-nimbledeck/composables/tourEngine'
-import { setSound, sound, soundOn } from 'slidev-addon-nimbledeck/composables/useSound'
+import SoundToggle from './SoundToggle.vue'
+import { begin, end, holdFor, isViewer, pageRoot, planOf, runSlide, settled } from '../composables/tourEngine'
+import { setSound, sound, soundOn } from '../composables/useSound'
 
-// The bar of the hosted site: wordmark, links, slide arrows, a tour that plays the deck by itself, a progress hairline,
+// The bar of a hosted deck: wordmark, links, slide arrows, a tour that plays the deck by itself, a progress hairline,
 // and a hint on the first slide. The site build injects `window.__ND_SITE__` (see website/build.mjs); without it (the
-// dev server, the PDF export, any other build) this renders nothing and takes no room.
+// dev server, the PDF export, any other build) this renders nothing and takes no room. Any deck gets it from the addon, with no
+// code of its own. The speaker button and the "with sound" switch only show for a deck that has sound (`ndSound` or `ndSlideSound`).
 //
 // The tour paces itself. A slide stays until its entrance has settled (nothing finite is still animating, typing or
 // counting) plus a short reading hold, so a quiet slide goes fast and a rich one keeps its time. `tour: <seconds>` in a
@@ -16,6 +17,8 @@ type SiteLinks = { docs: string; playground: string; science?: string; github: s
 const site: SiteLinks | undefined = (window as unknown as { __ND_SITE__?: SiteLinks }).__ND_SITE__
 
 const { currentPage, total, clicks, clicksTotal, hasNext, next, prev, go, slides, currentSlideRoute, isPrintMode } = useNav()
+const cfg = (useSlideContext().$slidev.configs ?? {}) as Record<string, unknown>
+const hasSound = !!(cfg.ndSound || cfg.ndSlideSound)
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const touch = window.matchMedia('(pointer: coarse)').matches
 
@@ -100,7 +103,7 @@ watch([currentPage, clicks], () => { if (currentPage.value > 1 || clicks.value >
 let soundApplied = false
 function play(gesture = true) {
   if (atEnd.value) { go(1); spent.value = {} }   // a finished tour plays again from the start
-  if (gesture && !soundApplied) { soundApplied = true; if (tourSound.value) setSound(true) }
+  if (hasSound && gesture && !soundApplied) { soundApplied = true; if (tourSound.value) setSound(true) }
   begin()
   playing.value = true
   enter(true)
@@ -180,7 +183,7 @@ const links = computed(() => [
       <button class="ndb-btn ndb-arrow" type="button" aria-label="Previous slide" :disabled="currentPage === 1 && clicks === 0" @click="press(prev)($event)">&#8592;</button>
       <span class="ndb-count" aria-live="off">{{ currentPage }} / {{ total }}</span>
       <button class="ndb-btn ndb-arrow" type="button" aria-label="Next slide" :disabled="!hasNext" @click="press(next)($event)">&#8594;</button>
-      <SoundToggle class="ndb-snd-btn" />
+      <SoundToggle v-if="hasSound" class="ndb-snd-btn" />
       <button class="ndb-btn ndb-tour" type="button" :aria-pressed="playing" :title="playing ? 'Pause the tour' : 'Watch the deck play itself, about ' + mmss(length)" @click="toggle">
         <span class="ndb-ico" aria-hidden="true">{{ playing ? '❚❚' : atEnd && moved ? '↻' : '▶' }}</span>
         <span class="ndb-label">{{ playing ? 'Pause' : atEnd && moved ? 'Replay the tour' : 'Play the tour' }}</span>
@@ -194,10 +197,10 @@ const links = computed(() => [
     <div v-if="showHint" class="ndb-cta">
       <button class="ndb-play" type="button" @click="toggle">
         <span class="ndb-play-ico" aria-hidden="true">&#9654;</span>
-        <span>Watch the tour{{ tourSound ? ', with sound' : '' }}</span>
+        <span>Watch the tour{{ hasSound && tourSound ? ', with sound' : '' }}</span>
         <span class="ndb-play-time" aria-hidden="true">{{ mmss(length) }}</span>
       </button>
-      <button class="ndb-with" type="button" role="switch" :aria-checked="tourSound" @click="pickSound">
+      <button v-if="hasSound" class="ndb-with" type="button" role="switch" :aria-checked="tourSound" @click="pickSound">
         <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9.5v5h3.6L12.5 19V5L7.6 9.5z" fill="currentColor" stroke="none" /><path v-if="tourSound" d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8" /><path v-else d="M16.2 9.6l4.6 4.8M20.8 9.6l-4.6 4.8" /></svg>
         {{ tourSound ? 'With sound' : 'Without sound' }}
       </button>
@@ -207,6 +210,12 @@ const links = computed(() => [
 </template>
 
 <style>
+/* The bar takes 40px above the slides. The injected script adds the `nd-site-bar` class to <html> before anything paints, so the slide
+   area is smaller from the first frame and the bar never covers a slide. */
+html.nd-site-bar { --nd-site-bar-h: 40px; background: var(--nd-bg, #000); }
+html.nd-site-bar body { background: var(--nd-bg, #000); }
+html.nd-site-bar #page-root { box-sizing: border-box; padding-top: var(--nd-site-bar-h); }
+@media print { html.nd-site-bar #page-root { padding-top: 0; } }
 .ndb {
   position: fixed; inset: 0 0 auto 0; height: var(--nd-site-bar-h, 40px); z-index: 60;
   display: flex; align-items: center; gap: 4px; padding: 0 10px 1px 12px; box-sizing: border-box;

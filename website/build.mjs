@@ -9,7 +9,7 @@
 import { spawnSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { firstSlidePreloads, homePage, slideTitles, writeNotFound, writeRedirects, writeRobotsAndSitemap } from './home.mjs'
+import { dressDeck, firstSlidePreloads, homePage, slideTitles, writeNotFound, writeRedirects, writeRobotsAndSitemap } from './home.mjs'
 import { webEdition } from '../packages/cli/src/webedition.mjs'
 import { playgroundData } from './playground-data.mjs'
 import { root, siteConfig } from './site.mjs'
@@ -70,6 +70,9 @@ if (hasScience) {
   cpSync(out, resolve(root, 'site/demos/science'), { recursive: true })
   writeFileSync(resolve(root, 'site/demos/science/nimbledeck.json'), NO_SESSION)
 }
+// The hosted decks get the site bar too (its tour, its clock): the addon's SiteBar shows when the page says it is on the site.
+dressDeck(resolve(root, 'site/demos/how-it-works'), cfg, { hasScience, self: 'how-it-works' })
+if (hasScience) dressDeck(resolve(root, 'site/demos/science'), cfg, { hasScience, self: 'science' })
 
 // 4. The showcase deck is the front door: built for the site's root, then dressed by home.mjs.
 const showcase = resolve(root, 'examples/showcase')

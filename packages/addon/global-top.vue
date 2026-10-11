@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import CommandPalette from './components/CommandPalette.vue'
 import ShortcutHelp from './components/ShortcutHelp.vue'
+import SiteBar from './components/SiteBar.vue'
 import SoundDirector from './components/SoundDirector.vue'
 import TourCursor from './components/TourCursor.vue'
 import { helpOpen, isEditable, paletteOpen } from './composables/palette'
@@ -24,4 +25,5 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   <ShortcutHelp />
   <SoundDirector />
   <TourCursor />
+  <SiteBar />
 </template>

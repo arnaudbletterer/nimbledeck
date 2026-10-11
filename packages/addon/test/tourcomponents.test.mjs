@@ -33,7 +33,7 @@ test('the equalizer gates on the slide, stops its frame loop and reads the engin
 
 test('the engine ignores nothing but trusted events: a player must test isTrusted', () => {
   assert.match(read('../composables/tourEngine.ts'), /isViewer = \(e: Event\) => e\.isTrusted/)
-  assert.match(read('../../../examples/showcase/global-top.vue'), /isViewer\(e\)/)
+  assert.match(read('../components/SiteBar.vue'), /isViewer\(e\)/)
   assert.match(read('../components/SoundDirector.vue'), /!e\.isTrusted/)
 })
 
