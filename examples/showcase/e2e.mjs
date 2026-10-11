@@ -209,6 +209,8 @@ async function webTests(browser) {
         await s.page.goto(url(n, '?clicks=99'), { waitUntil: 'domcontentloaded' })
         await shown(s.page)
         await s.page.waitForTimeout(/webgl|orbit|chart/.test(expected(n).join()) ? 3000 : 1300)
+        // A slow machine (CI) is still inside the entrance of a motion preset after that: measure the settled slide, as `nimbledeck verify` does.
+        await s.page.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 4000))]))
         const kinds = await kindsHere(s.page)
         const miss = expected(n).filter((k) => !kinds.includes(k))
         if (miss.length) missing.push(`slide ${n}: ${miss.join(', ')}`)
