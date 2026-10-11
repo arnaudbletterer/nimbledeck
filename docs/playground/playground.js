@@ -183,6 +183,7 @@ function measureTitle(root) {
 }
 // Play the entrance again: take the attribute off, let the browser notice, put it back.
 function restart(el) {
+  if (el.id === 'mount') $('stage').classList.remove('pg-still')   // asking for the motion again lifts the typing freeze
   const root = el.firstElementChild, m = root?.getAttribute('data-nd-motion')
   if (!m) return
   root.removeAttribute('data-nd-motion'); void root.offsetWidth
@@ -263,8 +264,9 @@ function editor(host, lang, onInput) {
   ta.addEventListener('keydown', (e) => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); ta.setRangeText('  ', ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input')) } if (e.key === 'Escape') ta.blur() })
   return { set(v) { if (ta.value !== v) { ta.value = v; paint() } }, get focused() { return document.activeElement === ta } }
 }
-const slideEd = editor($('ed-slide'), 'md', (v) => { S.slides[cur] = v; save(); update({ cards: true }) })
-const codeEd = editor($('ed-code'), 'code', (v) => { S.layouts[curLayout()] = v; save(); update({ code: false }) })
+// Typing must not replay the slide's motion: the stage stays still (final state) until something asks for the motion again.
+const slideEd = editor($('ed-slide'), 'md', (v) => { S.slides[cur] = v; save(); update({ cards: true, still: true }) })
+const codeEd = editor($('ed-code'), 'code', (v) => { S.layouts[curLayout()] = v; save(); update({ code: false, still: true }) })
 const curLayout = () => parseSlide(S.slides[cur]).fm.layout || 'default'
 
 
@@ -279,6 +281,7 @@ function update(o = {}) {
   if (tcss !== lastTweakCss) tweakStyle.textContent = lastTweakCss = tcss
   const v = variantNow()
   $('stage').dataset.ndVariant = v; $('frame').dataset.dark = lookOf(v).dark
+  $('stage').classList.toggle('pg-still', !!o.still)   // typing: show the final state, never replay the motion
   try { draw($('mount'), S.slides[cur], cur); toast('') } catch (e) { toast(e.message) }
   if (o.restart) restart($('mount'))
   $('ms').textContent = `${(performance.now() - t0).toFixed(1)} ms`
