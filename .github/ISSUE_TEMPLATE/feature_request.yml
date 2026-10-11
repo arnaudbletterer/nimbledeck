@@ -1,0 +1,14 @@
+name: Feature request
+description: An idea for a layout, component, look, motion or command
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What are you trying to do?
+      description: The need first, then the idea. A small example deck helps.
+    validations: { required: true }
+  - type: textarea
+    id: alt
+    attributes:
+      label: What do you do today instead?

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://arnaudbletterer.github.io/nimbledeck/docs/
+    about: Guides for writing a deck, the layouts, the components and running it locally.

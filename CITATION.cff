@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use Nimbledeck, please cite it as below."
+title: "Nimbledeck"
+abstract: "Markdown slide decks that run things: live animation, 3D, Python and video on top of Slidev."
+type: software
+authors:
+  - family-names: Bletterer
+    given-names: Arnaud
+version: 0.1.0
+date-released: 2026-10-11
+license: MIT
+repository-code: "https://github.com/arnaudbletterer/nimbledeck"
+url: "https://arnaudbletterer.github.io/nimbledeck/"
+keywords:
+  - presentations
+  - slidev
+  - markdown
