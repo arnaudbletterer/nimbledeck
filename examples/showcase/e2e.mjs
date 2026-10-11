@@ -70,7 +70,7 @@ async function open(browser, { origin, network = 'abort', reduced = false, dpr =
     if (network === 'abort') r.abort('internetdisconnected')   // 'hang': never answered
   })
   const page = await context.newPage()
-  page.on('pageerror', (e) => log.errors.push(`pageerror: ${String(e).slice(0, 200)}`))
+  page.on('pageerror', (e) => log.errors.push(`pageerror: ${String(e).slice(0, 200)} at ${page.url().replace(/^.*#?\//, '')} ${String(e.stack ?? '').split('\n').slice(1, 4).map((l) => l.trim().slice(0, 90)).join(' < ')}`))
   // Slidev's own FloatingVue patch fails on every load of any deck: upstream noise, not ours.
   page.on('console', (m) => { if (m.type() === 'error' && !/FloatingVue/.test(m.text())) log.errors.push(`console: ${m.text().slice(0, 200)}`) })
   page.on('requestfailed', (r) => { if (local(r.url()) && !/ERR_ABORTED/.test(r.failure()?.errorText ?? '')) log.failed.push(`${r.url()} ${r.failure()?.errorText}`) })
@@ -429,7 +429,7 @@ async function fullTests(browser) {
     await go(streamIdx)
     const streamed = await s.page.waitForFunction(() => [...document.querySelectorAll('[data-kind=pystream]')].some((e) => e.getBoundingClientRect().width > 0 && e.dataset.state === 'live' && Number(e.dataset.fps) > 0), null, { timeout: 60000 }).then(() => true, () => false)
     check('PyStream connects and frames arrive', streamed)
-    const drawn = await s.page.evaluate(() => { const c = [...document.querySelectorAll('[data-kind=pystream] canvas')].find((e) => e.getBoundingClientRect().width > 0); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; for (let i = 3; i < d.length; i += 4) if (d[i]) return true; return false })
+    const drawn = await s.page.evaluate(() => { const cs = [...document.querySelectorAll('[data-kind=pystream] canvas')].filter((e) => e.getBoundingClientRect().width > 0); return cs.some((c) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; for (let i = 3; i < d.length; i += 4) if (d[i]) return true; return false }) })    // the stream has several layers (field, points, shapes): any of them drawn counts
     check('and particles are drawn on the canvas', drawn)
 
     // The whole deck, keyboard only, from slide 1.
