@@ -22,6 +22,7 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
   let ctx = null, bus = null, master = null, analyser = null, bedGain = null
   let bed = null                       // { src, voice, gain, level, ducked }
   let enabled = false
+  let available = true   // false for a deck that declares no sound at all: it stays silent whatever the viewer chose elsewhere
   const voices = new Set()             // { scope, gain, sources, end }
   const buffers = new Map()            // file address -> Promise<AudioBuffer>
   const listeners = new Set()
@@ -82,7 +83,7 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
 
   // Start a sound now (or `delay` seconds from now). Returns a handle with stop(), or null when sound is off or locked.
   function play(src, { volume = 1, delay = 0, scope = 'cue', pitch = 0 } = {}) {
-    if (!enabled || !ctx) return null
+    if (!enabled || !ctx || !available) return null
     const kind = soundKind(src).kind
     if (kind === 'invalid') return null
     prune()
@@ -111,16 +112,18 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
   // A sound for something that happened on the page (a click, a landing number). Free when sound is off, and rate limited
   // per name (`gap` ms) and overall (25 ms) so a burst of events never machine-guns. `pitch` is in cents.
   function sfx(name, { volume = 0.5, pitch = 0, gap = 90, key = name } = {}) {
-    if (!enabled || !ctx) return null
+    if (!enabled || !ctx || !available) return null
     const now = clock()
     if (now - (lastSfx.get(key) ?? -1e9) < gap || now - lastAny < 25) return null
     lastSfx.set(key, now); lastAny = now
     return play(name, { volume, pitch, scope: 'sfx' })
   }
+  // A deck that declares no sound (no ndSound, ndSlideSound, sound or sounds) is silent: the viewer's choice on another deck of the same site does not reach it.
+  function setAvailable(on) { available = !!on; if (!available) stopAll() }
   function setTour(on) { on = !!on; if (on === tour) return; tour = on; if (!on) stopScope('cue') }
 
   function startBed(src) {
-    if (!enabled || !ctx || !src || bed?.src === src) return
+    if (!enabled || !ctx || !available || !src || bed?.src === src) return
     stopBed()
     const kind = soundKind(src).kind
     if (kind === 'invalid') return
@@ -180,7 +183,7 @@ export function createSoundManager({ AudioContextCtor = globalThis.AudioContext 
     get analyser() { return analyser },
     get log() { return log },
     get tour() { return tour },
-    setTour, cue, sfx, setEnabled, unlock, ensure, play, startBed, stopBed, stopScope, stopAll, levels,
+    setTour, setAvailable, cue, sfx, setEnabled, unlock, ensure, play, startBed, stopBed, stopScope, stopAll, levels,
     subscribe(f) { listeners.add(f); return () => listeners.delete(f) },
     dispose() { if (ctx) { stopAll(); ctx.close?.().catch?.(() => {}); ctx = null; analyser = null } listeners.clear() },
   }

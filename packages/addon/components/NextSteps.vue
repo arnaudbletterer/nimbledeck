@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import configs from '#slidev/configs'
 import { computed } from 'vue'
 import { useActive } from '../composables/useActive'
 
@@ -17,7 +18,10 @@ const cards = computed<Card[]>(() => {
   if (site?.playground) list.push({ key: 'playground', title: 'Open the playground', promise: 'Edit a layout and watch it change.', href: site.playground })
   if (site?.science) list.push({ key: 'science', title: 'Science, in one idea', promise: 'Why a positive test is often wrong, as a story you can play with.', href: site.science })
   list.push({ key: 'github', title: 'Star it on GitHub', promise: 'Read the source, clone it, make a deck.', href: site?.github ?? props.github, external: true })
-  if (site) list.push({ key: 'replay', title: 'Replay the tour', promise: 'Watch it play itself again, with sound.' })
+  // The promise names sound only when the deck has some (a bed or a slide-change cue).
+  const head = configs as Record<string, unknown>
+  const hasSound = !!(head.ndSound || head.ndSlideSound)
+  if (site) list.push({ key: 'replay', title: 'Replay the tour', promise: hasSound ? 'Watch it play itself again, with sound.' : 'Watch it play itself again.' })
   return list.filter((c) => !props.skip?.includes(c.key))   // `skip`: card keys to leave out (a deck does not link to itself)
 })
 const replay = () => window.dispatchEvent(new CustomEvent('nd-tour-replay'))

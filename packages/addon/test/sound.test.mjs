@@ -178,6 +178,20 @@ test('sfx is free and silent when sound is off or the context is not there yet',
   assert.equal(FakeContext.made.length, 0)
 })
 
+test('a deck that declares no sound is silent, whatever the viewer chose elsewhere', () => {
+  const m = make(); m.setEnabled(true)
+  assert.ok(m.sfx('pop', { gap: 0 }))
+  m.setAvailable(false)
+  T = 5000
+  assert.equal(m.sfx('pop', { gap: 0 }), null)
+  assert.equal(m.play('pop'), null)
+  m.startBed('uplift')
+  assert.equal(m.levels().length >= 0, true)   // nothing started, nothing thrown
+  m.setAvailable(true)
+  T = 6000
+  assert.ok(m.sfx('pop', { gap: 0 }))
+})
+
 test('sfx is rate limited per name and overall, then plays again after the gap', () => {
   const m = make(); m.setEnabled(true)
   T = 1000

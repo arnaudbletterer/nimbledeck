@@ -19,6 +19,8 @@ const head = configs as Record<string, unknown>
 let timers: number[] = []
 let first = true
 
+// Sound exists only in a deck that declares some: a bed, a cue on every slide change, or a cue on a slide.
+const declaresSound = () => !!(head.ndSound || head.ndSlideSound || (slides.value as any[]).some((r) => { const f = r?.meta?.slide?.frontmatter ?? {}; return f.sound || f.sounds }))
 const clear = () => { timers.forEach(clearTimeout); timers = []; sound.stopScope('cue') }
 const slideFm = () => (slides.value[currentPage.value - 1] as any)?.meta?.slide?.frontmatter ?? {}
 const alwaysCues = () => parseSounds({ sound: slideFm().sound, sounds: slideFm().sounds }).cues.some((c: any) => c.when === 'always')
@@ -46,6 +48,7 @@ watch(() => tourState.playing, () => enter(false))   // the tour starts: this sl
 const unlock = (e: Event) => { if (!e.isTrusted) return; const had = sound.state !== 'none'; sound.unlock(); if (!had && sound.state !== 'none') enter(false) }
 onMounted(() => {
   first = false
+  sound.setAvailable(declaresSound())
   window.addEventListener('keydown', unlock, true)
   window.addEventListener('pointerdown', unlock, true)
   if (soundOn.value && sound.state !== 'none') enter(false)
