@@ -605,7 +605,7 @@
 .nd-chance-bigcap { font: 600 22px/1.2 var(--nd-font-body); padding-bottom: 8px; }
 .nd-chance-say { grid-column: 1 / -1; margin: 6px 0 0; font: 500 24px/1.3 var(--nd-font-body); }
 .nd-chance-play .nd-chance-read { grid-template-columns: 1fr; gap: 6px; align-content: start; }
-.nd-chance-play .nd-chance-big { font-size: 110px; }
+.nd-chance-play .nd-chance-big { font-size: 92px; }
 .nd-chance-play .nd-chance-say { font-size: 26px; min-height: 102px; }
 .nd-chance-read label { display: flex; flex-direction: column; grid-column: 1 / -1; margin-top: 14px; }
 .nd-chance-read label span { font: 600 16px/1.2 var(--nd-font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--nd-muted); }
