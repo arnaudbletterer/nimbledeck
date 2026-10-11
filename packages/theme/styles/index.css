@@ -175,6 +175,7 @@
   box-shadow: 0 0 28px 3px color-mix(in srgb, var(--nd-accent) 40%, transparent); }
 .nd-pane-in { position: absolute; inset: 0; padding: 40px 40px 76px; z-index: 1; }
 .nd-caption { position: absolute; left: 40px; bottom: 28px; z-index: 3; font-size: 18px; color: var(--nd-muted); }
+.nd-split-cap { left: 88px; right: calc(50% + 40px); }   /* a source line under the words of a split slide */
 .nd-pill { position: absolute; right: 32px; bottom: 24px; z-index: 3; padding: 4px 16px; border-radius: 999px; font-size: 16px; color: var(--nd-muted);
   background: color-mix(in srgb, var(--nd-surface) 80%, transparent); border: 1px solid var(--nd-line); font-variant-numeric: tabular-nums; }
 .nd-nums { position: absolute; left: 70px; right: 70px; top: 110px; bottom: 70px; align-content: center; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: 24px; }
