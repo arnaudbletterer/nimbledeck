@@ -21,26 +21,21 @@ The whole talk in one question. Sam is made up, the condition is made up, and th
 -->
 
 ---
-layout: split
-motion: slide-left
-tour: 12
+layout: default
+tour: 10
 tourScript:
-  - { at: 9, wait: 1 }
+  - { at: 8, wait: 1 }
 ---
-
-#### Meet Sam
 
 # Sam tests positive
 
 A routine check-up for something that affects 1 person in 1,000. The test says: positive.
 
-::right::
-
-<Stage :w="640" :h="720">
-<At :x="60" :y="150" :w="520" :h="230" enter="up" :delay="200" middle>
+<Stage :h="480">
+<At :x="0" :y="30" :w="620" :h="400" enter="up" :delay="200" middle>
 <Stat value="99" suffix="%" label="accurate: it catches 99 of 100 sick people and clears 99 of 100 healthy ones" :duration="1400" />
 </At>
-<At :x="60" :y="440" :w="520" :h="140" enter="up" :delay="900" middle>
+<At :x="680" :y="30" :w="460" :h="400" enter="up" :delay="900" middle>
 <Kinetic text="Positive." mode="letters" from="up" :stagger="60" :delay="1200" size="l" accent="Positive." />
 </At>
 </Stage>
@@ -51,7 +46,6 @@ Sam is a made-up person. The test is 99 percent accurate in the plain sense: of 
 
 ---
 layout: default
-motion: pop
 tour: 11
 tourScript:
   - { at: 2.0, hover: B, caption: "Maybe about 90?" }
@@ -62,8 +56,8 @@ tourScript:
 
 The condition affects 1 person in 1,000, and the test is 99% accurate.
 
-<Stage :h="400">
-<At :y="30" :w="1140" :h="370">
+<Stage :h="480">
+<At :y="30" :w="1140" :h="400">
 <Quiz answer="D">
 <Choice letter="A">About 99 in 100</Choice>
 <Choice letter="B">About 90 in 100</Choice>
@@ -83,24 +77,18 @@ Take a guess before the reveal; click an answer or press 1 to 4. The condition i
 -->
 
 ---
-layout: split
-motion: focus
-background: aurora
-tour: 11
+layout: default
+tour: 9
 tourScript:
   - { at: 8, wait: 1 }
 ---
-
-#### The answer
 
 # About 9 in 100
 
 Most people guess far higher. Here is why.
 
-::right::
-
-<Stage :w="640" :h="720">
-<At :x="40" :y="200" :w="560" :h="320" middle>
+<Stage :h="480">
+<At :x="0" :y="30" :w="1140" :h="400" middle>
 <Stat value="9" suffix="%" label="chance that Sam is really sick" :duration="1600" />
 </At>
 </Stage>
@@ -114,23 +102,18 @@ The exact figure is 9.0 percent: 10 sick people among 110 who test positive is 9
 -->
 
 ---
-layout: split
-motion: slide-left
+layout: default
 tour: 9
 tourScript:
   - { at: 2.8, key: "ArrowRight" }
 ---
 
-#### Picture 10,000 people
-
 # Ten of them are sick
 
-Each dot is one person, and only 1 in 1,000 is sick.
+Picture 10,000 people. Each dot is one person, and only 1 in 1,000 is sick.
 
-::right::
-
-<Stage :w="640" :h="720">
-<At :x="40" :y="30" :w="560" :h="660" enter="scale" :delay="200"><Chance mode="crowd" :w="560" :h="660" :steps="1" /></At>
+<Stage :h="480">
+<At :x="383" :y="30" :w="374" :h="450" enter="scale" :delay="200"><Chance mode="crowd" :w="374" :h="450" :steps="1" /></At>
 </Stage>
 
 ::caption::
@@ -142,24 +125,19 @@ Counting people helps: Gigerenzer and Hoffrage, 1995.
 -->
 
 ---
-layout: split
-motion: slide-left
+layout: default
 tour: 11
 tourScript:
   - { at: 2.2, key: "ArrowRight" }
   - { at: 5.6, key: "ArrowRight" }
 ---
 
-#### Now everyone is tested
-
 # Who tests positive?
 
-The test catches the sick, and wrongly flags 1 healthy person in 100.
+Now everyone is tested. The test catches the sick, and wrongly flags 1 healthy person in 100.
 
-::right::
-
-<Stage :w="640" :h="720">
-<At :x="40" :y="30" :w="560" :h="660"><Chance mode="crowd" :w="560" :h="660" :from="1" :steps="2" /></At>
+<Stage :h="480">
+<At :x="383" :y="30" :w="374" :h="450"><Chance mode="crowd" :w="374" :h="450" :from="1" :steps="2" /></At>
 </Stage>
 
 <!--
@@ -168,7 +146,6 @@ First click: the 10 sick people test positive (the test catches 99 percent of th
 
 ---
 layout: default
-motion: wipe
 tour: 8
 tourScript:
   - { at: 2.0, key: "ArrowRight" }
@@ -178,8 +155,8 @@ tourScript:
 
 The healthy are so many that their false alarms outnumber the real cases ten to one.
 
-<Stage :h="340">
-<At :w="1140" :h="340"><Chance mode="rows" :w="1100" :h="330" :from="1" :steps="1" /></At>
+<Stage :h="480">
+<At :y="30" :w="1140" :h="340"><Chance mode="rows" :w="1100" :h="330" :from="1" :steps="1" /></At>
 </Stage>
 
 <!--
@@ -188,7 +165,6 @@ The healthy are so many that their false alarms outnumber the real cases ten to 
 
 ---
 layout: default
-motion: fade-up
 tour: 14
 tourScript:
   - { at: 2.0, drag: ".nd-chance-read input", from: 0.18, to: 0.46, over: 2.4, caption: "1 in 100" }
@@ -197,8 +173,10 @@ tourScript:
 
 # Change how rare it is
 
-<Stage :h="500">
-<At :w="1140" :h="470"><Chance mode="play" controls="prevalence" :w="1140" :h="470" /></At>
+Drag the slider: the condition gets more common, and the sentence follows.
+
+<Stage :h="480">
+<At :y="30" :w="1140" :h="450"><Chance mode="play" controls="prevalence" :w="1140" :h="450" /></At>
 </Stage>
 
 <!--
@@ -207,7 +185,6 @@ Drag the slider: the condition gets more common and the false alarms stop domina
 
 ---
 layout: default
-motion: fade-up
 tour: 14
 tourScript:
   - { at: 2.0, drag: ".nd-chance-read label:nth-of-type(1) input", from: 0.98, to: 0.6, over: 2.2, caption: "catches fewer sick people" }
@@ -216,8 +193,10 @@ tourScript:
 
 # Change how good the test is
 
-<Stage :h="500">
-<At :w="1140" :h="470"><Chance mode="play" controls="accuracy" :w="1140" :h="470" /></At>
+Drag the sliders: the condition stays at 1 in 1,000, and the sentence follows.
+
+<Stage :h="480">
+<At :y="30" :w="1140" :h="450"><Chance mode="play" controls="accuracy" :w="1140" :h="450" /></At>
 </Stage>
 
 <!--
@@ -225,23 +204,19 @@ Here the condition stays at 1 in 1,000. Catching fewer sick people hurts a littl
 -->
 
 ---
-layout: stage
-motion: fade-up
-background: gradient
-tour: 13
+layout: default
+tour: 10
 tourScript:
-  - { at: 11, wait: 1 }
+  - { at: 8, wait: 1 }
 ---
 
-<Stage :w="1200" :h="604">
-<At :x="40" :y="14" :w="1120"><Kinetic text="A rule of thumb" mode="words" from="up" :stagger="140" size="m" accent="thumb" /></At>
-<At :x="40" :y="100" :w="1120" enter="up" :delay="400">
+# A rule of thumb
 
 When something is rare, even a good test gives mostly false alarms.
 
-</At>
-<At :x="40" :y="190" :w="540" :h="410" enter="up" :delay="700"><Chance mode="pile" :w="540" :h="400" :prev="0.001" /></At>
-<At :x="620" :y="190" :w="540" :h="410" enter="up" :delay="900"><Chance mode="pile" :w="540" :h="400" :prev="0.1" /></At>
+<Stage :h="480">
+<At :x="0" :y="30" :w="540" :h="440" enter="up" :delay="300"><Chance mode="pile" :w="540" :h="430" :prev="0.001" /></At>
+<At :x="600" :y="30" :w="540" :h="440" enter="up" :delay="600"><Chance mode="pile" :w="540" :h="430" :prev="0.1" /></At>
 </Stage>
 
 ::caption::
@@ -253,27 +228,29 @@ Same test, same 99 percent accuracy, two worlds. Left: the condition is rare (1 
 -->
 
 ---
-layout: split
-motion: pop
-tour: 12
+layout: default
+tour: 9
 tourScript:
-  - { at: 10, wait: 1 }
+  - { at: 7, wait: 1 }
 ---
 
-#### After a positive test
-
 # What to ask
+
+After a positive test, ask for counts of people.
+
+<Stage :h="480">
+<At :x="0" :y="30" :w="560" :h="330" enter="left" :delay="300" frame pad="28px 32px">
+
+**Ask your doctor**
 
 - How common is this condition?
 - Of 100 people with a positive test, how many are really sick?
 - What comes next: a second test?
 
-::right::
+</At>
+<At :x="600" :y="30" :w="540" :h="330" enter="left" :delay="500" frame pad="28px 32px">
 
-<Stage :w="640" :h="720">
-<At :x="40" :y="150" :w="560" enter="left" :delay="300">
-
-#### The same idea elsewhere
+**The same idea elsewhere**
 
 - A scanner: if danger is rare, most beeps are false alarms.
 - A card alert: if fraud is rare, most alerts are really you.
@@ -291,9 +268,7 @@ Asking for counts of people ("out of 100 people with a positive test") rather th
 -->
 
 ---
-layout: stage
-motion: fade-up
-background: grid
+layout: default
 tour: 14
 tourScript:
   - { at: 2.4, hover: ".nd-t3", caption: "sick, test positive" }
@@ -302,14 +277,13 @@ tourScript:
   - { at: 9.6, hover: ".nd-eq" }
 ---
 
-<Stage :w="1200" :h="604">
-<At :x="40" :y="10" :w="640" enter="up">
+# Bayes' rule, in colour
 
-#### For the curious (optional)
+For the curious (optional): the rule counts the real cases among all the positives.
 
-</At>
-<At :x="40" :y="70" :w="640"><Kinetic text="Bayes' rule, in colour" mode="words" from="up" :stagger="120" size="m" accent="colour" /></At>
-<At :x="40" :y="190" :w="600" enter="up" :delay="500">
+<Stage :h="480">
+<At :x="640" :y="30" :w="500" :h="440" enter="left" :delay="300"><Chance mode="pile" :w="500" :h="430" :prev="0.001" /></At>
+<At :x="0" :y="110" :w="600" enter="up" :delay="500">
 <Equation label="Bayes' rule in words. The chance that a positive test is real equals the people who are sick and test positive, divided by the people who are sick and test positive plus the healthy people who test positive. With the numbers of the story, 10 divided by 10 plus 100, about 9 percent." align="left" :size="25" :decimals="{ riskppv: 0 }" :params="{ risktp: 10, riskfp: 100, riskppv: 9 }">
 
 $$
@@ -322,12 +296,6 @@ $$
 
 </Equation>
 </At>
-<At :x="40" :y="470" :w="580" enter="up" :delay="800">
-
-Bayes' rule counts the real cases among all the positives.
-
-</At>
-<At :x="680" :y="20" :w="500" :h="580" enter="left" :delay="300"><Chance mode="pile" :w="500" :h="560" :prev="0.001" /></At>
 </Stage>
 
 ::caption::
@@ -336,6 +304,210 @@ For the curious. Rule: Bayes and Price, 1763.
 
 <!--
 This is Bayes' rule, written in words and then in the counts of the story. Point at a coloured term: the matching dots light up in the picture. Bayes' own essay was published after his death, communicated by Richard Price (1763). Writing it with counts of people, 10 / (10 + 100), is the natural-frequency form of Gigerenzer and Hoffrage (1995); with probabilities it is P(sick | positive) = P(positive | sick) P(sick) / (P(positive | sick) P(sick) + P(positive | healthy) P(healthy)). refs: [bayes1763] [gigerenzer1995]
+-->
+
+---
+layout: numbers
+class: nd-cards
+motion: cascade
+tour: 9
+tourScript:
+  - { at: 3.0, hover: ".nd-num:nth-child(2)" }
+  - { at: 5.2, hover: ".nd-num:nth-child(3)" }
+---
+
+# The giants, 1763 to 1978
+
+Standing on the shoulders of giants: the idea, and how we get it wrong.
+
+::a::
+
+### The idea
+
+## 1763
+
+**Bayes and Price**
+
+An essay towards solving a problem in the doctrine of chances. The rule itself.
+
+*Phil. Trans. R. Soc.* 53 · [doi:10.1098/rstl.1763.0053](https://doi.org/10.1098/rstl.1763.0053)
+
+::b::
+
+### How we get it wrong
+
+## 1973
+
+**Kahneman and Tversky**
+
+On the psychology of prediction. People ignore how rare things are.
+
+*Psychological Review* 80 · [doi:10.1037/h0034747](https://doi.org/10.1037/h0034747)
+
+::c::
+
+### How we get it wrong
+
+## 1978
+
+**Casscells and colleagues**
+
+Interpretation by physicians of clinical laboratory results. Only 11 of 60 got it right.
+
+*NEJM* 299 · [doi:10.1056/NEJM197811022991808](https://doi.org/10.1056/NEJM197811022991808)
+
+<!--
+refs: [bayes1763] [kahneman1973] [casscells1978]
+-->
+
+---
+layout: numbers
+class: nd-cards
+motion: cascade
+tour: 9
+tourScript:
+  - { at: 3.0, hover: ".nd-num:nth-child(2)" }
+  - { at: 5.2, hover: ".nd-num:nth-child(3)" }
+---
+
+# The giants, 1982 to 1998
+
+Why even doctors get it wrong, and a better way to say it.
+
+::a::
+
+### How we get it wrong
+
+## 1982
+
+**Eddy**
+
+Probabilistic reasoning in clinical medicine. Physicians make big errors.
+
+*Judgment under Uncertainty* · [doi:10.1017/CBO9780511809477.019](https://doi.org/10.1017/CBO9780511809477.019)
+
+::b::
+
+### How to explain it
+
+## 1995
+
+**Gigerenzer and Hoffrage**
+
+How to improve Bayesian reasoning without instruction: frequency formats. Counting people beats percentages.
+
+*Psychological Review* 102 · [doi:10.1037/0033-295X.102.4.684](https://doi.org/10.1037/0033-295X.102.4.684)
+
+::c::
+
+### How to explain it
+
+## 1998
+
+**Hoffrage and Gigerenzer**
+
+Using natural frequencies to improve diagnostic inferences. 46% right with counts, 10% with percentages.
+
+*Academic Medicine* 73 · [doi:10.1097/00001888-199805000-00024](https://doi.org/10.1097/00001888-199805000-00024)
+
+<!--
+refs: [eddy1982] [gigerenzer1995] [hoffrage1998]
+-->
+
+---
+layout: numbers
+class: nd-cards
+motion: cascade
+tour: 9
+tourScript:
+  - { at: 3.0, hover: ".nd-num:nth-child(2)" }
+  - { at: 5.2, hover: ".nd-num:nth-child(3)" }
+---
+
+# The giants, 2007 to 2014
+
+A last word on how to explain it, and on how little has changed.
+
+::a::
+
+### How to explain it
+
+## 2007
+
+**Gigerenzer and colleagues**
+
+Helping doctors and patients make sense of health statistics. Say it with counts of people.
+
+*Psychol. Sci. Public Interest* 8 · [doi:10.1111/j.1539-6053.2008.00033.x](https://doi.org/10.1111/j.1539-6053.2008.00033.x)
+
+::b::
+
+### Still true today
+
+## 2014
+
+**Manrai and colleagues**
+
+Medicine's uncomfortable relationship with math. In 2013, 14 of 61 answered the question right.
+
+*JAMA Intern. Med.* 174 · [doi:10.1001/jamainternmed.2014.1059](https://doi.org/10.1001/jamainternmed.2014.1059)
+
+::c::
+
+### Checked
+
+## 8 of 8
+
+**Every source above**
+
+Each one was checked against Crossref, PubMed or the publisher on 2026-10-11.
+
+The claims behind them: REFERENCES.md
+
+<!--
+All eight references were checked against Crossref, PubMed or the publisher on 2026-10-11 (REFERENCES.md says how). refs: [gigerenzer2007] [manrai2014]
+-->
+
+---
+layout: numbers
+class: nd-cards
+motion: cascade
+tour: 8
+tourScript:
+  - { at: 3.0, hover: ".nd-num:nth-child(2)" }
+  - { at: 5.2, hover: ".nd-num:nth-child(3)" }
+---
+
+# Credits
+
+An illustration, not medical advice.
+
+::a::
+
+### The people
+
+## Made up
+
+Sam, the condition and the 10,000 dots are simulated. No real disease is meant.
+
+::b::
+
+### The look
+
+## Silent
+
+No music and no photographs. No Python runs: every picture is drawn in your browser.
+
+::c::
+
+### Made with
+
+## Tools
+
+Nimbledeck on Slidev and Vue, with equations typeset by KaTeX.
+
+<!--
+Tools: Nimbledeck on Slidev and Vue, KaTeX for the equations; see THIRD_PARTY.md. No music or photographs are used.
 -->
 
 ---
@@ -357,46 +529,4 @@ An illustration, not medical advice.
 
 <!--
 The one sentence to remember: when something is rare, even a good test gives mostly false alarms. Sam, the condition and the people are made up.
--->
-
----
-layout: default
-motion: fade-up
-tour: 11
-tourScript:
-  - { at: 9, wait: 1 }
----
-
-# Standing on the shoulders of... 1 of 2
-
-- Bayes and Price (1763). An essay towards solving a problem in the doctrine of chances. *Phil. Trans. R. Soc.* 53, 370-418. doi:10.1098/rstl.1763.0053
-- Kahneman and Tversky (1973). On the psychology of prediction. *Psychological Review* 80, 237-251. doi:10.1037/h0034747
-- Casscells, Schoenberger and Graboys (1978). Interpretation by physicians of clinical laboratory results. *NEJM* 299, 999-1001. doi:10.1056/NEJM197811022991808
-- Eddy (1982). Probabilistic reasoning in clinical medicine. In *Judgment under Uncertainty*, 249-267. doi:10.1017/CBO9780511809477.019
-
-The idea, and early studies of how doctors reason about it.
-
-<!--
-refs: [bayes1763] [kahneman1973] [casscells1978] [eddy1982]
--->
-
----
-layout: default
-motion: fade-up
-tour: 11
-tourScript:
-  - { at: 9, wait: 1 }
----
-
-# Standing on the shoulders of... 2 of 2
-
-- Gigerenzer and Hoffrage (1995). How to improve Bayesian reasoning without instruction: frequency formats. *Psychological Review* 102, 684-704. doi:10.1037/0033-295X.102.4.684
-- Hoffrage and Gigerenzer (1998). Using natural frequencies to improve diagnostic inferences. *Academic Medicine* 73, 538-540. doi:10.1097/00001888-199805000-00024
-- Gigerenzer et al. (2007). Helping doctors and patients make sense of health statistics. *Psychological Science in the Public Interest* 8, 53-96. doi:10.1111/j.1539-6053.2008.00033.x
-- Manrai et al. (2014). Medicine's uncomfortable relationship with math. *JAMA Internal Medicine* 174, 991-993. doi:10.1001/jamainternmed.2014.1059
-
-An illustration, not medical advice. Simulated people. Made with Nimbledeck (Slidev), equations by KaTeX. Full list: REFERENCES.md.
-
-<!--
-All eight references were checked against Crossref, PubMed or the publisher on 2026-10-11 (REFERENCES.md says how). Tools: Nimbledeck on Slidev and Vue, KaTeX for the equations, matplotlib for the live-code picture; see THIRD_PARTY.md. No music or photographs are used. refs: [gigerenzer1995] [hoffrage1998] [gigerenzer2007] [manrai2014]
 -->
