@@ -12,7 +12,7 @@ transition: fade
 
 <Kinetic text="Copy. Mutate. Filter. Repeat." mode="words" from="mask" :stagger="200" size="l" accent="Filter." />
 
-A population searches a landscape that nobody can see.
+<Kinetic text="A population searches a landscape that nobody can see." mode="lines" from="blur" size="s" tone="muted" :delay="1400" />
 
 <!--
 Four verbs are the whole algorithm: make copies, let the copies differ a little, keep the ones that do better, do it again. The next slides run exactly that, with 1,200 individuals, on this laptop. It is a simulation model: two heritable traits, one fitness landscape, no real species.
@@ -30,7 +30,7 @@ tourScript:
 ---
 
 <Stage full>
-<At :w="1280" :h="720" :z="0"><PyStream name="evo-landscape" controls :w="1280" :h="720" :size="2.6" :fade="0.3" :colors="['#f8fafc']" :highlight="{ 1: 'p: how many dots are here', 2: 'w: the height under them', 3: 'M: mutation spreads the children' }" :sliders="[{ label: 'population', min: 100, max: 3000, step: 100, value: 1200 }, { label: 'mutation', min: 0, max: 0.15, step: 0.005, value: 0.04 }, { label: 'selection', min: 0, max: 12, step: 0.5, value: 4 }]" :extra="[{ name: 'rugged', label: 'ruggedness', min: 0, max: 1, step: 0.05, value: 0 }, { name: 'env', label: 'environment', min: 0, max: 1, step: 0.01, value: 0 }, { name: 'comp', label: 'competition', min: 0, max: 1.6, step: 0.05, value: 0 }, { name: 'h2', label: 'heritability', min: 0.1, max: 1, step: 0.05, value: 1 }, { name: 'start', label: 'start', min: 1, max: 6, step: 1, value: 1 }]" /></At>
+<At :w="1280" :h="720" :z="0"><PyStream name="evo-landscape" controls values :w="1280" :h="720" :size="2.6" :fade="0.3" :colors="['#f8fafc']" :highlight="{ 1: 'p: how many dots are here', 2: 'w: the height under them', 3: 'M: mutation spreads the children' }" :sliders="[{ label: 'population', min: 100, max: 3000, step: 100, value: 1200 }, { label: 'mutation', min: 0, max: 0.15, step: 0.005, value: 0.04 }, { label: 'selection', min: 0, max: 12, step: 0.5, value: 4 }]" :extra="[{ name: 'rugged', label: 'ruggedness', min: 0, max: 1, step: 0.05, value: 0 }, { name: 'env', label: 'environment', min: 0, max: 1, step: 0.01, value: 0 }, { name: 'comp', label: 'competition', min: 0, max: 1.6, step: 0.05, value: 0 }, { name: 'h2', label: 'heritability', min: 0.1, max: 1, step: 0.05, value: 1 }, { name: 'start', label: 'start', min: 1, max: 6, step: 1, value: 1 }]" /></At>
 <At :x="70" :y="46" :w="540" :z="1">
 <Kinetic text="Dots climb|a landscape." mode="lines" from="up" :stagger="260" size="m" accent="climb" />
 </At>
@@ -101,7 +101,7 @@ plt.scatter(*z.T, s=5, c="w")
 
 ::caption::
 
-The whole model in 22 lines. Add a peak, set compete=0.9, or swap the selection step.
+The whole model on one screen. Add a peak, set compete=0.9, or swap the selection step.
 
 <!--
 The same model as the live landscape, small enough to read. Founders start in the middle; each generation is one line: select, then mutate. The white line is the path of the mean, the dots are the last generation. By chance this seed drifts to the lower hill and stays: selection climbs the nearest hill, not the best one.
@@ -138,43 +138,9 @@ $h^2 = \dfrac{V_g}{V_g + V_e} = \val{h2}{0.5}$
 The landscape turns, so the cloud keeps chasing. Parents sit S ahead of the average; only the heritable share of that gap reaches the children.
 
 </At>
-<At :x="640" :y="10" :w="600" :h="700" :z="1" enter="left" :delay="300"><PyStream name="evo-breeder" controls :w="640" :h="700" :size="2.4" :fade="0.3" :colors="['#f8fafc']" :highlight="{ 1: 'R: the mean moves this far', 2: 'h²: the slider', 3: 'S: the parents sit this far ahead' }" :sliders="[{ label: 'population', min: 300, max: 3000, step: 100, value: 1500 }, { label: 'mutation', min: 0, max: 0.15, step: 0.005, value: 0.04 }, { label: 'selection', min: 0, max: 12, step: 0.5, value: 4 }]" :extra="[{ name: 'h2', label: 'heritability', min: 0.1, max: 1, step: 0.05, value: 0.5 }]" /></At>
+<At :x="640" :y="10" :w="600" :h="700" :z="1" enter="left" :delay="300"><PyStream name="evo-breeder" controls values :w="640" :h="700" :size="2.4" :fade="0.3" :colors="['#f8fafc']" :highlight="{ 1: 'R: the mean moves this far', 2: 'h²: the slider', 3: 'S: the parents sit this far ahead' }" :sliders="[{ label: 'population', min: 300, max: 3000, step: 100, value: 1500 }, { label: 'mutation', min: 0, max: 0.15, step: 0.005, value: 0.04 }, { label: 'selection', min: 0, max: 12, step: 0.5, value: 4 }]" :extra="[{ name: 'h2', label: 'heritability', min: 0.1, max: 1, step: 0.05, value: 0.5 }]" /></At>
 </Stage>
 
 <!--
 Standard form (Lush 1937; Falconer and Mackay 1996, Introduction to Quantitative Genetics, ch. 11): R = h^2 S, where S = (mean of the selected parents) - (mean of the population), R = (mean of the offspring) - (mean of the population), and h^2 = V_g / (V_g + V_e) is the narrow-sense heritability (here every genetic effect is additive, so broad and narrow agree). In the model, selection sees the trait plus noise, with the noise sized so that h^2 is the value of the slider. The picture measures S and R in every generation and draws them ten times longer. The pink arrow is S, the cyan one R, and R/S in the corner follows the slider. At h^2 = 1 the arrows coincide; at 0.2 the cyan one is a fifth of the pink one. The cloud climbs more slowly even though selection is as strong: that is the whole message. Needs nimbledeck run.
--->
-
----
-layout: full
-tour: 16
-tourScript:
-  - { at: 2.4, hover: ".nd-t1", caption: "selection" }
-  - { at: 4.4, hover: ".nd-t2", caption: "mutation bias" }
-  - { at: 6.4, drag: ".nd-ctl-many label:nth-child(4) input", from: 0.5, to: 0.95, over: 2.6, caption: "push mutation uphill or down" }
----
-
-<Stage full>
-<At :x="70" :y="58" :w="520" :z="1">
-<Kinetic text="The mean,|exactly." mode="lines" from="up" :stagger="260" size="m" accent="exactly." />
-</At>
-<At :x="70" :y="250" :w="520" :z="1" enter="up" :delay="500">
-<Equation label="The Price equation: the change of the mean trait equals the covariance of fitness and trait divided by mean fitness, plus the expected fitness-weighted change of trait inside the lineages, divided by mean fitness." align="left" :size="40">
-
-$$
-\Delta\bar z = \term{1}{\frac{\operatorname{Cov}(w, z)}{\bar w}} + \term{2}{\frac{\operatorname{E}(w\,\Delta z)}{\bar w}}
-$$
-
-</Equation>
-</At>
-<At :x="70" :y="440" :w="500" :z="1" enter="up" :delay="800">
-
-Selection moves the mean uphill. Mutation bias can push it back. Where the two arrows cancel, the mean stops.
-
-</At>
-<At :x="640" :y="10" :w="600" :h="700" :z="1" enter="left" :delay="300"><PyStream name="evo-price" controls :w="640" :h="700" :size="2.4" :fade="0.3" :colors="['#f8fafc']" :highlight="{ 1: 'selection: fit parents sit uphill', 2: 'transmission: what mutation adds' }" :sliders="[{ label: 'population', min: 300, max: 3000, step: 100, value: 1500 }, { label: 'mutation', min: 0, max: 0.15, step: 0.005, value: 0.04 }, { label: 'selection', min: 0, max: 12, step: 0.5, value: 4 }]" :extra="[{ name: 'bias', label: 'mutation bias', min: -0.05, max: 0.05, step: 0.005, value: 0.02 }]" /></At>
-</Stage>
-
-<!--
-Standard form (Price 1970, Nature 227: 520; Frank 2012, Journal of Evolutionary Biology 26: 1): the change of the mean trait is Delta z-bar = Cov(w, z) / w-bar + E(w Delta z) / w-bar, with w the number of offspring of an individual, z its trait and Delta z the average change of trait between it and its offspring. It is an identity, not a model: in the simulation the two terms add up to the measured change of the mean to the last digit. The first term is selection, the cyan arrow. The second is transmission: here it is the mutation bias, the violet arrow, and with a bias of zero it is nothing but noise. Slide the bias towards plus 0.03: the mean stops short of the peak, where selection pulling back balances mutation pushing out (mutation-selection balance). Arrows are drawn ten times longer than the real change per generation. Needs nimbledeck run.
 -->

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch, onUnmounted } from 'vue'
+import { computed, reactive, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useActive } from '../composables/useActive'
 import { useCrisp } from '../composables/useCrisp'
 import { useNimbleConfig, cssVar } from '../composables/useConfig'
@@ -124,6 +124,7 @@ function onJson(text: string) {
   if (m && typeof m === 'object' && Array.isArray(m.draw)) { shapes = m.draw; paintShapes() }
 }
 watch(k, () => { paintImages(); paintShapes() })
+onMounted(() => { paintImages(); paintShapes() })   // size the layers too, so that an unused one is as sharp as the points
 function send() { ws?.readyState === 1 && ws.send(JSON.stringify({ n: n.value, dt: dt.value, g: g.value, ...(ls ? { lockstep: true } : {}), ...Object.fromEntries([...touched].map((k) => [k, ex[k]])) })) }
 async function connect() {
   if (closed) return

@@ -12,7 +12,7 @@ transition: fade
 
 <Kinetic text="The weather forgets in two weeks." mode="words" from="blur" :stagger="170" size="l" accent="forgets" />
 
-Not for lack of computers. The equations are chaotic, and every measurement is a little wrong.
+<Kinetic text="Not for lack of computers. The equations are chaotic, and every measurement is a little wrong." mode="lines" from="blur" size="s" tone="muted" :delay="1400" />
 
 <!--
 The next slides are a toy atmosphere that runs on this laptop: forty numbers on a circle of latitude, simulated, not a forecast. It behaves like the real thing in the one way that matters here. Two starts that differ by a hair end up as different weather.
@@ -188,54 +188,4 @@ Without data the forecast mean fades to a flat grey-blue. When observations arri
 
 <!--
 Left: Lorenz-96 (Lorenz 1996; Lorenz and Emanuel 1998), the model of the stream. The first term moves a wave round the circle and steepens it, the second damps it, F keeps it alive; in the pictures, F = 8. Below: the analysis step of the Kalman filter (Kalman 1960; in its ensemble form Evensen 1994). x_f is the forecast, y the observation, H picks the observed variables out of the state, R is the covariance of the instrument noise, P the covariance of the forecast error, estimated here from the spread of 20 members. K weighs the innovation y minus H x_f: a large P (a large spread) and a small R mean the filter trusts the observation. Every member is updated with its own perturbed observation (Burgers, van Leeuwen and Evensen 1998). The colour scale of the two panels is flat near the climate mean, so a mean that has lost its structure looks flat. The clip is the recording of the stream of the second slide.
--->
-
----
-layout: full
-tour: 12
-tourScript:
-  - { at: 2, hover: ".nd-t1", caption: "the error of the mean" }
-  - { at: 4, hover: ".nd-t2", caption: "the spread" }
-  - { at: 6, hover: ".nd-eq" }
----
-
-<Stage full>
-<At :x="70" :y="46" :w="560" :z="1">
-<Kinetic text="The spread|should match|the error." mode="lines" from="up" :stagger="240" size="m" accent="match" />
-</At>
-<At :x="70" :y="330" :w="540" :z="1" enter="up" :delay="500">
-<Equation label="The root mean square error of the ensemble mean is about the square root of N plus one over N times the ensemble spread" align="left" :size="32">
-
-$$
-\term{1}{\mathrm{RMSE}(\bar x)} \approx \sqrt{\tfrac{N+1}{N}}\;\term{2}{\mathrm{spread}}
-$$
-
-</Equation>
-</At>
-<At :x="70" :y="440" :w="540" :z="1" enter="up" :delay="800">
-<Equation label="The ensemble mean is the average of the members. The spread squared is the variance of the members, averaged over the variables" align="left" :size="22">
-
-$$
-\bar x = \tfrac1N \sum_i x_i, \qquad \mathrm{spread}^2 = \tfrac1K \sum_k \tfrac{1}{N-1} \sum_i (x_{ik} - \bar x_k)^2
-$$
-
-</Equation>
-</At>
-<At :x="70" :y="560" :w="540" :z="1" enter="up" :delay="1000">
-
-Violet below cyan: overconfident. Violet above cyan: too cautious.
-
-</At>
-<At :x="640" :y="120" :w="600" :h="275" :z="1" frame enter="left" :delay="300"><Clip src="/recordings/stream-climate-l96.webm" fit="cover" /></At>
-<At :x="640" :y="420" :w="580" :z="1" enter="up" :delay="900">
-
-Simulated: a toy atmosphere of 40 variables. A real forecast model has orders of magnitude more.
-
-</At>
-<At :x="800" :y="300" :z="2"><Marker term="1">error of the ensemble mean</Marker></At>
-<At :x="800" :y="330" :z="2"><Marker term="2">spread of the members</Marker></At>
-</Stage>
-
-<!--
-Spread-skill: for a reliable ensemble of N members the root mean square error of the ensemble mean equals the square root of (N+1)/N times the average ensemble spread (Leutbecher and Palmer 2008, Journal of Computational Physics 227; Fortin, Abaza, Anctil and Turcotte 2014, Monthly Weather Review 142). The factor is a finite-size correction: the truth counts as one more member. In the pictures the two curves sit together in the free forecast and saturate together, at the spread of the climate, about 3.6 here. In the assimilating part the spread can sit under the error when inflation is small; the live code slide shows it: inflation 1.0 gives a spread of 0.6 against an error of 2. The limit in the real atmosphere is about two weeks for the weather of the day (Lorenz 1969; Zhang et al. 2019, Journal of the Atmospheric Sciences 76); this toy has no such number, its model days follow Lorenz's rough scale of five days per time unit.
 -->

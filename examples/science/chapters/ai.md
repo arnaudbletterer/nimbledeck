@@ -12,7 +12,7 @@ background: aurora
 
 <Kinetic text="Noise in. A picture out." mode="words" from="blur" :stagger="170" size="l" accent="picture" />
 
-Two small models, running on this laptop, show how image generators and chatbots work.
+<Kinetic text="Two small models, running on this laptop, show how image generators and chatbots work." mode="lines" from="blur" size="s" tone="muted" :delay="1400" />
 
 <!--
 Two ideas carry most of today's AI. Image generators start from pure noise and remove it, step by step. Chatbots let every word look at the other words and decide which ones matter. Both demos in this chapter are toy models: a few thousand numbers, trained in minutes on made-up data. They are not a real image model or a real chatbot, and they run for real, nothing is faked. Needs nimbledeck run for the live parts.
@@ -47,55 +47,6 @@ Toy model: 145,000 numbers, trained for minutes on made-up points.
 
 <!--
 This is a diffusion model in miniature (Ho, Jain and Abbeel 2020). A picture of 2,800 points is mixed with Gaussian noise until nothing is left (the forward process, a closed formula). Then the reverse process draws a new picture from fresh noise: at each step a small network, trained on three pictures, guesses the noise in every point and a step removes a little of it. The arrows are the network's guess, reversed, on a grid. Fewer steps: a blurred picture. The cosine schedule beats the linear one when steps are few. Guidance (Ho and Salimans 2022) pushes the result further toward the prompt than the network alone would: a little sharpens it, too much tears it apart. Prompt anything mixes the three pictures. Needs nimbledeck run.
--->
-
----
-layout: stage
-motion: none
----
-
-<Stage :w="1200" :h="604">
-<At :w="1200" :h="604">
-<LiveCode id="ai-sampler" :timeout="30">
-
-```python
-import numpy as np, matplotlib.pyplot as plt
-from aitoy import diffusion as D   # trained network
-
-steps, g, prompt = 50, 2.0, 1   # 1 smiley 2 spiral 3 AI
-s = np.linspace(1, 0, steps + 1)  # 1 noise, 0 picture
-abar = np.exp(-(0.1 * s + 9.95 * s**2))  # signal left
-  # cos: np.clip(np.cos(s * 1.57) ** 2, 1e-5, 1)
-
-rng = np.random.default_rng(0)
-x = rng.normal(size=(2000, 2))     # pure noise
-shots = [x]
-for t, u in zip(abar[:-1], abar[1:]):
-    lab = [0] * len(x) + [prompt] * len(x)
-    e0, e1 = np.split(D.eps(np.r_[x, x], t, lab), 2)
-    eps = e0 + g * (e1 - e0)       # guidance
-    a = t / u
-    k = (1 - a) / np.sqrt(1 - t)
-    mean = (x - k * eps) / np.sqrt(a)   # remove noise
-    sig = np.sqrt((1 - u) / (1 - t) * (1 - a))
-    x = mean + sig * rng.normal(size=x.shape)
-    shots.append(x)
-
-fig, axs = plt.subplots(1, 4, figsize=(10, 3))
-for ax, k in zip(axs, np.linspace(0, steps, 4).astype(int)):
-    ax.scatter(*shots[k].T, s=1); ax.axis("equal"); ax.axis("off")
-```
-
-</LiveCode>
-</At>
-</Stage>
-
-::caption::
-
-Reverse diffusion. Edit steps, schedule, guidance.
-
-<!--
-The sampler of the demo, as code. The network D.eps is the one of the demo, trained once beforehand (demos/train_diffusion.py). Each loop turn is one reverse step: guess the noise, remove a little, add a little fresh noise. Try steps = 6, then 100. Swap the schedule line for the cosine one. Set g to 0, then to 5. Delete the last term of the x update to remove the fresh noise. Needs nimbledeck run.
 -->
 
 ---
@@ -158,7 +109,7 @@ from aitoy import attention as T   # toy: 23 words
 s = "the cat chased the mouse because it was hungry"
 temp = 1.0                         # try 3, then 0.3
 words = s.split()
-x = T.embed(words)                 # 16 numbers per word
+x = T.embed(words)                 # 16 numbers each
 
 def softmax(z):
     e = np.exp(z - z.max(1, keepdims=True))

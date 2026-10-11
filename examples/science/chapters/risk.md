@@ -97,48 +97,6 @@ A simulation, not data: 2,000 polls of the same population, 52 percent for A. Ea
 -->
 
 ---
-layout: full
-tour: 14
-tourScript:
-  - { at: 2.2, hover: ".nd-t1", caption: "the true share" }
-  - { at: 4, hover: ".nd-t4", caption: "people per poll" }
-  - { at: 5.8, hover: ".nd-t2", caption: "the spread of the polls" }
-  - { at: 7.6, hover: ".nd-t3", caption: "95% of polls fall inside" }
-  - { at: 9.6, hover: ".nd-eq" }
----
-
-<Stage full>
-<At :x="70" :y="58" :w="560" :z="1">
-<Kinetic text="The size|of the noise." mode="lines" from="up" :stagger="260" size="m" accent="noise." />
-</At>
-<At :x="70" :y="250" :w="580" :z="1" enter="up" :delay="500">
-<Equation label="The standard error of a poll is the square root of p times one minus p, over n. The margin of error is 1.96 standard errors. With the current sliders the standard error and the margin, in points, are shown below." align="left" :size="32" :decimals="{ riskpollse: 1, riskpollmoe: 1 }" :params="{ riskpollse: 1.6, riskpollmoe: 3.1 }">
-
-$$
-\term{2}{\mathrm{SE}} = \sqrt{\frac{\term{1}{p}\,(1 - \term{1}{p})}{\term{4}{n}}}
-\qquad
-\term{3}{\mathrm{MoE} = 1.96\,\mathrm{SE}}
-$$
-
-$$
-\term{2}{\val{riskpollse}{1.6}} \text{ points} \qquad \term{3}{\val{riskpollmoe}{3.1}} \text{ points}
-$$
-
-</Equation>
-</At>
-<At :x="70" :y="500" :w="560" :z="1" enter="up" :delay="800">
-
-Four times the people, half the noise. The margin is for one share: the lead of A over B has twice that margin, and a lead inside it is still ahead about 9 times in 10.
-
-</At>
-<At :x="670" :y="60" :w="560" :h="600" :z="1" enter="left" :delay="300"><Polls :w="560" :h="600" :controls="false" /></At>
-</Stage>
-
-<!--
-For n independent answers, each saying A with probability p, the number of A answers is binomial, so the share has variance p (1 - p) / n: SE = sqrt(p (1 - p) / n). About 95 percent of polls land within 1.96 SE of p (the normal approximation; Brown, Cai and DasGupta 2001 discuss where it is poor, mainly for small n or p near 0 or 1). At n = 1,000 and p = 0.52, SE = 1.58 points and MoE = 3.1 points. The lead A minus B equals 2 p minus 1, so its variance is 4 p (1 - p) / n and its margin is twice the margin of one share. That is why a 52 to 48 poll of 1,000 people, with a margin of 3 points on each share, is not a coin flip: in the simulation it names the right winner about 9 times in 10. It is not a certainty either. None of this formula contains bias: a poll that cannot reach part of the population has an error that does not shrink with n. The sliders are those of the previous slide.
--->
-
----
 layout: stage
 ---
 
@@ -149,7 +107,7 @@ layout: stage
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-
+plt.figure(figsize=(7, 4))
 rng = np.random.default_rng(3)
 N, POLLS = 1000, 4000          # people, polls
 share = np.array([0.4, 0.6])   # young, older

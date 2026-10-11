@@ -5,8 +5,8 @@ import { useActive } from '../composables/useActive'
 // The call to action of a closing slide: large link cards read from `window.__ND_SITE__` (the hosted site injects it):
 // docs, playground, the science deck when there is one, GitHub, and "Replay the tour". Without it (the dev server, any
 // other build) only the GitHub card shows, pointing at `github` (default: the project's repository).
-// Replay asks the site bar to go back to the first slide and play the tour, through the `nd-tour-replay` event.
-const props = withDefaults(defineProps<{ github?: string }>(), { github: 'https://github.com/arnaudbletterer/nimbledeck' })
+// `skip` names cards to leave out (docs, playground, science, github, replay). Replay asks the site bar to go back to the first slide and play the tour, through the `nd-tour-replay` event.
+const props = withDefaults(defineProps<{ github?: string; skip?: string[] }>(), { github: 'https://github.com/arnaudbletterer/nimbledeck' })
 type Site = { docs?: string; playground?: string; science?: string; github?: string }
 const site = (typeof window !== 'undefined' ? (window as unknown as { __ND_SITE__?: Site }).__ND_SITE__ : undefined)
 const active = useActive()
@@ -18,7 +18,7 @@ const cards = computed<Card[]>(() => {
   if (site?.science) list.push({ key: 'science', title: 'See the science deck', promise: 'Live Python and equations in a real talk.', href: site.science })
   list.push({ key: 'github', title: 'Star it on GitHub', promise: 'Read the source, clone it, make a deck.', href: site?.github ?? props.github, external: true })
   if (site) list.push({ key: 'replay', title: 'Replay the tour', promise: 'Watch it play itself again, with sound.' })
-  return list
+  return list.filter((c) => !props.skip?.includes(c.key))   // `skip`: card keys to leave out (a deck does not link to itself)
 })
 const replay = () => window.dispatchEvent(new CustomEvent('nd-tour-replay'))
 </script>

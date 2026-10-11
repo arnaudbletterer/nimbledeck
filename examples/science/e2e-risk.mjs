@@ -1,10 +1,10 @@
-// Browser test of the risk chapter: the sliders move the numbers, a term of the equation lights its group, the polls
+// Browser test of the risk chapter (slides 4 to 6 of the composed deck): the sliders move the numbers, a term of the equation lights its group, the polls
 // respond to their sliders, and nothing logs an error or reaches another origin.
-// Usage: node e2e.mjs [url]   (default http://localhost:3030, start the chapter with `nimbledeck run risk.md` first;
+// Usage: node e2e.mjs [url]   (default http://localhost:3030, start the deck with `nimbledeck run science.md` first;
 //        for a static build use the hash form, e.g. http://localhost:4173/base/#)
 import assert from 'node:assert/strict'
 import { chromium } from 'playwright-chromium'
-import { findChrome } from '../../../../packages/cli/src/chrome.mjs'
+import { findChrome } from '../../packages/cli/src/chrome.mjs'
 
 const base = (process.argv[2] ?? 'http://localhost:3030').replace(/\/$/, '')
 const hash = base.endsWith('#')
@@ -21,7 +21,7 @@ const next = async () => { await page.evaluate(() => document.activeElement?.blu
 const ppv = () => page.$eval('.nd-crowd', (e) => Number(e.dataset.ppv))
 
 // the crowd
-await page.goto(go(2), { waitUntil: 'load' })
+await page.goto(go(4), { waitUntil: 'load' })
 await page.waitForSelector('.nd-crowd-ctl input', { timeout: 30000 })
 await page.waitForTimeout(1500)
 assert.equal(await ppv(), 9.0, 'default: 99 percent accurate, 1 in 1000: 9 percent')
@@ -58,12 +58,6 @@ assert.ok((await wrong()) < w0 / 3, 'ten times the people: far fewer wrong winne
 await setRange('.nd-polls-ctl label:nth-child(4) input', 10)          // 10 percent of A supporters do not answer
 await page.waitForTimeout(300)
 assert.ok((await wrong()) > 80, 'with bias and a huge sample the polls are confidently wrong')
-
-// the standard error equation follows the sliders
-await next()
-await page.waitForSelector('.nd-eq [data-term="2"]', { timeout: 30000 })
-await page.waitForTimeout(2000)
-assert.match(await page.locator('.nd-eq:visible').last().textContent(), /0\.5|0\.4|0\.3/, 'SE of 10,000 people is about 0.5 points')
 
 await browser.close()
 assert.deepEqual(problems, [], problems.join('\n'))
