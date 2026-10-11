@@ -61,11 +61,6 @@ The condition affects 1 person in 1,000, and the test is 99% accurate.
 <Choice letter="B">About 90 in 100</Choice>
 <Choice letter="C">About 50 in 100</Choice>
 <Choice letter="D">About 9 in 100</Choice>
-<Explain letter="D">
-
-Only about 9 in 100. Surprising? Most people think so.
-
-</Explain>
 </Quiz>
 </At>
 </Stage>
