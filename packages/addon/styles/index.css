@@ -328,7 +328,7 @@
 @media (prefers-reduced-motion: reduce) { .nd-stat-label { opacity: 1; transform: none; transition: none !important; } .nd-stat.nd-on .nd-stat-num { animation: none; } }
 
 /* ==== Motion toolkit: Marquee ==== */
-.nd-marquee { display: block; width: auto; overflow: hidden; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); }
+.nd-marquee { display: block; width: auto; overflow: hidden; padding-block: .25em; margin-block: -.25em;    /* room for the tall glyphs of a fallback font, which would otherwise be cut (Windows) */ white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent); }
 :where(.nd-at) > .nd-marquee { width: 100%; }
 .nd-mq-track { display: flex; width: max-content; will-change: transform; animation: nd-mq var(--nd-mq-t, 20s) linear infinite; animation-play-state: paused; }
 .nd-mq-run .nd-mq-track { animation-play-state: running; }
@@ -452,7 +452,7 @@
 .nd-lw-in { display: flex; flex-direction: column; align-items: flex-start; gap: 1.2cqw; height: 100%; box-sizing: border-box; padding: 6.6cqw 6cqw 4.2cqw; }
 .nd-lw-in > * { max-width: 100%; flex: none; }
 .nd-lw-bar { position: absolute; left: 0; right: 0; top: 0; height: 2.4cqw; background: var(--nd-gradient, var(--nd-accent)); }
-.nd-lw-title { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--nd-font-display); font-size: 9.6cqw; line-height: 1.1;
+.nd-lw-title { display: block; max-width: 100%; overflow: hidden; padding-bottom: .2em; margin-bottom: -.2em; text-overflow: ellipsis; white-space: nowrap; font-family: var(--nd-font-display); font-size: 9.6cqw; line-height: 1.1;
   font-weight: var(--nd-h1-weight, 700); font-style: var(--nd-h1-style, normal); letter-spacing: var(--nd-h1-tracking, normal); text-transform: var(--nd-title-transform, none); }
 .nd-lw-sub { display: block; color: var(--nd-muted); font-size: 4.8cqw; line-height: 1.2; }
 .nd-lw-li { display: flex; align-items: center; gap: 2cqw; margin-top: .6cqw; font-size: 5.2cqw; line-height: 1.2; }
