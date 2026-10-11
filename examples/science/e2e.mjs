@@ -1,10 +1,16 @@
 // Browser test of the science deck: the guess quiz answers, the clicks reveal the dots, the sliders change the plain sentence, a term of
-// the equation lights its dots, and nothing logs an error or reaches another origin.
+// the equation lights its dots, the slides keep one grammar (coherence.mjs), the site bar plays the tour (the guess is scripted), and nothing logs an
+// error or reaches another origin.
 // Usage: node e2e.mjs [url]   (default http://localhost:3030: start the deck with `npm run dev` first;
 //        for a static build use the hash form, e.g. http://localhost:4173/base/#)
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-chromium'
 import { findChrome } from '../../packages/cli/src/chrome.mjs'
+import { splitSlides } from '../../packages/cli/src/slides.mjs'
+import { audit, colourCode } from './coherence.mjs'
 
 const base = (process.argv[2] ?? 'http://localhost:3030').replace(/\/$/, '')
 const hash = base.endsWith('#')
@@ -74,6 +80,33 @@ await page.waitForSelector(q('.nd-eq [data-term="3"]'), { timeout: 20000 })
 await page.hover(q('.nd-t4'), { force: true })
 await page.waitForSelector(q('.nd-linkchip'), { timeout: 5000 })
 assert.match(await text('.nd-linkchip'), /false alarm/)
+
+// The slides keep one grammar: title, sentence, source line, footer and page number in the same place, with the same style.
+const total = splitSlides(readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), 'science.md'), 'utf8')).length
+const deviations = [...colourCode(), ...(await audit(page, base, total, hash))]
+assert.deepEqual(deviations, [], 'the slide grammar')
+
+// The site bar (injected by the hosted build as window.__ND_SITE__; here by the test): the big button, the clock, a tour that plays the guess,
+// a shield against the real pointer, no speaker (the deck has no sound), and a real key takes over.
+const site = await browser.newPage({ viewport: { width: 1280, height: 720 } })
+site.on('pageerror', (e) => problems.push(`pageerror: ${e.message.slice(0, 200)}`))
+await site.addInitScript(() => { window.__ND_SITE__ = { docs: '/docs/', playground: '/playground/', github: 'https://github.com/' }; document.addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('nd-site-bar')) })
+await site.goto(`${base}/1`, { waitUntil: 'load' })
+if (hash) await site.reload({ waitUntil: 'load' })
+await site.waitForSelector('.ndb', { timeout: 20000 })
+assert.match(await site.textContent('.ndb-play'), /Watch the tour\s*\d+:\d\d$/, 'the big button shows the length')
+assert.equal(await site.locator('.nd-sound-btn, .ndb-with').count(), 0, 'no sound controls on a deck without sound')
+assert.equal(await site.locator('.ndb a:text("Science")').count(), 0, 'no link from the science deck to itself')
+await site.click('.ndb-play')
+await site.waitForSelector('.ndb-shield', { timeout: 5000 })
+const slideNo = () => site.evaluate(() => Number(location.href.replace(/^.*(?:#\/|\/)(\d+)(?:\?.*)?$/, '$1')))
+await site.waitForFunction(() => /(?:#\/|\/)3(?:\?.*)?$/.test(location.href), null, { timeout: 60000 })
+await site.waitForFunction(() => document.querySelector('[data-slidev-no="3"] .nd-quiz')?.dataset.state === 'good', null, { timeout: 20000 })   // the tour guessed, then chose D
+assert.match(await site.textContent('.ndb-time'), /^\d+:\d\d \/ \d+:\d\d$/, 'the clock')
+await site.keyboard.press('ArrowRight')   // a real key takes over
+await site.waitForSelector('.ndb-shield', { state: 'detached', timeout: 5000 })
+assert.equal(await site.getAttribute('.ndb-tour', 'aria-pressed'), 'false')
+await site.close()
 
 await browser.close()
 if (problems.length) { console.error(problems.join('\n')); process.exit(1) }

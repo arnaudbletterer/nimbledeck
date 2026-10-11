@@ -105,6 +105,34 @@ const aria = (page) => page.locator('.ndb-tour').getAttribute('aria-pressed')
   await context.close()
 }
 
+// 1b. The science deck has the bar too: the big button, the clock, a tour that plays all of it and ends on the last slide, and no link to itself.
+{
+  const science = `${origin}${base}demos/science/`
+  const { context, page } = await open({ width: 1440, height: 900 })
+  await page.clock.install()
+  await page.goto(`${science}#/1`, { waitUntil: 'domcontentloaded' })
+  await shown(page)
+  check('science: the page has the site bar', (await page.locator('.ndb').count()) === 1)
+  check('science: the big button shows the length of the tour', /Watch the tour\s*\d:\d\d$/.test((await page.locator('.ndb-play').innerText()).replace(/\s+/g, ' ')), await page.locator('.ndb-play').innerText())
+  check('science: no sound controls and no link to itself', (await page.locator('.nd-sound-btn, .ndb-with, .ndb a:has-text("Science")').count()) === 0)
+  check('science: the bar links to Docs, Playground and GitHub', await page.evaluate(() => ['Docs', 'Playground', 'GitHub'].every((t) => [...document.querySelectorAll('.ndb a')].some((a) => a.textContent === t))))
+  await page.locator('.ndb-play').click()
+  check('science: the tour plays and a shield keeps the real pointer off', (await aria(page)) === 'true' && await page.evaluate(() => document.elementFromPoint(640, 450)?.classList.contains('ndb-shield')))
+  let at = ''
+  for (let i = 0; i < 400 && (await aria(page)) === 'true'; i++) { await page.clock.runFor(1000); await page.waitForTimeout(40); at = await hash(page) }
+  const total = Number((await page.locator('.ndb-count').innerText()).split('/')[1])
+  check('science: the tour stops on the last slide', (await aria(page)) === 'false' && at === `#/${total}`, at)
+  if (shots) await page.screenshot({ path: join(shots, 'science-end.png') })
+  await context.close()
+  // /?tour starts it by itself
+  const t = await open({ width: 1440, height: 900 })
+  await t.page.goto(`${science}?tour#/1`, { waitUntil: 'domcontentloaded' })
+  await shown(t.page)
+  await t.page.waitForTimeout(1500)
+  check('science: ?tour starts the tour by itself', (await aria(t.page)) === 'true')
+  await t.context.close()
+}
+
 // 2. Wide screen, a tablet and a phone: the 16:9 slide fits, the bar is usable with touch.
 for (const [name, vp] of [['1080p', { width: 1920, height: 1080 }], ['tablet', { width: 820, height: 1180 }], ['phone', { width: 390, height: 844 }]]) {
   const touch = name !== '1080p'

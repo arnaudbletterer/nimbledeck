@@ -48,3 +48,12 @@ test('the context is created only by a control, never at import', () => {
   assert.doesNotMatch(src.split('export function createSoundManager')[0], /new AudioContext/)
   assert.match(src, /function ensure\(\)/)
 })
+
+test('the site bar is the addon\'s: global-top mounts it, it needs window.__ND_SITE__, and sound controls need a deck with sound', () => {
+  assert.match(read('../global-top.vue'), /<SiteBar \/>/)
+  const bar = read('../components/SiteBar.vue')
+  assert.match(bar, /<Teleport v-if="site && !isPrintMode"/)
+  assert.match(bar, /hasSound = !!\(cfg\.ndSound \|\| cfg\.ndSlideSound\)/)
+  assert.match(bar, /<SoundToggle v-if="hasSound"/)
+  assert.match(bar, /v-if="hasSound" class="ndb-with"/)
+})

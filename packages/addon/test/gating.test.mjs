@@ -11,6 +11,7 @@ const LIVE = /\b(setInterval|WebSocket|requestAnimationFrame)\b|<iframe\b/
 // Exceptions, each with the reason it is safe without its own gate.
 const ALLOWED = {
   'FrameGuard.vue': 'its iframe is a child passed in by Demo.vue and Site.vue, which are gated',
+  'SiteBar.vue': 'mounted once by global-top, outside the slides; it is the tour clock and renders nothing without window.__ND_SITE__',
 }
 
 const strip = (src) => src.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
