@@ -30,7 +30,7 @@ Last known checks on `main`: `npm test` 241 pass; link crawler 0 problems; `webs
 
 ## Science deck: one idea (branch `feat/science-risk-story`, not merged)
 
-The five-chapter, 26-slide talk was replaced by one story for a general audience: why a positive test is often wrong (17 slides, about two and a half minutes, predict then reveal; one slide grammar, checked by `examples/science/coherence.mjs`). `examples/science/science.md` is edited directly; there is no compose step, no Python, no
+The five-chapter, 26-slide talk was replaced by one story for a general audience: why a positive test is often wrong (16 slides, about two and a half minutes, predict then reveal; one slide grammar, checked by `examples/science/coherence.mjs`). `examples/science/science.md` is edited directly; there is no compose step, no Python, no
 recording and no runner, so the dev server and the hosted edition are the same deck. New `<Chance>` component (four plain-word
 pictures, one colour each for sick, healthy and tested positive), `default` gained a `::caption::` slot for source lines and `numbers` a `class: nd-cards` mode, the site bar and its tour became the addon's `SiteBar` (the hosted science and how-it-works pages have it), and every
 claim is cited (`examples/science/REFERENCES.md`, verified against Crossref and PubMed; `packages/cli/test/science-refs.test.mjs`).

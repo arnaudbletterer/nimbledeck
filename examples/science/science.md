@@ -14,8 +14,6 @@ tour: 7
 
 #### How worried should you be?
 
-An illustration, not medical advice.
-
 <!--
 The whole talk in one question. Sam is made up, the condition is made up, and the people are dots in a simulation: an illustration, not medical advice. Everything that follows is arithmetic you can check on a napkin.
 -->
@@ -31,7 +29,7 @@ tourScript:
 
 A routine check-up for something that affects 1 person in 1,000. The test says: positive.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="0" :y="30" :w="620" :h="400" enter="up" :delay="200" middle>
 <Stat value="99" suffix="%" label="accurate: it catches 99 of 100 sick people and clears 99 of 100 healthy ones" :duration="1400" />
 </At>
@@ -56,7 +54,7 @@ tourScript:
 
 The condition affects 1 person in 1,000, and the test is 99% accurate.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :y="30" :w="1140" :h="400">
 <Quiz answer="D">
 <Choice letter="A">About 99 in 100</Choice>
@@ -87,7 +85,7 @@ tourScript:
 
 Most people guess far higher. Here is why.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="0" :y="30" :w="1140" :h="400" middle>
 <Stat value="9" suffix="%" label="chance that Sam is really sick" :duration="1600" />
 </At>
@@ -112,7 +110,7 @@ tourScript:
 
 Picture 10,000 people. Each dot is one person, and only 1 in 1,000 is sick.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="383" :y="30" :w="374" :h="440" enter="scale" :delay="200"><Chance mode="crowd" :w="374" :h="440" :steps="1" /></At>
 </Stage>
 
@@ -136,7 +134,7 @@ tourScript:
 
 Now everyone is tested. The test catches the sick, and wrongly flags 1 healthy person in 100.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="383" :y="30" :w="374" :h="440"><Chance mode="crowd" :w="374" :h="440" :from="1" :steps="2" /></At>
 </Stage>
 
@@ -155,7 +153,7 @@ tourScript:
 
 The healthy are so many that their false alarms outnumber the real cases ten to one.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :y="30" :w="1140" :h="340"><Chance mode="rows" :w="1100" :h="330" :from="1" :steps="1" /></At>
 </Stage>
 
@@ -175,7 +173,7 @@ tourScript:
 
 Drag the slider: the condition gets more common, and the sentence follows.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :y="30" :w="1140" :h="410"><Chance mode="play" controls="prevalence" :w="1140" :h="410" /></At>
 </Stage>
 
@@ -195,7 +193,7 @@ tourScript:
 
 Drag the sliders: the condition stays at 1 in 1,000, and the sentence follows.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :y="30" :w="1140" :h="410"><Chance mode="play" controls="accuracy" :w="1140" :h="410" /></At>
 </Stage>
 
@@ -214,7 +212,7 @@ tourScript:
 
 When something is rare, even a good test gives mostly false alarms.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="0" :y="30" :w="540" :h="440" enter="up" :delay="300"><Chance mode="pile" :w="540" :h="430" :prev="0.001" /></At>
 <At :x="600" :y="30" :w="540" :h="440" enter="up" :delay="600"><Chance mode="pile" :w="540" :h="430" :prev="0.1" /></At>
 </Stage>
@@ -238,7 +236,7 @@ tourScript:
 
 After a positive test, ask for counts of people.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="0" :y="30" :w="560" :h="360" enter="left" :delay="300" frame pad="28px 32px">
 
 **Ask your doctor**
@@ -281,7 +279,7 @@ tourScript:
 
 For the curious (optional): the rule counts the real cases among all the positives.
 
-<Stage :h="520">
+<Stage :h="500">
 <At :x="640" :y="30" :w="500" :h="440" enter="left" :delay="300"><Chance mode="pile" :w="500" :h="430" :prev="0.001" /></At>
 <At :x="0" :y="110" :w="600" enter="up" :delay="500">
 <Equation label="Bayes' rule in words. The chance that a positive test is real equals the people who are sick and test positive, divided by the people who are sick and test positive plus the healthy people who test positive. With the numbers of the story, 10 divided by 10 plus 100, about 9 percent." align="left" :size="25" :decimals="{ riskppv: 0 }" :params="{ risktp: 10, riskfp: 100, riskppv: 9 }">
@@ -452,62 +450,8 @@ Medicine's uncomfortable relationship with math. In 2013, 14 of 61 answered the 
 
 *JAMA Intern. Med.* 174 · [doi:10.1001/jamainternmed.2014.1059](https://doi.org/10.1001/jamainternmed.2014.1059)
 
-::c::
-
-### Checked
-
-## 8 of 8
-
-**Every source above**
-
-Each one was checked against Crossref, PubMed or the publisher on 2026-10-11.
-
-The claims behind them: REFERENCES.md
-
 <!--
-All eight references were checked against Crossref, PubMed or the publisher on 2026-10-11 (REFERENCES.md says how). refs: [gigerenzer2007] [manrai2014]
--->
-
----
-layout: numbers
-class: nd-cards
-motion: cascade
-tour: 8
-tourScript:
-  - { at: 3.0, hover: ".nd-num:nth-child(2)" }
-  - { at: 5.2, hover: ".nd-num:nth-child(3)" }
----
-
-# Credits
-
-An illustration, not medical advice.
-
-::a::
-
-### The people
-
-## Made up
-
-Sam, the condition and the 10,000 dots are simulated. No real disease is meant.
-
-::b::
-
-### The look
-
-## Silent
-
-No music and no photographs. No Python runs: every picture is drawn in your browser.
-
-::c::
-
-### Made with
-
-## Tools
-
-Nimbledeck on Slidev and Vue, with equations typeset by KaTeX.
-
-<!--
-Tools: Nimbledeck on Slidev and Vue, KaTeX for the equations; see THIRD_PARTY.md. No music or photographs are used.
+refs: [gigerenzer2007] [manrai2014]. Every reference was checked against Crossref, PubMed or the publisher (REFERENCES.md says how).
 -->
 
 ---
@@ -519,14 +463,14 @@ tourScript:
   - { at: 7, wait: 1 }
 ---
 
-# Ask how rare it is
+# Made with Nimbledeck
 
-#### A positive test is a clue, not a verdict.
+#### This whole talk is one Markdown file: pictures you can play with, a quiz, equations, and a tour that plays itself.
 
-An illustration, not medical advice.
+Everything you touched here runs in your browser.
 
 <NextSteps :skip="['science']" />
 
 <!--
-The one sentence to remember: when something is rare, even a good test gives mostly false alarms. Sam, the condition and the people are made up.
+The talk is only an example. Nimbledeck turns plain Markdown into live slides: the quiz, the crowd, the equations in colour and this tour are all features of the tool. The people and the condition in the story are made up.
 -->

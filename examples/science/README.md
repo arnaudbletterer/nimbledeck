@@ -1,13 +1,13 @@
 # Science, in one idea
 
-**Why a positive test is often wrong.** A talk of 17 slides and about two and a half minutes for a general audience, in one Markdown file
+**Why a positive test is often wrong.** A talk of 16 slides and about two and a half minutes for a general audience, in one Markdown file
 (`science.md`). It tells a story (Sam tests positive), asks the viewer to guess, reveals the answer (about 9 in 100), then shows
 why with pictures the viewer changes: 10,000 dots, two rows of positives, sliders for how rare the condition is and how good the
 test is. The device is predict, then reveal. Each slide says one thing in one plain sentence next to one picture.
 
 **The deck needs no Python.** Every picture runs in the browser, so `npm run dev`, `nimbledeck run` and the hosted edition behave
 the same and nothing is recorded. **Everything is simulated**: Sam, the condition and the people are made up, no real disease is
-named, and the first and last slides say "An illustration, not medical advice."
+named.
 
 Colour means one thing everywhere: pink is sick, grey is healthy, an amber ring or frame is "the test said positive".
 
@@ -18,17 +18,17 @@ Every content slide (all but the cover and the closing slide, which are lead lay
 
 | Role | Rule |
 |---|---|
-| Layout | One family: `default` for every content slide, `numbers` (`class: nd-cards`) for the references and the credits. Never `split` or `stage`, whose chrome differs. |
+| Layout | One family: `default` for every content slide, `numbers` (`class: nd-cards`) for the references. Never `split` or `stage`, whose chrome differs. |
 | Title | One zone: the title bar of the theme (56 px, rule below), at most 40 characters, a message or a name. |
 | Sentence | The first line under the title, 24 px, in ink: the one thing the slide says. Never a kicker. |
 | Picture | A `<Stage :h="520">` whose first block starts 30 px under the sentence (the cards start at the same place). |
 | Source line | `::caption::`, 18 px, muted, on the left gutter just above the footer, only where a claim needs one. |
 | Footer | The deck title, 18 px, muted, bottom left. |
-| Page number | A quiet `n/17`, the same 18 px, on the right gutter and the same baseline as the footer (`style.css`). |
+| Page number | A quiet `n/16`, the same 18 px, on the right gutter and the same baseline as the footer (`style.css`). |
 | Gutter | 70 px on both sides, for the title text, the sentence, the picture, the source line and the footer. |
 | Type scale | Title 56, sentence 24, label and source 18 to 22, numbers big (the picture draws them). |
 | Colour | Pink is sick, grey is healthy, an amber ring or frame is "the test said positive". Only theme tokens: `science.md` writes no colour. |
-| Kicker | Only in the cards of the references and credits, and "For the curious (optional)" in the sentence of the Bayes slide. |
+| Kicker | Only in the cards of the references, and "For the curious (optional)" in the sentence of the Bayes slide. |
 | Motion | The deck default (`fade-up`) everywhere; the cards cascade; the cover and the closing slide have their own. |
 
 ## The slides
@@ -48,8 +48,7 @@ Every content slide (all but the cover and the closing slide, which are lead lay
 | 11 | What to ask | After a positive test, ask for counts of people. | two cards of lists |
 | 12 | Bayes' rule, in colour | For the curious (optional): the rule counts the real cases among all the positives. | `<Equation>` terms light the dots |
 | 13 to 15 | The giants, 1763 to 1978, 1982 to 1998, 2007 to 2014 | Standing on the shoulders of giants | cards: year, authors, title, what they showed, venue and DOI link; the last card says all eight were checked |
-| 16 | Credits | An illustration, not medical advice. | three cards: made up, silent, tools |
-| 17 | Ask how rare it is | A positive test is a clue, not a verdict. | closing, `<NextSteps>` |
+| 16 | This talk was made with Nimbledeck | One Markdown file, quiz, pictures, equations and a tour that plays itself. | closing, `<NextSteps>` |
 
 Slides 4, 5, 10, 11 and 12 carry a source line. The speaker notes name the references by key.
 
